@@ -12,6 +12,9 @@ class _SignupState extends State<Signup> {
   // TextEditingControllers for username and password
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
+  TextEditingController Emailaddress=TextEditingController();
+  TextEditingController Phone_number=TextEditingController();
+  TextEditingController confirmpassword=TextEditingController();
   bool show = true;
 
   // Create a GlobalKey to manage the form state
@@ -33,7 +36,7 @@ class _SignupState extends State<Signup> {
         return LoginPage();
       },));
       print('Registration Successful');
-      print('Username: ${username.text}');
+      ('Username: ${username.text}');
       print('Password: ${password.text}');
       // You could send the data to a backend or show a success message
     } else {
@@ -54,12 +57,16 @@ class _SignupState extends State<Signup> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.asset(
-                  'asset/download.jpg', // Ensure this path is correct
-                  width: double.infinity,
+                  'asset/van.jpg', // Ensure this path is correct
+                  width: 250,
                   height: 250,
                   fit: BoxFit.cover,
+                  
                 ),
               ),
+              const SizedBox(height:10),
+              Text('Create Account',
+              style: TextStyle(fontSize: 24,color: Colors.blue),),
               const SizedBox(height: 20),
               TextFormField(
                 controller: username,
@@ -75,7 +82,23 @@ class _SignupState extends State<Signup> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: Emailaddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email address',
+                  border: OutlineInputBorder(),
+                )),
+                const SizedBox(height:10),
+              
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: Phone_number,
+                decoration: const InputDecoration(
+                  labelText: 'Phone number',
+                  border: OutlineInputBorder(),
+                )),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: password,
                 obscureText: show,
@@ -101,6 +124,28 @@ class _SignupState extends State<Signup> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: confirmpassword,
+                obscureText: show,
+                decoration: InputDecoration(
+                  labelText: 'Confirm password',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                    setState(() {
+                      show=!show;
+                    });
+                  }, icon: Icon(show? Icons.visibility:Icons.visibility_off),
+                ),
+              ),
+              validator: (value){
+                if(value==null || value.isEmpty){
+                  return'please confirm your password';
+                }else if (value!=password.text){
+                  return 'password do not match';
+                }
+              },),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: registrationHandler, // Handle form submission
