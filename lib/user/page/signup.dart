@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:travel_guide/user/page/details.dart';
 import 'package:travel_guide/user/page/login_page.dart';
 
 class Signup extends StatefulWidget {
@@ -9,12 +10,12 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  // TextEditingControllers for username and password
+  // TextEditingControllers for username, email, phone, password, and confirm password
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
-  TextEditingController Emailaddress=TextEditingController();
-  TextEditingController Phone_number=TextEditingController();
-  TextEditingController confirmpassword=TextEditingController();
+  TextEditingController Emailaddress = TextEditingController();
+  TextEditingController Phone_number = TextEditingController();
+  TextEditingController confirmpassword = TextEditingController();
   bool show = true;
 
   // Create a GlobalKey to manage the form state
@@ -25,6 +26,9 @@ class _SignupState extends State<Signup> {
   void dispose() {
     username.dispose();
     password.dispose();
+    Emailaddress.dispose();
+    Phone_number.dispose();
+    confirmpassword.dispose();
     super.dispose();
   }
 
@@ -33,10 +37,10 @@ class _SignupState extends State<Signup> {
     if (_formKey.currentState?.validate() ?? false) {
       // If the form is valid, you can handle the registration logic
       Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return LoginPage();
-      },));
+        return Details();
+      }));
       print('Registration Successful');
-      ('Username: ${username.text}');
+      print('Username: ${username.text}');
       print('Password: ${password.text}');
       // You could send the data to a backend or show a success message
     } else {
@@ -61,20 +65,22 @@ class _SignupState extends State<Signup> {
                   width: 250,
                   height: 250,
                   fit: BoxFit.cover,
-                  
                 ),
               ),
-              const SizedBox(height:10),
-              Text('Create Account',
-              style: TextStyle(fontSize: 24,color: Colors.blue),),
+              const SizedBox(height: 10),
+              Text(
+                'Create Account',
+                style: TextStyle(fontSize: 24, color: Colors.blue),
+              ),
               const SizedBox(height: 20),
+
+              // Username field
               TextFormField(
                 controller: username,
                 decoration: const InputDecoration(
                   labelText: 'Username',
                   border: OutlineInputBorder(),
                 ),
-                // Validation for username
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a username';
@@ -83,22 +89,47 @@ class _SignupState extends State<Signup> {
                 },
               ),
               const SizedBox(height: 10),
+
+              // Email field with validation
               TextFormField(
                 controller: Emailaddress,
                 decoration: const InputDecoration(
                   labelText: 'Email address',
                   border: OutlineInputBorder(),
-                )),
-                const SizedBox(height:10),
-              
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an email address';
+                  } else if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 10),
+
+              // Phone number field with validation
               TextFormField(
                 controller: Phone_number,
                 decoration: const InputDecoration(
                   labelText: 'Phone number',
                   border: OutlineInputBorder(),
-                )),
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your phone number';
+                  } else if (value.length < 10) {
+                    return 'Phone number should be at least 10 digits';
+                  } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                    return 'Phone number can only contain digits';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 10),
+
+              // Password field with validation
               TextFormField(
                 controller: password,
                 obscureText: show,
@@ -114,7 +145,6 @@ class _SignupState extends State<Signup> {
                     icon: Icon(show ? Icons.visibility : Icons.visibility_off),
                   ),
                 ),
-                // Validation for password
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a password';
@@ -125,6 +155,8 @@ class _SignupState extends State<Signup> {
                 },
               ),
               const SizedBox(height: 10),
+
+              // Confirm password field with validation
               TextFormField(
                 controller: confirmpassword,
                 obscureText: show,
@@ -133,22 +165,27 @@ class _SignupState extends State<Signup> {
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     onPressed: () {
-                    setState(() {
-                      show=!show;
-                    });
-                  }, icon: Icon(show? Icons.visibility:Icons.visibility_off),
+                      setState(() {
+                        show = !show;
+                      });
+                    },
+                    icon: Icon(show ? Icons.visibility : Icons.visibility_off),
+                  ),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please confirm your password';
+                  } else if (value != password.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
               ),
-              validator: (value){
-                if(value==null || value.isEmpty){
-                  return'please confirm your password';
-                }else if (value!=password.text){
-                  return 'password do not match';
-                }
-              },),
               const SizedBox(height: 20),
+
+              // Sign Up Button
               ElevatedButton(
-                onPressed: registrationHandler, // Handle form submission
+                onPressed: registrationHandler,
                 child: const Text('Sign Up'),
               ),
             ],
