@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:travel_guide/guide/page/guide_details.dart';
 import 'package:travel_guide/user/page/details.dart';
 import 'package:travel_guide/user/page/login_page.dart';
 
-class Signup extends StatefulWidget {
-  const Signup({super.key});
+class GuideSignup extends StatefulWidget {
+  const GuideSignup({super.key});
 
   @override
-  State<Signup> createState() => _SignupState();
+  State<GuideSignup> createState() => _GuideSignupState();
 }
 
-class _SignupState extends State<Signup> {
+class _GuideSignupState extends State<GuideSignup> {
   // TextEditingControllers for username, email, phone, password, and confirm password
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
@@ -37,7 +38,7 @@ class _SignupState extends State<Signup> {
     if (_formKey.currentState?.validate() ?? false) {
       // If the form is valid, you can handle the registration logic
       Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return Details();
+        return GuideDetails();
       }));
       print('Registration Successful');
       print('Username: ${username.text}');
