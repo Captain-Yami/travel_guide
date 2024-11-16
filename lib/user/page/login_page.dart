@@ -41,14 +41,16 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: Stack (
         children: [SizedBox(height:30),
+        
           // Background image
           Positioned.fill(
+            child:Opacity(opacity: 0.8,
             child: Image.asset(
-              'asset/background.jpg', // Ensure this path is correct
+              'asset/background3.jpg', // Ensure this path is correct
               fit: BoxFit.cover,
-            ),
+            )),
           ),
           // Form content
           Padding(

@@ -33,7 +33,7 @@ class _IntroState extends State<Intro> {
                 children: <Widget>[
                   Center(
                       child: ClipOval(
-                          child: Image.asset('asset/logo2.jpg',
+                          child: Image.asset('asset/logo3.jpg',
                               width: 300, height: 300))),
                   SizedBox(height: 20),
                   Text(
