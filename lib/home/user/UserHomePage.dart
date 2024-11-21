@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/guide_profile.dart';
 import 'package:travel_guide/home/hotel.dart';
-import 'package:travel_guide/home/place.dart';
+import 'package:travel_guide/place/place.dart';
 import 'package:travel_guide/home/recommended.dart';
-import 'package:travel_guide/home/season.dart';
+import 'package:travel_guide/seasons/season.dart';
 import 'package:travel_guide/home/start.dart';
 import 'package:travel_guide/home/user/Recent.dart';
 import 'package:travel_guide/home/user/User_profile.dart';
@@ -18,42 +18,48 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   // Navigation functions for each page
-  void _navigateTohotel() {
+  void _navigateToHotel() {
+    print('Navigating to Hotel page');
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const hotel()),
     );
   }
 
-  void _navigateToplace() {
+  void _navigateToPlace() {
+    print('Navigating to Place page');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const place()),
+      MaterialPageRoute(builder: (context) => const Place()),
     );
   }
 
-  void _navigateToguidedetails() {
+  void _navigateToGuideDetails() {
+    print('Navigating to Guide page');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const guidedetails()),
+      MaterialPageRoute(builder: (context) => const Guidedetails()),
     );
   }
 
-  void _navigateToseason() {
+  void _navigateToSeason() {
+    print('Navigating to Season page');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const season()),
+      MaterialPageRoute(builder: (context) => const Season()),
     );
   }
 
-  void _navigateTorecommended() {
+  void _navigateToRecommended() {
+    print('Navigating to Recommended page');
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const Recommended()),
     );
   }
 
-  void _navigateTostart() {
+  void _navigateToStart() {
+    print('Navigating to Start your Journey page');
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const start()),
@@ -69,28 +75,24 @@ class _MainPageState extends State<MainPage> {
     });
     switch (_selectedIndex) {
       case 0:
-        // Navigate to the Home Page (or main page)
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const MainPage()),
         );
         break;
       case 1:
-        // Navigate to the Clock Page
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const Recent()),
         );
         break;
       case 2:
-        // Navigate to the Favorites Page
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const Favorites()),
         );
         break;
       case 3:
-        // Navigate to the Profile Page
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const UserProfile()),
@@ -127,7 +129,7 @@ class _MainPageState extends State<MainPage> {
           IconButton(
             icon: const Icon(Icons.search), // Search icon
             onPressed: () {
-              // You can add search functionality here
+              // Add your search functionality here
             },
           ),
         ],
@@ -154,7 +156,7 @@ class _MainPageState extends State<MainPage> {
                 ),
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton(
-                  onPressed: _navigateTorecommended,
+                  onPressed: _navigateToRecommended,
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
                     padding: const EdgeInsets.all(16),
@@ -184,105 +186,28 @@ class _MainPageState extends State<MainPage> {
                   mainAxisSpacing: 10,
                   children: [
                     // Button 1: Place
-                    Container(
-                      width: 100, // Reduced width of container
-                      height: 100, // Reduced height of container
-                      margin: const EdgeInsets.all(8),
-                      child: ElevatedButton(
-                        onPressed: _navigateToplace,
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Opacity(
-                              opacity: 1,
-                              child: Icon(Icons.map, size: 30, color: Colors.purple), // Reduced icon size
-                            ),
-                            const SizedBox(height: 8),
-                            const Text('Place', style: TextStyle(fontSize: 14)), // Reduced text size
-                          ],
-                        ),
-                      ),
+                    _buildGridButton(
+                      icon: Icons.map,
+                      label: 'Place',
+                      onPressed: _navigateToPlace,
                     ),
                     // Button 2: Guide
-                    Container(
-                      width: 100, // Reduced width of container
-                      height: 100, // Reduced height of container
-                      margin: const EdgeInsets.all(10),
-                      child: ElevatedButton(
-                        onPressed: _navigateToguidedetails,
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Opacity(
-                              opacity: 1,
-                              child: Icon(Icons.map, size: 30, color: Colors.purple), // Reduced icon size
-                            ),
-                            const SizedBox(height: 8),
-                            const Text('Guide', style: TextStyle(fontSize: 14)), // Reduced text size
-                          ],
-                        ),
-                      ),
+                    _buildGridButton(
+                      icon: Icons.map,
+                      label: 'Guide',
+                      onPressed: _navigateToGuideDetails,
                     ),
                     // Button 3: Hotel
-                    Container(
-                      width: 100, // Reduced width of container
-                      height: 100, // Reduced height of container
-                      margin: const EdgeInsets.all(10),
-                      child: ElevatedButton(
-                        onPressed: _navigateTohotel,
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Opacity(
-                              opacity: 1,
-                              child: Icon(Icons.hotel, size: 30, color: Colors.purple), // Reduced icon size
-                            ),
-                            const SizedBox(height: 8),
-                            const Text('Hotel', style: TextStyle(fontSize: 14)), // Reduced text size
-                          ],
-                        ),
-                      ),
+                    _buildGridButton(
+                      icon: Icons.hotel,
+                      label: 'Hotel',
+                      onPressed: _navigateToHotel,
                     ),
                     // Button 4: Season
-                    Container(
-                      width: 100, // Reduced width of container
-                      height: 100, // Reduced height of container
-                      margin: const EdgeInsets.all(10),
-                      child: ElevatedButton(
-                        onPressed: _navigateToseason,
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Opacity(
-                              opacity: 1,
-                              child: Icon(Icons.calendar_today, size: 30, color: Colors.purple), // Reduced icon size
-                            ),
-                            const SizedBox(height: 8),
-                            const Text('Season', style: TextStyle(fontSize: 14)), // Reduced text size
-                          ],
-                        ),
-                      ),
+                    _buildGridButton(
+                      icon: Icons.calendar_today,
+                      label: 'Season',
+                      onPressed: _navigateToSeason,
                     ),
                   ],
                 ),
@@ -293,7 +218,7 @@ class _MainPageState extends State<MainPage> {
                 height: 50,
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton(
-                  onPressed: _navigateTostart,
+                  onPressed: _navigateToStart,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(12),
                     shape: RoundedRectangleBorder(
@@ -338,6 +263,40 @@ class _MainPageState extends State<MainPage> {
         selectedItemColor: const Color.fromARGB(255, 66, 62, 62),
         unselectedItemColor: const Color.fromARGB(255, 58, 54, 54),
         backgroundColor: Colors.purple,
+      ),
+    );
+  }
+
+  // Helper function to create grid buttons
+  Widget _buildGridButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      width: 150, // Adjust width of container
+      height: 150, // Adjust height of container
+      margin: const EdgeInsets.all(10),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.zero,
+          backgroundColor: Colors.purple, // Set button color
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 30, color: Colors.white),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 14, color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
