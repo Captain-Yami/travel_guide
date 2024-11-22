@@ -184,6 +184,8 @@ class _MainPageState extends State<MainPage> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
+                  // Here is where we set the childAspectRatio
+                  childAspectRatio: 2.2, // Adjust this ratio to change button size
                   children: [
                     // Button 1: Place
                     _buildGridButton(
