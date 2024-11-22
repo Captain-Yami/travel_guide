@@ -16,4 +16,4 @@ import 'package:travel_guide/home/user/Recent.dart';
 import 'package:travel_guide/home/guide/guide_profile.dart';
 import 'package:travel_guide/home/admin/Admin_Homepage.dart';
 void main() {
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:GuideHomepage()));}
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:MainPage()));}
