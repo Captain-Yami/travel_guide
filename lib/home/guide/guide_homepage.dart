@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/guide_profile.dart';
+import 'package:travel_guide/home/guide/req.dart';
 import 'package:travel_guide/home/hotel.dart';
 import 'package:travel_guide/place/place.dart';
 import 'package:travel_guide/home/recommended.dart';
@@ -17,52 +18,15 @@ class GuideHomepage extends StatefulWidget {
 }
 
 class _MainPageState extends State<GuideHomepage> {
+  final _searchcontroller = TextEditingController();
+
   // Navigation functions for each page
-  void _navigateToHotel() {
-    print('Navigating to Hotel page');
+  void _navigateToreq() {
+    // Make sure 'req' class is defined or replace it with a valid screen
+    print("Navigating to Requests & Booking page");
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const hotel()),
-    );
-  }
-
-  void _navigateToPlace() {
-    print('Navigating to Place page');
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Place()),
-    );
-  }
-
-  void _navigateToGuideDetails() {
-    print('Navigating to Guide page');
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Guidedetails()),
-    );
-  }
-
-  void _navigateToSeason() {
-    print('Navigating to Season page');
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Season()),
-    );
-  }
-
-  void _navigateToRecommended() {
-    print('Navigating to Recommended page');
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Recommended()),
-    );
-  }
-
-  void _navigateToStart() {
-    print('Navigating to Start your Journey page');
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const start()),
+      MaterialPageRoute(builder: (context) => const req()), // Replace with actual destination widget
     );
   }
 
@@ -75,10 +39,7 @@ class _MainPageState extends State<GuideHomepage> {
     });
     switch (_selectedIndex) {
       case 0:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const GuideHomepage()),
-        );
+        // No need to push a new page, just update the body
         break;
       case 1:
         Navigator.push(
@@ -118,7 +79,7 @@ class _MainPageState extends State<GuideHomepage> {
                 width: 40, // Make the width and height equal for a perfect circle
               ),
             ),
-            const SizedBox(width: 120), // Space between logo and text
+            const SizedBox(width: 70), // Space between logo and text
             const Text(
               'Travel Chronicles',
               style: TextStyle(fontSize: 20),
@@ -135,9 +96,11 @@ class _MainPageState extends State<GuideHomepage> {
         ],
       ),
       body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, Colors.purple],
+            colors: [const Color.fromARGB(255, 24, 24, 24), const Color.fromARGB(255, 251, 249, 251)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -145,51 +108,40 @@ class _MainPageState extends State<GuideHomepage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                height: 400, // Fix the height of the grid view
-                child: GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  // Here is where we set the childAspectRatio
-                  childAspectRatio: 2.2, // Adjust this ratio to change button size
-                  children: [
-                    // Button 1: Place
-                    _buildGridButton(
-                      icon: Icons.map,
-                      label: 'Place',
-                      onPressed: _navigateToPlace,
-                    ),
-                    // Button 2: Guide
-                    _buildGridButton(
-                      icon: Icons.map,
-                      label: 'Guide',
-                      onPressed: _navigateToGuideDetails,
-                    ),
-                    // Button 3: Hotel
-                    _buildGridButton(
-                      icon: Icons.hotel,
-                      label: 'Hotel',
-                      onPressed: _navigateToHotel,
-                    ),
-                    // Button 4: Season
-                    _buildGridButton(
-                      icon: Icons.calendar_today,
-                      label: 'Season',
-                      onPressed: _navigateToSeason,
-                    ),
-                  ],
+              Padding(
+                padding: const EdgeInsets.all(9.0),
+                child: Form(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        width: 400, // Set the width of the TextFormField
+                        height: 60, // Set the height of the TextFormField
+                        child: TextFormField(
+                          controller: _searchcontroller,
+                          decoration: InputDecoration(
+                            hintText: 'Search', // Optional hint text
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30), // Oval shape
+                              borderSide: const BorderSide(color: Color.fromARGB(255, 5, 0, 0), width: 2), // Border color and thickness
+                            ),
+                            suffixIcon: const Icon(Icons.search, color: Color.fromARGB(255, 1, 2, 3)),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding to adjust the internal space
+                          ),
+                          style: const TextStyle(fontSize: 18), // Font size inside the text field
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              // Start your journey button
+              // "Requests & Booking" Button
               Container(
                 width: 350,
                 height: 50,
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton(
-                  onPressed: _navigateToStart,
+                  onPressed: _navigateToreq,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(12),
                     shape: RoundedRectangleBorder(
@@ -197,7 +149,30 @@ class _MainPageState extends State<GuideHomepage> {
                     ),
                   ),
                   child: const Text(
-                    'chat',
+                    'Requests & Booking',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ),
+              ),
+              // "Start your journey" button
+              Container(
+                width: 350,
+                height: 50,
+                margin: const EdgeInsets.all(10),
+                child: ElevatedButton(
+                  onPressed: _navigateToreq,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.all(12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Start your journey',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -222,7 +197,10 @@ class _MainPageState extends State<GuideHomepage> {
             icon: Icon(Icons.access_time),
             label: 'Clock',
           ),
-          
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorites',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
             label: 'Profile',
@@ -230,41 +208,7 @@ class _MainPageState extends State<GuideHomepage> {
         ],
         selectedItemColor: const Color.fromARGB(255, 66, 62, 62),
         unselectedItemColor: const Color.fromARGB(255, 58, 54, 54),
-        backgroundColor: const Color.fromARGB(255, 242, 241, 242),
-      ),
-    );
-  }
-
-  // Helper function to create grid buttons
-  Widget _buildGridButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      width: 150, // Adjust width of container
-      height: 150, // Adjust height of container
-      margin: const EdgeInsets.all(10),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: EdgeInsets.zero,
-          backgroundColor: Colors.purple, // Set button color
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 30, color: Colors.white),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 14, color: Colors.white),
-            ),
-          ],
-        ),
+        backgroundColor: Colors.purple,
       ),
     );
   }

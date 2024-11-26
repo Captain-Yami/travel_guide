@@ -324,6 +324,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   // Navigation functions for each page
+  final _searchcontroller = TextEditingController();
   void _navigateToHotel() {
     print('Navigating to Hotel page');
     Navigator.push(
@@ -452,6 +453,23 @@ class _MainPageState extends State<MainPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+               Container(
+                        width: 400, // Set the width of the TextFormField
+                        height: 60, // Set the height of the TextFormField
+                        child: TextFormField(
+                          controller: _searchcontroller,
+                          decoration: InputDecoration(
+                            hintText: 'Search', // Optional hint text
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30), // Oval shape
+                              borderSide: BorderSide(color: const Color.fromARGB(255, 5, 0, 0), width: 2), // Border color and thickness
+                            ),
+                            suffixIcon: Icon(Icons.search, color: const Color.fromARGB(255, 1, 2, 3)),
+                            contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding to adjust the internal space
+                          ),
+                          style: TextStyle(fontSize: 18), // Font size inside the text field
+                        ),
+                      ),
               // Carousel Slider inside the Recommended Section
               Container(
                 width: double.infinity,
