@@ -12,7 +12,7 @@ class Place extends StatefulWidget {
 }
 
 class _PlaceState extends State<Place> {
-  // Define navigation for each button
+  // Define navigation for each card
   void _navigateToBeaches() {
     Navigator.push(
       context,
@@ -51,71 +51,79 @@ class _PlaceState extends State<Place> {
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: GridView.count(
-          crossAxisCount: 2, // 2 buttons per row
+          crossAxisCount: 2, // 2 cards per row
           crossAxisSpacing: 10, // Space between columns
           mainAxisSpacing: 10, // Space between rows
           children: [
-            // Button 1: Beaches
-            ElevatedButton(
-              onPressed: _navigateToBeaches,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(12),
+            // Card 1: Beaches
+            GestureDetector(
+              onTap: _navigateToBeaches,
+              child: Card(
+                color: Colors.blueAccent, // Card color
+                elevation: 5, // Card shadow
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.blueAccent, // Customize button color
-              ),
-              child: const Text(
-                'Beaches',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                child: Center(
+                  child: const Text(
+                    'Beaches',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
               ),
             ),
 
-            // Button 2: Temples
-            ElevatedButton(
-              onPressed: _navigateToTemples,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(12),
+            // Card 2: Temples
+            GestureDetector(
+              onTap: _navigateToTemples,
+              child: Card(
+                color: Colors.green, // Card color
+                elevation: 5, // Card shadow
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.green, // Customize button color
-              ),
-              child: const Text(
-                'Temples',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                child: Center(
+                  child: const Text(
+                    'Temples',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
               ),
             ),
 
-            // Button 3: Trekking Spots
-            ElevatedButton(
-              onPressed: _navigateToTrekkingSpots,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(12),
+            // Card 3: Trekking Spots
+            GestureDetector(
+              onTap: _navigateToTrekkingSpots,
+              child: Card(
+                color: Colors.brown, // Card color
+                elevation: 5, // Card shadow
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.brown, // Customize button color
-              ),
-              child: const Text(
-                'Trekking Spots',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                child: Center(
+                  child: const Text(
+                    'Trekking Spots',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
               ),
             ),
 
-            // Button 4: Museums and Forts
-            ElevatedButton(
-              onPressed: _navigateToMuseumsAndForts,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(12),
+            // Card 4: Museums and Forts
+            GestureDetector(
+              onTap: _navigateToMuseumsAndForts,
+              child: Card(
+                color: Colors.purple, // Card color
+                elevation: 5, // Card shadow
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.purple, // Customize button color
-              ),
-              child: const Text(
-                'Museums & Forts',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                child: Center(
+                  child: const Text(
+                    'Museums & Forts',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
               ),
             ),
           ],

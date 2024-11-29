@@ -18,5 +18,12 @@ import 'package:travel_guide/home/guide/guide_profile.dart';*/
 import 'package:travel_guide/home/admin/Admin_Homepage.dart';
 import 'package:travel_guide/home/admin/admin_users.dart';
 import 'package:travel_guide/home/user/UserHomePage.dart';
-void main() {
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:AdminUsers()));}
+import 'package:travel_guide/place/place.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+Future<void> main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+);
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:Place()));}
