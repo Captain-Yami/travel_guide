@@ -1,263 +1,3 @@
-/*import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart'; // Import for PieChart
-import 'package:travel_guide/home/admin/admin_hotels.dart';
-import 'package:travel_guide/home/admin/admin_places.dart';
-import 'package:travel_guide/home/admin/admin_ratings.dart';
-
-class AdminHomepage extends StatefulWidget {
-  const AdminHomepage({super.key});
-
-  @override
-  State<AdminHomepage> createState() => _AdminHomepageState();
-}
-
-class _AdminHomepageState extends State<AdminHomepage> {
-  // Navigation functions
-  void navigateToPlaces() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AdminPlaces()),
-    );
-  }
-
-  void navigateToHotels() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AdminHotels()),
-    );
-  }
-
-  void navigateToRatings() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AdminRatings()),
-    );
-  }
-
-  // Sample data for ratings
-  final List<PieChartSectionData> pieSections = [
-    PieChartSectionData(
-      value: 50, // Percentage for 'Best' rating
-      color: Colors.green, // Color for 'Best'
-      title: 'Best',
-      radius: 50,
-      titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-    ),
-    PieChartSectionData(
-      value: 30, // Percentage for 'Good' rating
-      color: Colors.blue, // Color for 'Good'
-      title: 'Good',
-      radius: 50,
-      titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-    ),
-    PieChartSectionData(
-      value: 20, // Percentage for 'Worst' rating
-      color: Colors.red, // Color for 'Worst'
-      title: 'Worst',
-      radius: 50,
-      titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-          title: Text(
-            'Admin Homepage',
-            style: TextStyle(
-              color: Colors.black, // Text color
-              fontSize: 16,
-            ),
-          )),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          // Stack all widgets vertically
-          children: [
-            // "Analysis" container aligned to the center
-            Align(
-              alignment: Alignment.center, // Aligns the container to the center
-              child: Container(
-                width: 350, // Custom width for "Analysis" container
-                height: 150, // Adjust height to fit all text widgets
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                decoration: BoxDecoration(
-                  color: Colors.white, // Background color of the container
-                  borderRadius: BorderRadius.circular(20.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1), // Shadow color
-                      spreadRadius: 2, // How much the shadow spreads
-                      blurRadius: 5, // Blur radius
-                      offset: Offset(
-                          0, 3), // Shadow position (horizontal, vertical)
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment:
-                      MainAxisAlignment.start, // Align items at the top
-                  crossAxisAlignment:
-                      CrossAxisAlignment.center, // Center items horizontally
-                  children: [
-                    Text(
-                      'Analysis', // Text for Analysis
-                      style: TextStyle(
-                        color: Colors.black, // Text color
-                        fontSize: 16, // Larger font size for Analysis
-                      ),
-                    ),
-                    SizedBox(
-                        height:
-                            20), // Space between Analysis and the next texts
-                    // Row for placing Success, Failed, and Pending on the left side
-                    Align(
-                      alignment:
-                          Alignment.centerLeft, // Align the texts to the left
-                      child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start, // Align texts to the left
-                        children: [
-                          Text(
-                            'Success', // Text for Success
-                            style: TextStyle(
-                              color: Colors.black, // Text color
-                              fontSize: 14, // Smaller font size for other texts
-                            ),
-                          ),
-                          SizedBox(
-                              height: 10), // Space between Success and Failed
-                          Text(
-                            'Failed', // Text for Failed
-                            style: TextStyle(
-                              color: Colors.black, // Text color
-                              fontSize: 14, // Smaller font size for other texts
-                            ),
-                          ),
-                          SizedBox(
-                              height: 10), // Space between Failed and Pending
-                          Text(
-                            'Pending', // Text for Pending
-                            style: TextStyle(
-                              color: Colors.black, // Text color
-                              fontSize: 14, // Smaller font size for other texts
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-                height:
-                    20), // Space between the Analysis container and the pie chart
-
-            // Pie Chart Widget for User Ratings
-            Container(
-              width: double.infinity,
-              height: 250,
-              child: PieChart(
-                PieChartData(
-                  sections: pieSections,
-                  centerSpaceRadius: 30,
-                  sectionsSpace: 0,
-                ),
-              ),
-            ),
-            SizedBox(
-                height:
-                    20), // Space between the Pie chart and the next containers
-
-            // Row to hold "User" and "Guide" containers side by side
-            Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.center, // Centers the children in the Row
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Background color of the container
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1), // Shadow color
-                        spreadRadius: 2, // How much the shadow spreads
-                        blurRadius: 5, // Blur radius
-                        offset: Offset(
-                            0, 3), // Shadow position (horizontal, vertical)
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    'User',
-                    style: TextStyle(
-                      color: Colors.black, // Text color
-                      fontSize: 12, // Smaller font size
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10), // Space between the containers
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Background color of the container
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1), // Shadow color
-                        spreadRadius: 2, // How much the shadow spreads
-                        blurRadius: 5, // Blur radius
-                        offset: Offset(
-                            0, 3), // Shadow position (horizontal, vertical)
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    'Guide',
-                    style: TextStyle(
-                      color: Colors.black, // Text color
-                      fontSize: 12, // Smaller font size
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Spacer(), // This will push the buttons to the bottom of the screen
-
-            // Row for placing the buttons horizontally
-            Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.center, // Centers buttons horizontally
-              children: [
-                ElevatedButton(
-                  onPressed: navigateToPlaces,
-                  child: Text('Places'),
-                ),
-                SizedBox(width: 10), // Space between buttons
-                ElevatedButton(
-                  onPressed: navigateToHotels,
-                  child: Text('Hotels'),
-                ),
-                SizedBox(width: 10), // Space between buttons
-                ElevatedButton(
-                  onPressed: navigateToRatings,
-                  child: Text('Ratings'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}*/
 
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart'; // Import for PieChart
@@ -305,8 +45,7 @@ class _AdminHomepageState extends State<AdminHomepage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>
-              AdminComplaints()), // Navigate to AdminComplaints page
+          builder: (context) => AdminComplaints()), // Navigate to AdminComplaints page
     );
   }
 
@@ -435,7 +174,6 @@ class _AdminHomepageState extends State<AdminHomepage> {
             SizedBox(
                 height:
                     20), // Space between the Analysis container and the pie chart
-
             // Pie Chart Widget for User Ratings with Animation
             Container(
               width: double.infinity,
@@ -446,38 +184,40 @@ class _AdminHomepageState extends State<AdminHomepage> {
                   centerSpaceRadius: 30,
                   sectionsSpace: 0,
                   pieTouchData: PieTouchData(
-                    touchCallback: (FlTouchEvent event,
-                        PieTouchResponse? pieTouchResponse) {
-                      setState(() {
-                        if (pieTouchResponse != null &&
-                            pieTouchResponse.touchedSection != null) {
-                          touchedIndex = pieTouchResponse
-                              .touchedSection!.touchedSectionIndex;
-                          // Navigate based on touched section
-                          if (touchedIndex == 0) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      AdminPlaces()), // Redirect to AdminPlaces as an example
-                            );
-                          } else if (touchedIndex == 1) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      AdminHotels()), // Redirect to AdminHotels as an example
-                            );
-                          } else if (touchedIndex == 2) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      AdminRatings()), // Redirect to AdminRatings as an example
-                            );
+                    touchCallback: (FlTouchEvent event, PieTouchResponse? pieTouchResponse) {
+                      // Check for the tap event and ensure we only respond to tap
+                      if (event is FlTapUpEvent) {
+                        setState(() {
+                          if (pieTouchResponse != null &&
+                              pieTouchResponse.touchedSection != null) {
+                            touchedIndex = pieTouchResponse
+                                .touchedSection!.touchedSectionIndex;
+                            // Navigate based on touched section
+                            if (touchedIndex == 0) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                       AdminRatings()), // Redirect to AdminPlaces as an example
+                              );
+                            } else if (touchedIndex == 1) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                         AdminRatings()), // Redirect to AdminHotels as an example
+                              );
+                            } else if (touchedIndex == 2) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        AdminRatings()), // Redirect to AdminRatings as an example
+                              );
+                            }
                           }
-                        }
-                      });
+                        });
+                      }
                     },
                   ),
                   startDegreeOffset: 90, // Offset the start angle for animation
@@ -487,7 +227,6 @@ class _AdminHomepageState extends State<AdminHomepage> {
             SizedBox(
                 height:
                     20), // Space between the Pie chart and the next containers
-
             // Row to hold "User," "Guide," and "Complaints" buttons side by side
             Row(
               mainAxisAlignment:
