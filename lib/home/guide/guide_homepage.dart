@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/guide/availability,dart';
+import 'package:travel_guide/home/guide/availability.dart';
+import 'package:travel_guide/home/guide/availability.dart';
 import 'package:travel_guide/home/guide/guide_profile.dart';
 import 'package:travel_guide/home/guide/req.dart';
 import 'package:travel_guide/home/start.dart';
