@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:travel_guide/home/user/screen/signup.dart';
 //import 'package:travel_guide/home/admin/admin_hotels.dart';
 //import 'package:travel_guide/guide/page/guide_signup.dart';
 //import 'package:travel_guide/home/guide/guide_homepage.dart';
@@ -15,10 +16,12 @@ import 'package:travel_guide/guide/page/guide_signup.dart';
 import 'package:travel_guide/home/user/favorites.dart';
 import 'package:travel_guide/home/user/Recent.dart';
 import 'package:travel_guide/home/guide/guide_profile.dart';*/
-import 'package:travel_guide/home/admin/Admin_Homepage.dart';
-import 'package:travel_guide/home/admin/admin_users.dart';
-import 'package:travel_guide/home/user/UserHomePage.dart';
-import 'package:travel_guide/place/place.dart';
+/*import 'package:travel_guide/home/admin/screen/Admin_Homepage.dart';
+import 'package:travel_guide/home/admin/screen/admin_users.dart';
+import 'package:travel_guide/home/user/screen/UserHomePage.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';*/
+import 'package:travel_guide/intro.dart';
+//import 'package:travel_guide/home/user/place/place.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -26,4 +29,4 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:Place()));}
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:Signup()));}

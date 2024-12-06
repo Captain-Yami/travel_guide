@@ -305,15 +305,15 @@ class _MainPageState extends State<MainPage> {
 }*/
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart'; // Import the carousel_slider package
-import 'package:travel_guide/home/guide/guide_profile.dart';
+import 'package:travel_guide/home/guide/screen/guide_profile.dart';
 import 'package:travel_guide/home/hotel.dart';
-import 'package:travel_guide/place/place.dart';
+import 'package:travel_guide/home/user/place/place.dart';
 import 'package:travel_guide/home/recommended.dart';
-import 'package:travel_guide/seasons/season.dart';
+import 'package:travel_guide/home/user/seasons/season.dart';
 import 'package:travel_guide/home/start.dart';
-import 'package:travel_guide/home/user/Recent.dart';
-import 'package:travel_guide/home/user/User_profile.dart';
-import 'package:travel_guide/home/user/favorites.dart';
+import 'package:travel_guide/home/user/screen/Recent.dart';
+import 'package:travel_guide/home/user/screen/User_profile.dart';
+import 'package:travel_guide/home/user/screen/favorites.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});

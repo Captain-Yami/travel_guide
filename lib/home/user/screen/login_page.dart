@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:travel_guide/select_user.dart'; // Ensure correct import path
-//import 'package:travel_guide/user/page/signup.dart'; // Ensure correct import path
 
 class LoginPage extends StatefulWidget {
   @override
@@ -9,7 +8,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   // Controllers to manage the input text
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   // GlobalKey for form validation
@@ -19,13 +18,13 @@ class _LoginPageState extends State<LoginPage> {
   void _login() {
     if (_formKey.currentState?.validate() ?? false) {
       // Only proceed if form is valid
-      final username = _usernameController.text;
+      final email = _emailController.text;
       final password = _passwordController.text;
-      print('Login successful with username: $username and password: $password');
+      print('Login successful with email: $email and password: $password');
     } else {
       // Show an error message if fields are empty or invalid
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter both username and password')),
+        SnackBar(content: Text('Please enter both email and password')),
       );
     }
   }
@@ -41,16 +40,18 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack (
-        children: [SizedBox(height:30),
-        
+      body: Stack(
+        children: [
+          SizedBox(height: 30),
           // Background image
           Positioned.fill(
-            child:Opacity(opacity: 0.8,
-            child: Image.asset(
-              'asset/background3.jpg', // Ensure this path is correct
-              fit: BoxFit.cover,
-            )),
+            child: Opacity(
+              opacity: 0.8,
+              child: Image.asset(
+                'asset/background3.jpg', // Ensure this path is correct
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           // Form content
           Padding(
@@ -60,18 +61,19 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  // Username field with validation
+                  // Email field with validation
                   TextFormField(
-                    controller: _usernameController,
+                    controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Username',
+                      labelText: 'Email Address',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your username';
-                      } else if (value.length < 3) {
-                        return 'Username must be at least 3 characters';
+                        return 'Please enter your email address';
+                      } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                          .hasMatch(value)) {
+                        return 'Please enter a valid email address';
                       }
                       return null; // Return null if the input is valid
                     },

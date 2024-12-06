@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/user/login_page.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';
 
-class Details extends StatefulWidget {
-  const Details({super.key});
+class GuideDetails extends StatefulWidget {
+  const GuideDetails({super.key});
 
   @override
-  State<Details> createState() => _DetailsState();
+  State<GuideDetails> createState() => _GuideDetailsState();
 }
 
-class _DetailsState extends State<Details> {
+class _GuideDetailsState extends State<GuideDetails> {
   // TextEditingControllers for each field
   TextEditingController DOB = TextEditingController();
   TextEditingController address = TextEditingController();
@@ -16,6 +16,7 @@ class _DetailsState extends State<Details> {
   TextEditingController city = TextEditingController();
   TextEditingController nation = TextEditingController();
   TextEditingController pincode = TextEditingController();
+  TextEditingController Aadharnumber= TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -185,7 +186,24 @@ class _DetailsState extends State<Details> {
                 },
               ),
               const SizedBox(height: 10),
-              
+               TextFormField(
+                  controller: Aadharnumber,
+                  decoration: const InputDecoration(
+                    labelText: 'Aadhra number',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your Aadhar number';
+                    } else if (value.length < 12) {
+                      return 'Phone number should be at least 10 digits';
+                    } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                      return 'Aadhar number can only contain digits';
+                    }
+                    return null;
+                  },
+                ),
 
               // Submit Button
               ElevatedButton(

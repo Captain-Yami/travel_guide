@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/user/details.dart';
+import 'package:travel_guide/home/user/screen/details.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -36,7 +36,7 @@ class _SignupState extends State<Signup> {
     if (_formKey.currentState?.validate() ?? false) {
       // If the form is valid, you can handle the registration logic
       Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return const Details();
+        return  Details(username: username.text,password: password.text, EmailAddress: Emailaddress.text, Phone_number: Phone_number.text);
       }));
       print('Registration Successful');
       print('Username: ${username.text}');

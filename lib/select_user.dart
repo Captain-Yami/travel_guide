@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:travel_guide/guide/page/guide_signup.dart';
-import 'package:travel_guide/home/user/signup.dart';
+import 'package:travel_guide/home/guide/screen/guide_signup.dart';
+import 'package:travel_guide/home/user/screen/signup.dart';
 
 class SelectUser extends StatefulWidget {
   const SelectUser({super.key});

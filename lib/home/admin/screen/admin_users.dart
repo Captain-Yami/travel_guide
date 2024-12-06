@@ -8,7 +8,7 @@ class AdminUsers extends StatefulWidget {
 }
 
 class _AdminUsersState extends State<AdminUsers> {
-  // Sample data for users
+  // Sample data for users (unchanged)
   List<Map<String, String>> users = [
     {'name': 'John Doe', 'gender': 'Male', 'image': 'assets/images/john_doe.jpg'},
     {'name': 'Jane Smith', 'gender': 'Female', 'image': 'assets/images/jane_smith.jpg'},
@@ -19,7 +19,7 @@ class _AdminUsersState extends State<AdminUsers> {
 
   String selectedGender = 'All'; // Default gender filter (All)
 
-  // Filter users by gender
+  // Filter users by gender (unchanged)
   List<Map<String, String>> getFilteredUsers() {
     if (selectedGender == 'All') {
       return users;
@@ -28,7 +28,7 @@ class _AdminUsersState extends State<AdminUsers> {
     }
   }
 
-  // Show Gender Filter Dialog
+  // Show Gender Filter Dialog (unchanged)
   void showGenderFilterDialog() {
     showDialog(
       context: context,
@@ -56,7 +56,7 @@ class _AdminUsersState extends State<AdminUsers> {
     );
   }
 
-  // Show Search Dialog
+  // Show Search Dialog (unchanged)
   void showSearchDialog() {
     showDialog(
       context: context,
@@ -87,12 +87,12 @@ class _AdminUsersState extends State<AdminUsers> {
     );
   }
 
-  // Navigate to a user-specific page
-  void navigateToUserDetails(Map<String, String> user) {
+  // Navigate to a user-specific page (redirect to CardDetailsPage now)
+  void navigateToCardDetails(int index) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => UserDetailsPage(user: user), // Pass user data to the details page
+        builder: (context) => CardDetailsPage(cardNumber: index + 1), // Pass card number
       ),
     );
   }
@@ -122,10 +122,12 @@ class _AdminUsersState extends State<AdminUsers> {
             Expanded(
               child: ListView(
                 children: [
-                  // Display cards for filtered users
-                  ...getFilteredUsers().map((user) {
+                  // Display cards for filtered users, now labeled as Card 1, Card 2, etc.
+                  ...getFilteredUsers().asMap().entries.map((entry) {
+                    int index = entry.key;
+                    var user = entry.value;
                     return GestureDetector(
-                      onTap: () => navigateToUserDetails(user), // Navigate to user details page
+                      onTap: () => navigateToCardDetails(index), // Navigate to card details
                       child: Card(
                         elevation: 5,
                         shape: RoundedRectangleBorder(
@@ -141,12 +143,12 @@ class _AdminUsersState extends State<AdminUsers> {
                                 backgroundImage: AssetImage(user['image']!),
                               ),
                               const SizedBox(width: 16), // Space between image and text
-                              // User Name
+                              // Card Number as label
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    user['name']!,
+                                    'Card ${index + 1}', // Display card number
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -170,17 +172,17 @@ class _AdminUsersState extends State<AdminUsers> {
   }
 }
 
-// User Details Page
-class UserDetailsPage extends StatelessWidget {
-  final Map<String, String> user;
+// New Page for Card Details
+class CardDetailsPage extends StatelessWidget {
+  final int cardNumber;
 
-  const UserDetailsPage({super.key, required this.user});
+  const CardDetailsPage({super.key, required this.cardNumber});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(user['name']!),
+        title: Text('Card Details - $cardNumber'),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
@@ -188,24 +190,18 @@ class UserDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User Profile Image
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage(user['image']!),
-            ),
-            const SizedBox(height: 16),
-            // User Name
+            // Display the card number
             Text(
-              user['name']!,
+              'Details for Card $cardNumber',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
-            // User Gender
+            const SizedBox(height: 16),
+            // Optionally, you can add more details here as needed
             Text(
-              'Gender: ${user['gender']}',
+              'This is where the details for Card $cardNumber would go.',
               style: const TextStyle(
                 fontSize: 18,
               ),

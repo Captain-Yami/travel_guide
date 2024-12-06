@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:travel_guide/place/beaches.dart';
-import 'package:travel_guide/place/temples.dart';
-import 'package:travel_guide/place/forts.dart';
-import 'package:travel_guide/place/trekking_spots.dart';
+import 'package:travel_guide/home/user/place/beaches.dart';
+import 'package:travel_guide/home/user/place/temples.dart';
+import 'package:travel_guide/home/user/place/forts.dart';
+import 'package:travel_guide/home/user/place/trekking_spots.dart';
 
 class Place extends StatefulWidget {
   const Place({super.key});

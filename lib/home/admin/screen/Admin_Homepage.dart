@@ -1,12 +1,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart'; // Import for PieChart
-import 'package:travel_guide/home/admin/admin_guides.dart';
-import 'package:travel_guide/home/admin/admin_hotels.dart';
-import 'package:travel_guide/home/admin/admin_places.dart';
-import 'package:travel_guide/home/admin/admin_ratings.dart';
-import 'package:travel_guide/home/admin/admin_complaints.dart';
-import 'package:travel_guide/home/admin/admin_users.dart'; // Make sure to import Complaints page
+import 'package:travel_guide/home/admin/screen/admin_guides.dart';
+import 'package:travel_guide/home/admin/screen/admin_hotels.dart';
+import 'package:travel_guide/home/admin/screen/admin_places.dart';
+import 'package:travel_guide/home/admin/screen/admin_ratings.dart';
+import 'package:travel_guide/home/admin/screen/admin_complaints.dart';
+import 'package:travel_guide/home/admin/screen/admin_users.dart'; // Make sure to import Complaints page
 
 class AdminHomepage extends StatefulWidget {
   const AdminHomepage({super.key});

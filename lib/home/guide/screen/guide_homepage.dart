@@ -1,13 +1,13 @@
 
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/guide/availability.dart';
-import 'package:travel_guide/home/guide/availability.dart';
-import 'package:travel_guide/home/guide/guide_profile.dart';
-import 'package:travel_guide/home/guide/req.dart';
+import 'package:travel_guide/home/guide/screen/availability.dart';
+import 'package:travel_guide/home/guide/screen/availability.dart';
+import 'package:travel_guide/home/guide/screen/guide_profile.dart';
+import 'package:travel_guide/home/guide/screen/req.dart';
 import 'package:travel_guide/home/start.dart';
-import 'package:travel_guide/home/user/Recent.dart';
-import 'package:travel_guide/home/user/User_profile.dart';
-import 'package:travel_guide/home/user/favorites.dart';
+import 'package:travel_guide/home/user/screen/Recent.dart';
+import 'package:travel_guide/home/user/screen/User_profile.dart';
+import 'package:travel_guide/home/user/screen/favorites.dart';
 
 class GuideHomepage extends StatefulWidget {
   const GuideHomepage({super.key});

@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
-import 'package:travel_guide/home/guide/guide_homepage.dart';
+import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
 
 class Availability extends StatefulWidget {
   const Availability({super.key});

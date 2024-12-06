@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/user/login_page.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';
 
 class Intro extends StatefulWidget {
   const Intro({super.key});
