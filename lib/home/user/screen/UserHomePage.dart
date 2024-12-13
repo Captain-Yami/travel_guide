@@ -343,13 +343,13 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void _navigateToGuideDetails() {
+  /*void _navigateToGuideDetails() {
     print('Navigating to Guide page');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ListOfGuides()),
+      MaterialPageRoute(builder: (context) => const ),
     );
-  }
+  }*/
 
   void _navigateToSeason() {
     print('Navigating to Season page');
@@ -582,7 +582,9 @@ class _MainPageState extends State<MainPage> {
                           child: _buildElevatedButton(
                             icon: Icons.map,
                             label: 'Guide',
-                            onPressed: _navigateToGuideDetails,
+                            onPressed: () {
+                              
+                            },
                           ),
                         ),
                       ],

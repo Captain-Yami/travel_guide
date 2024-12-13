@@ -1,5 +1,10 @@
-
 import 'package:flutter/material.dart';
+import 'package:travel_guide/home/guide/activities.dart';
+import 'package:travel_guide/home/guide/screen/availability.dart';
+import 'package:travel_guide/home/guide/chats.dart';
+import 'package:travel_guide/home/guide/screen/guide_profile.dart';
+import 'package:travel_guide/home/guide/notifications.dart';
+import 'package:travel_guide/home/guide/screen/req.dart';
 import 'package:travel_guide/home/guide/screen/availability.dart';
 import 'package:travel_guide/home/guide/screen/availability.dart';
 import 'package:travel_guide/home/guide/screen/guide_profile.dart';
@@ -8,6 +13,7 @@ import 'package:travel_guide/home/start.dart';
 import 'package:travel_guide/home/user/screen/Recent.dart';
 import 'package:travel_guide/home/user/screen/User_profile.dart';
 import 'package:travel_guide/home/user/screen/favorites.dart';
+
 
 class GuideHomepage extends StatefulWidget {
   const GuideHomepage({super.key});
@@ -20,7 +26,7 @@ class _MainPageState extends State<GuideHomepage> {
   final _searchcontroller = TextEditingController();
   int _selectedIndex = 0;
   late PageController _pageController;
-
+  
   @override
   void initState() {
     super.initState();
@@ -31,7 +37,7 @@ class _MainPageState extends State<GuideHomepage> {
   void _navigateToreq() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const req()), // Replace with actual destination widget
+      MaterialPageRoute(builder: (context) => const GuideDashboard()), // Replace with actual destination widget
     );
   }
 
@@ -60,43 +66,64 @@ class _MainPageState extends State<GuideHomepage> {
     super.dispose();
   }
 
+   void handleMenuSelection(String option) {
+    switch (option) {
+      case 'Edit Profile':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const GuideProfile(isEditing: true)),
+        );
+        break;
+      case 'Change Password':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Change Password feature coming soon!")),
+        );
+        break;
+      case 'Privacy Settings':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Privacy Settings feature coming soon!")),
+        );
+        break;
+      case 'Notifications':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Notifications feature coming soon!")),
+        );
+        break;
+      case 'Logout':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Logged out")),
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+   void _handleMenuSelection(String option) {
+    switch (option) {
+      case 'Filter Activities':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Filter activities feature coming soon!")),
+        );
+        break;
+      case 'Sort Activities':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Sort activities feature coming soon!")),
+        );
+        break;
+      case 'View Activity History':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Viewing activity history")),
+        );
+        break;
+      default:
+        break;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 42, 41, 41),
-        title: Row(
-          children: [
-            ClipOval(
-              child: Image.asset(
-                'asset/logo3.jpg', // Replace with your logo path
-                fit: BoxFit.cover,
-                height: 40,
-                width: 40, // Make the width and height equal for a perfect circle
-              ),
-            ),
-            const SizedBox(width: 120), // Space between logo and text
-            const Text(
-              'Travel Chronicles',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 253, 253, 253),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_active), 
-            color: Colors.white,
-            onPressed: () {
-              // Add your notification functionality here
-            },
-          ),
-          const SizedBox(width: 15),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
@@ -119,38 +146,182 @@ class _MainPageState extends State<GuideHomepage> {
           },
           children: [
             _buildHomePage(),
-            const Recent(),
-            const Favorites(),
-            const UserProfile(),
+            const Activities(),
+            const Chats(),
+            const GuideProfile(isEditing: false),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-
-currentIndex: _selectedIndex,
+        currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: _buildIcon(Icons.home, 0),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.access_time),
+            icon: _buildIcon(Icons.access_time, 1),
             label: 'Activities',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
+            icon: _buildIcon(Icons.chat, 2),
             label: 'Chats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
+            icon: _buildIcon(Icons.account_circle, 3),
             label: 'Profile',
           ),
         ],
         selectedItemColor: const Color.fromARGB(255, 6, 6, 6),
         unselectedItemColor: const Color.fromARGB(255, 6, 6, 6),
         backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+        showSelectedLabels: true,  // Show labels for selected items
+        showUnselectedLabels: true,  // Show labels for unselected items
       ),
+    );
+  }
+  
+  // Dynamically build AppBar based on the selected index
+  AppBar _buildAppBar() {
+    String title = '';
+    double logoTextSpacing = 20.0; // Default spacing
+
+    List<Widget> appBarActions = []; // Store dynamic actions for the AppBar
+
+    // Set the title, logo-text spacing, and appBar actions based on selected index
+    switch (_selectedIndex) {
+      case 0: // Home Page
+        title = 'Travel Chronicles';
+        logoTextSpacing = 120.0; // Normal space
+        appBarActions = [
+          IconButton(
+            icon: const Icon(Icons.notifications_active),
+            color: Colors.white,
+            onPressed: () {
+             Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const Notifications()), // Replace with actual destination widget
+    );
+            },
+          ),
+        ];
+        break;
+      case 1: // Activities
+        title = 'Activities';
+        logoTextSpacing = 150.0; // More space for Activities
+        appBarActions = [PopupMenuButton<String>(
+            onSelected: _handleMenuSelection,
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem(
+                  value: 'Filter Activities',
+                  child: Text('Filter Activities'),
+                ),
+                const PopupMenuItem(
+                  value: 'Sort Activities',
+                  child: Text('Sort Activities'),
+                ),
+                const PopupMenuItem(
+                  value: 'View Activity History',
+                  child: Text('View Activity History'),
+                ),
+              ];
+            },
+          ),
+        ];
+        break;
+      case 2: // Chats
+        title = 'Chats';
+        logoTextSpacing = 165.0; // Larger space for Chats
+        appBarActions = [
+          PopupMenuButton<String>(
+            onSelected: handleMenuSelection,
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem(
+                  value: 'Mark all as unread',
+                  child: Text('Mark all as unread'),
+                ),
+                const PopupMenuItem(
+                  value: 'Chat Settings',
+                  child: Text('Chat Settings'),
+                ),
+                const PopupMenuItem(
+                  value: 'Search Chats',
+                  child: Text('Search Chats'),
+                ),
+              ];
+            },
+          ),
+        ];
+        break;
+      case 3: // Profile
+        title = 'Profile';
+        logoTextSpacing = 165.0; // Smaller space for Profile
+        appBarActions =  [
+          PopupMenuButton<String>(
+            onSelected: handleMenuSelection,
+            icon: const Icon(Icons.settings,color: Colors.white),
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem(
+                  value: 'Edit Profile',
+                  child: Text('Edit Profile'),
+                ),
+                const PopupMenuItem(
+                  value: 'Change Password',
+                  child: Text('Change Password'),
+                ),
+                const PopupMenuItem(
+                  value: 'Privacy Settings',
+                  child: Text('Privacy Settings'),
+                ),
+                const PopupMenuItem(
+                  value: 'Notifications',
+                  child: Text('Notifications'),
+                ),
+                const PopupMenuItem(
+                  value: 'Logout',
+                  child: Text('Logout'),
+                ),
+              ];
+            },
+          ),
+        ];
+        break;
+      default:
+        title = 'Travel Chronicles';
+        logoTextSpacing = 120.0;
+        break;
+    }
+
+    return AppBar(
+      backgroundColor: const Color.fromARGB(255, 42, 41, 41),
+      title: Row(
+        children: [
+          ClipOval(
+            child: Image.asset(
+              'asset/logo3.jpg', // Replace with your logo path
+              fit: BoxFit.cover,
+              height: 40,
+              width: 40, // Make the width and height equal for a perfect circle
+            ),
+          ),
+          SizedBox(width: logoTextSpacing), // Dynamic spacing based on selected tab
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 253, 253, 253),
+            ),
+          ),
+        ],
+      ),
+      actions: appBarActions,
     );
   }
 
@@ -163,7 +334,7 @@ currentIndex: _selectedIndex,
             child: Form(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
+                children: <Widget>[ 
                   SizedBox(height: 20),
                   Container(
                     width: 400, // Set the width of the TextFormField
@@ -228,12 +399,12 @@ currentIndex: _selectedIndex,
             ),
           ),
           // "Start your journey" button
-Padding(
+          Padding(
             padding: const EdgeInsets.all(9.0),
             child: Form(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
+                children: <Widget>[ 
                   Container(
                     width: 400, // Set the width of the TextFormField
                     height: 200, // Set the height of the TextFormField
@@ -298,6 +469,15 @@ Padding(
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildIcon(IconData icon, int index) {
+    double iconSize = _selectedIndex == index ? 30.0 : 24.0; // Increase size for selected icon
+    return Icon(
+      icon,
+      size: iconSize,
+      color: const Color.fromARGB(255, 6, 6, 6),
     );
   }
 }
