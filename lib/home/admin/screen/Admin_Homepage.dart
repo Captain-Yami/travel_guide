@@ -1,12 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart'; // Import for PieChart
+import 'package:travel_guide/home/admin/screen/add_places.dart';
 import 'package:travel_guide/home/admin/screen/admin_guides.dart';
 import 'package:travel_guide/home/admin/screen/admin_hotels.dart';
 import 'package:travel_guide/home/admin/screen/admin_places.dart';
 import 'package:travel_guide/home/admin/screen/admin_ratings.dart';
 import 'package:travel_guide/home/admin/screen/admin_complaints.dart';
 import 'package:travel_guide/home/admin/screen/admin_users.dart'; // Make sure to import Complaints page
+
+// New AddPlacesPage class for the "Add Places" button
+
 
 class AdminHomepage extends StatefulWidget {
   const AdminHomepage({super.key});
@@ -286,6 +289,31 @@ class _AdminHomepageState extends State<AdminHomepage> {
                   ),
                   child: Text(
                     'Complaints',
+                    style: TextStyle(
+                        color: const Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 14),
+                  ),
+                ),
+                // Add Places Button
+                SizedBox(width: 10), // Space between the buttons
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddPlacesPage()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    shadowColor: Colors.black.withOpacity(0.3),
+                    elevation: 5,
+                  ),
+                  child: Text(
+                    'Add Places',
                     style: TextStyle(
                         color: const Color.fromARGB(255, 0, 0, 0),
                         fontSize: 14),

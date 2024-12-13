@@ -45,85 +45,88 @@ class _PlaceState extends State<Place> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(202, 19, 154, 216),
-        title: const Text('Place'),
+        backgroundColor: const Color.fromARGB(255, 42, 41, 41),
+        title: Row(
+          children: [
+             const SizedBox(width: 150),
+        const Text('Place',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 253, 253, 253),
+              ),),
+          ],     
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(16.0),
         child: GridView.count(
-          crossAxisCount: 2, // 2 cards per row
+          crossAxisCount: 2, // Two buttons per row
           crossAxisSpacing: 10, // Space between columns
-          mainAxisSpacing: 10, // Space between rows
+          mainAxisSpacing: 20, // Space between rows
+          childAspectRatio: 2, // Adjust the aspect ratio to control the button size
           children: [
-            // Card 1: Beaches
-            GestureDetector(
-              onTap: _navigateToBeaches,
-              child: Card(
-                color: Colors.blueAccent, // Card color
-                elevation: 5, // Card shadow
+            // Button 1: Monsoon
+            ElevatedButton(
+              onPressed: _navigateToBeaches,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(12), // Medium size button
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Center(
-                  child: const Text(
-                    'Beaches',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+              ),
+              child: const Text(
+                'Beaches',
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
-            // Card 2: Temples
-            GestureDetector(
-              onTap: _navigateToTemples,
-              child: Card(
-                color: Colors.green, // Card color
-                elevation: 5, // Card shadow
+            // Button 2: Theyyam
+            ElevatedButton(
+              onPressed: _navigateToTemples,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(12), // Medium size button
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Center(
-                  child: const Text(
-                    'Temples',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+              ),
+              child: const Text(
+                'Temples',
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
-            // Card 3: Trekking Spots
-            GestureDetector(
-              onTap: _navigateToTrekkingSpots,
-              child: Card(
-                color: Colors.brown, // Card color
-                elevation: 5, // Card shadow
+            // Button 3: Winter
+            ElevatedButton(
+              onPressed: _navigateToTrekkingSpots,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(12), // Medium size button
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Center(
-                  child: const Text(
-                    'Trekking Spots',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+              ),
+              child: const Text(
+                'Trekking Spots',
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
-            // Card 4: Museums and Forts
-            GestureDetector(
-              onTap: _navigateToMuseumsAndForts,
-              child: Card(
-                color: Colors.purple, // Card color
-                elevation: 5, // Card shadow
+            // Button 4: Summer
+            ElevatedButton(
+              onPressed: _navigateToMuseumsAndForts,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(12), // Medium size button
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Center(
-                  child: const Text(
-                    'Museums & Forts',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+              ),
+              child: const Text(
+                'Museums & Forts',
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
           ],

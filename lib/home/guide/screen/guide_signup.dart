@@ -36,7 +36,7 @@ class _GuideSignupState extends State<GuideSignup> {
     if (_formKey.currentState?.validate() ?? false) {
       // If the form is valid, navigate to the next screen
       Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return GuideDetails();  // Navigate to GuideDetails screen
+        return GuideDetails(guideName: '',);  // Navigate to GuideDetails screen
       }));
       print('Registration Successful');
       print('Username: ${username.text}');
@@ -50,162 +50,159 @@ class _GuideSignupState extends State<GuideSignup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background image with opacity
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.8, // Adjust opacity for the background image
-              child: Image.asset(
-                'asset/background2.jpg',  // Ensure this path is correct
-                fit: BoxFit.cover,  // Ensure the image covers the entire screen
-              ),
-            ),
-          ),
-          // Content (form) placed on top of the background image
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,  // Attach the form key here
-                child: Column(
-                  children: [
-                    // Circular logo image
-                    ClipOval(
-                      child: Image.asset(
-                        'asset/logo3.jpg',  // Ensure this path is correct
-                        width: 200,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Create Account',
-                      style: TextStyle(fontSize: 24, color: Colors.blue),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Username field
-                    TextFormField(
-                      controller: username,
-                      decoration: const InputDecoration(
-                        labelText: 'Username',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a username';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Email field with validation
-                    TextFormField(
-                      controller: Emailaddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email address',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter an email address';
-                        } else if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-                          return 'Please enter a valid email address';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Phone number field with validation
-                    TextFormField(
-                      controller: Phone_number,
-                      decoration: const InputDecoration(
-                        labelText: 'Phone number',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your phone number';
-                        } else if (value.length < 10) {
-                          return 'Phone number should be at least 10 digits';
-                        } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                          return 'Phone number can only contain digits';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Password field with validation
-                    TextFormField(
-                      controller: password,
-                      obscureText: show,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        border: const OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              show = !show;
-                            });
-                          },
-                          icon: Icon(show ? Icons.visibility : Icons.visibility_off),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a password';
-                        } else if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Confirm password field with validation
-                    TextFormField(
-                      controller: confirmpassword,
-                      obscureText: show,
-                      decoration: InputDecoration(
-                        labelText: 'Confirm password',
-                        border: const OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              show = !show;
-                            });
-                          },
-                          icon: Icon(show ? Icons.visibility : Icons.visibility_off),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please confirm your password';
-                        } else if (value != password.text) {
-                          return 'Passwords do not match';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Sign Up Button
-                    ElevatedButton(
-                      onPressed: registrationHandler,
-                      child: const Text('Sign Up'),
-                    ),
-                  ],
+      appBar: AppBar(
+        backgroundColor: Colors.black, // Black color for AppBar
+        elevation: 0, // No elevation to keep it flat
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,  // Attach the form key here
+          child: Column(
+            children: [
+              // Circular logo image
+              ClipOval(
+                child: Image.asset(
+                  'asset/logo3.jpg',  // Ensure this path is correct
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.cover,
                 ),
               ),
-            ),
+              const SizedBox(height: 10),
+              Text(
+                'Create Account',
+                style: TextStyle(fontSize: 24, color: Colors.black),
+              ),
+              const SizedBox(height: 20),
+
+              // Username field with oval shape
+              TextFormField(
+                controller: username,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a username';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Email field with oval shape and validation
+              TextFormField(
+                controller: Emailaddress,
+                decoration: InputDecoration(
+                  labelText: 'Email address',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an email address';
+                  } else if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Phone number field with oval shape and validation
+              TextFormField(
+                controller: Phone_number,
+                decoration: InputDecoration(
+                  labelText: 'Phone number',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your phone number';
+                  } else if (value.length < 10) {
+                    return 'Phone number should be at least 10 digits';
+                  } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                    return 'Phone number can only contain digits';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Password field with oval shape and validation
+              TextFormField(
+                controller: password,
+                obscureText: show,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        show = !show;
+                      });
+                    },
+                    icon: Icon(show ? Icons.visibility : Icons.visibility_off),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a password';
+                  } else if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Confirm password field with oval shape and validation
+              TextFormField(
+                controller: confirmpassword,
+                obscureText: show,
+                decoration: InputDecoration(
+                  labelText: 'Confirm password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        show = !show;
+                      });
+                    },
+                    icon: Icon(show ? Icons.visibility : Icons.visibility_off),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please confirm your password';
+                  } else if (value != password.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Sign Up Button
+              ElevatedButton(
+                onPressed: registrationHandler,
+                child: const Text('Nextzz'),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

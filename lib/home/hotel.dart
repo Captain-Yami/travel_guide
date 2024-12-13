@@ -31,8 +31,18 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
    Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(202, 19, 154, 216),
-        title: const Text('HOTELS'),
+        backgroundColor: const Color.fromARGB(255, 42, 41, 41),
+        title: Row(
+          children: [
+             const SizedBox(width: 150),
+        const Text('Hotels',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 253, 253, 253),
+              ),),
+          ],     
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -50,11 +60,11 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
               ),
               child: const Text(
                 'Homestay',
-                style: TextStyle(fontSize: 16, color: Colors.white), // Medium font size
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
@@ -66,11 +76,11 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.green,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
               ),
               child: const Text(
                 'FIVE STAR',
-                style: TextStyle(fontSize: 16, color: Colors.white), // Medium font size
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
@@ -82,11 +92,11 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.blueGrey,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
               ),
               child: const Text(
                 'FOUR STAR',
-                style: TextStyle(fontSize: 16, color: Colors.white), // Medium font size
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
@@ -98,11 +108,11 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
               ),
               child: const Text(
                 'hotel',
-                style: TextStyle(fontSize: 16, color: Colors.white), // Medium font size
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
           ],

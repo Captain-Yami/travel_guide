@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Guidedetails extends StatefulWidget {
-  const Guidedetails({super.key});
+  const Guidedetails({super.key, required String guidename});
 
   @override
   State<Guidedetails> createState() => _GuidedetailsState();

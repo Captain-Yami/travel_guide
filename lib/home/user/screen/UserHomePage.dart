@@ -304,8 +304,10 @@ class _MainPageState extends State<MainPage> {
   }
 }*/
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart'; // Import the carousel_slider package
 import 'package:travel_guide/home/guide/screen/guide_profile.dart';
+import 'package:travel_guide/home/guide/screen/list_of_guides.dart';
 import 'package:travel_guide/home/hotel.dart';
 import 'package:travel_guide/home/user/place/place.dart';
 import 'package:travel_guide/home/recommended.dart';
@@ -345,7 +347,7 @@ class _MainPageState extends State<MainPage> {
     print('Navigating to Guide page');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const Guidedetails()),
+      MaterialPageRoute(builder: (context) => const ListOfGuides()),
     );
   }
 
@@ -414,7 +416,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(202, 19, 154, 216),
+        backgroundColor: const Color.fromARGB(255, 42, 41, 41),
         title: Row(
           children: [
             ClipOval(
@@ -425,27 +427,33 @@ class _MainPageState extends State<MainPage> {
                 width: 40, // Make the width and height equal for a perfect circle
               ),
             ),
-            const SizedBox(width: 70), // Space between logo and text
+            const SizedBox(width: 120), // Space between logo and text
             const Text(
               'Travel Chronicles',
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 253, 253, 253),
+              ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search), // Search icon
+            icon: const Icon(Icons.list), 
+            color: Colors.white,
             onPressed: () {
-              // Add your search functionality here
+              // Add your notification functionality here
             },
           ),
+          const SizedBox(width: 15),
         ],
       ),
       body: Container(
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, Colors.purple],
+            colors: [Colors.white, Colors.white],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -453,7 +461,14 @@ class _MainPageState extends State<MainPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-               Container(
+              Padding(
+                padding: const EdgeInsets.all(9.0),
+                child: Form(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(height: 20),
+                      Container(
                         width: 400, // Set the width of the TextFormField
                         height: 60, // Set the height of the TextFormField
                         child: TextFormField(
@@ -462,14 +477,23 @@ class _MainPageState extends State<MainPage> {
                             hintText: 'Search', // Optional hint text
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30), // Oval shape
-                              borderSide: BorderSide(color: const Color.fromARGB(255, 5, 0, 0), width: 2), // Border color and thickness
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(255, 5, 0, 0),
+                                width: 2, // Border color and thickness
+                              ),
                             ),
-                            suffixIcon: Icon(Icons.search, color: const Color.fromARGB(255, 1, 2, 3)),
-                            contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20), // Padding to adjust the internal space
+                            suffixIcon: const Icon(Icons.search,
+                                color: Color.fromARGB(255, 1, 2, 3)),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 15, horizontal: 20), // Padding to adjust the internal space
                           ),
-                          style: TextStyle(fontSize: 18), // Font size inside the text field
+                          style: const TextStyle(fontSize: 18),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+              ),
               // Carousel Slider inside the Recommended Section
               Container(
                 width: double.infinity,
@@ -477,9 +501,54 @@ class _MainPageState extends State<MainPage> {
                 margin: const EdgeInsets.all(10),
                 child: CarouselSlider(
                   items: [
-                    Image.asset('asset/Tea Plantations in Munnar, Kerala, India.jpeg', fit: BoxFit.cover), // Replace with your image paths
-                    Image.asset('asset/thalassery fort.jpeg', fit: BoxFit.cover),
-                    Image.asset('asset/theyyam.jpeg', fit: BoxFit.cover),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20), // Adjust the value for desired roundness
+                      child: Image.asset(
+                        'asset/pic1.jpg',
+                        fit: BoxFit.cover,
+                        height: 200, // Ensure the image fills the height
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        'asset/pic3.jpg',
+                        fit: BoxFit.cover,
+                        height: 200,
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        'asset/pic4.jpg',
+                        fit: BoxFit.cover,
+                        height: 200,
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        'asset/pic5.jpg',
+                        fit: BoxFit.cover,
+                        height: 200,
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        'asset/pic6.jpg',
+                        fit: BoxFit.cover,
+                        height: 200,
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        'asset/pic7.jpg',
+                        fit: BoxFit.cover,
+                        height: 200,
+                      ),
+                    ),
                   ],
                   options: CarouselOptions(
                     autoPlay: true,
@@ -490,46 +559,67 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ),
               ),
-
-              // GridView below the Container with square buttons
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1.6, // Square aspect ratio (width == height)
-                children: [
-                  // Button 1: Place
-                  _buildGridButton(
-                    icon: Icons.map,
-                    label: 'Place',
-                    onPressed: _navigateToPlace,
-                  ),
-                  // Button 2: Guide
-                  _buildGridButton(
-                    icon: Icons.map,
-                    label: 'Guide',
-                    onPressed: _navigateToGuideDetails,
-                  ),
-                  // Button 3: Hotel
-                  _buildGridButton(
-                    icon: Icons.hotel,
-                    label: 'Hotel',
-                    onPressed: _navigateToHotel,
-                  ),
-                  // Button 4: Season
-                  _buildGridButton(
-                    icon: Icons.calendar_today,
-                    label: 'Season',
-                    onPressed: _navigateToSeason,
-                  ),
-                ],
+              // Elevated Buttons in two rows
+              Padding(
+                padding: const EdgeInsets.all(60.0),
+                child: Column(
+                  children: [
+                    // First row with two buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Button 1: Place
+                        Expanded(
+                          child: _buildElevatedButton(
+                            icon: Icons.map,
+                            label: 'Place',
+                            onPressed: _navigateToPlace,
+                          ),
+                        ),
+                        const SizedBox(width: 20), // Spacing between buttons
+                        // Button 2: Guide
+                        Expanded(
+                          child: _buildElevatedButton(
+                            icon: Icons.map,
+                            label: 'Guide',
+                            onPressed: _navigateToGuideDetails,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20), // Spacing between rows
+                    // Second row with two buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Button 3: Hotel
+                        Expanded(
+                          child: _buildElevatedButton(
+                            icon: Icons.hotel,
+                            label: 'Hotel',
+                            onPressed: _navigateToHotel,
+                          ),
+                        ),
+                        const SizedBox(width: 20), // Spacing between buttons
+                        // Button 4: Season
+                        Expanded(
+                          child: _buildElevatedButton(
+                            icon: Icons.calendar_today,
+                            label: 'Season',
+                            onPressed: _navigateToSeason,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               // Start your journey button
               Container(
                 width: 350,
                 height: 50,
                 margin: const EdgeInsets.all(10),
+                color: const Color.fromARGB(255, 240, 240, 240),
                 child: ElevatedButton(
                   onPressed: _navigateToStart,
                   style: ElevatedButton.styleFrom(
@@ -543,7 +633,7 @@ class _MainPageState extends State<MainPage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -573,44 +663,44 @@ class _MainPageState extends State<MainPage> {
             label: 'Profile',
           ),
         ],
-        selectedItemColor: const Color.fromARGB(255, 66, 62, 62),
-        unselectedItemColor: const Color.fromARGB(255, 58, 54, 54),
-        backgroundColor: Colors.purple,
+        selectedItemColor: const Color.fromARGB(255, 6, 6, 6),
+        unselectedItemColor: const Color.fromARGB(255, 6, 6, 6),
+        backgroundColor: const Color.fromARGB(255, 240, 240, 240),
       ),
     );
   }
 
-  // Helper function to create grid buttons
-  Widget _buildGridButton({
+  // Helper function to create ElevatedButton widgets
+  Widget _buildElevatedButton({
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
   }) {
-    return Container(
-      width: 150, // Adjust width of container
-      height: 150, // Adjust height of container
-      margin: const EdgeInsets.all(10),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: EdgeInsets.zero,
-          backgroundColor: Colors.purple, // Set button color
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 30, color: Colors.white),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 14, color: Colors.white),
+        backgroundColor: const Color.fromARGB(255, 240, 240, 240), // Button color
+        elevation: 5, // Optional elevation
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 24, color: Colors.black), // Icon
+          const SizedBox(height: 8), // Space between icon and label
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black, // Label text color
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
+

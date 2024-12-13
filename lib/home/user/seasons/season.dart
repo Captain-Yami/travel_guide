@@ -33,9 +33,20 @@ class _SeasonState extends State<Season> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(202, 19, 154, 216),
-        title: const Text('Seasons'),
+        backgroundColor: const Color.fromARGB(255, 42, 41, 41),
+        title: Row(
+          children: [
+             const SizedBox(width: 140),
+        const Text('Seasons',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 253, 253, 253),
+              ),),
+          ],     
+        ),
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.count(
@@ -52,11 +63,11 @@ class _SeasonState extends State<Season> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
               ),
               child: const Text(
                 'Monsoon',
-                style: TextStyle(fontSize: 16, color: Colors.white), // Medium font size
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
@@ -68,11 +79,11 @@ class _SeasonState extends State<Season> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.green,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
               ),
               child: const Text(
                 'Theyyam',
-                style: TextStyle(fontSize: 16, color: Colors.white), // Medium font size
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
@@ -84,11 +95,11 @@ class _SeasonState extends State<Season> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.blueGrey,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
               ),
               child: const Text(
                 'Winter',
-                style: TextStyle(fontSize: 16, color: Colors.white), // Medium font size
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
 
@@ -100,11 +111,11 @@ class _SeasonState extends State<Season> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
               ),
               child: const Text(
                 'Summer',
-                style: TextStyle(fontSize: 16, color: Colors.white), // Medium font size
+                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
               ),
             ),
           ],

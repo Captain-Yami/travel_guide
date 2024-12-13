@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:travel_guide/home/user/home_page.dart'; // Ensure correct import path
+import 'package:travel_guide/home/user/service/userfirebaseauthservice.dart'; // Ensure correct import path
 import 'package:travel_guide/select_user.dart'; // Ensure correct import path
 
 class LoginPage extends StatefulWidget {
@@ -15,17 +18,21 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   // Method to handle login action
-  void _login() {
+  bool loading = false;
+
+  void _login() async {
+    print('failed');
     if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        loading = true;
+      });
       // Only proceed if form is valid
-      final email = _emailController.text;
-      final password = _passwordController.text;
-      print('Login successful with email: $email and password: $password');
-    } else {
-      // Show an error message if fields are empty or invalid
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter both email and password')),
-      );
+
+      String email = _emailController.text;
+      String password = _passwordController.text;
+
+      // Verify the credentials using Firebase Firestore
+      await Userfirebaseauthservice().userLogin(email: email, password: password, context: context);
     }
   }
 
@@ -40,92 +47,97 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          SizedBox(height: 30),
-          // Background image
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.8,
-              child: Image.asset(
-                'asset/background3.jpg', // Ensure this path is correct
-                fit: BoxFit.cover,
+      appBar: AppBar(
+        backgroundColor: Colors.black, // Black color for AppBar // White color for text in AppBar
+        foregroundColor: Colors.white, // White color for text in AppBar
+      ),
+      backgroundColor: Colors.white, // Set background color to white
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey, // Attach the form key to the Form widget
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              // Add the text at the top center
+              Text(
+                'LOGIN',
+                style: TextStyle(
+                  fontSize: 30, // Set font size
+                  color: Colors.black, // Set text color
+                  fontWeight: FontWeight.bold, // Bold text style
+                ),
+                textAlign: TextAlign.center, // Center align the text
               ),
-            ),
-          ),
-          // Form content
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey, // Attach the form key to the Form widget
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  // Email field with validation
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email Address',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email address';
-                      } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                          .hasMatch(value)) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null; // Return null if the input is valid
-                    },
-                  ),
-                  SizedBox(height: 20),
+              SizedBox(height: 100), // Add some spacing
 
-                  // Password field with validation
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      } else if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
-                        // Password should contain at least one lowercase, one uppercase, and one digit
-                        return 'Password must include at least one uppercase letter, one lowercase letter, and one number';
-                      }
-                      return null; // Return null if the input is valid
-                    },
+              // Email field with validation and oval shape
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email Address',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval shape
                   ),
-                  SizedBox(height: 20),
-
-                  // Login button
-                  ElevatedButton(
-                    onPressed: _login, // Trigger login logic
-                    child: Text('Login'),
-                  ),
-                  SizedBox(height: 10),
-
-                  // Redirect to Signup page
-                  TextButton(
-                    onPressed: _navigateToSignup, // Navigate to Signup page
-                    child: Text(
-                      'Create account',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14, // Increased font size for better readability
-                        color: const Color(0xFF123E03),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email address';
+                  } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                      .hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null; // Return null if the input is valid
+                },
               ),
-            ),
+              SizedBox(height: 20),
+
+              // Password field with validation and oval shape
+              TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval shape
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  } else if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
+                    // Password should contain at least one lowercase, one uppercase, and one digit
+                    return 'Password must include at least one uppercase letter, one lowercase letter, and one number';
+                  }
+                  return null; // Return null if the input is valid
+                },
+              ),
+              SizedBox(height: 20),
+
+              // Login button
+              ElevatedButton(
+                onPressed: _login, // Trigger login logic
+                child: Text('Login'),
+              ),
+              SizedBox(height: 10),
+
+              // Redirect to Signup page
+              TextButton(
+                onPressed: _navigateToSignup, // Navigate to Signup page
+                child: Text(
+                  'Create account',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14, // Increased font size for better readability
+                    color: const Color(0xFF123E03),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
 
 class GuideDetails extends StatefulWidget {
-  const GuideDetails({super.key});
+  const GuideDetails({super.key, required String guideName});
 
   @override
   State<GuideDetails> createState() => _GuideDetailsState();
@@ -48,6 +48,10 @@ class _GuideDetailsState extends State<GuideDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black, // Black color for AppBar
+        elevation: 0, // No elevation for flat appearance
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -57,16 +61,18 @@ class _GuideDetailsState extends State<GuideDetails> {
               const SizedBox(height: 10),
               Text(
                 'Details',
-                style: TextStyle(fontSize: 24, color: Colors.blue),
+                style: TextStyle(fontSize: 24, color: Colors.black),
               ),
-              const SizedBox(height: 200),
+              const SizedBox(height: 20),
 
-              // Date of Birth Field with validation (DD/MM/YYYY)
+              // Date of Birth Field with oval shape and validation (DD/MM/YYYY)
               TextFormField(
                 controller: DOB,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Date of Birth (DD/MM/YYYY)',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -83,12 +89,14 @@ class _GuideDetailsState extends State<GuideDetails> {
               ),
               const SizedBox(height: 10),
 
-              // Address Field with validation
+              // Address Field with oval shape and validation
               TextFormField(
                 controller: address,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Address',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -104,12 +112,14 @@ class _GuideDetailsState extends State<GuideDetails> {
               ),
               const SizedBox(height: 10),
 
-              // Pincode Field with validation (6 digits)
+              // Pincode Field with oval shape and validation (6 digits)
               TextFormField(
                 controller: pincode,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Pincode',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -124,12 +134,14 @@ class _GuideDetailsState extends State<GuideDetails> {
               ),
               const SizedBox(height: 10),
 
-              // State Field with validation
+              // State Field with oval shape and validation
               TextFormField(
                 controller: state,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'State',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -145,12 +157,14 @@ class _GuideDetailsState extends State<GuideDetails> {
               ),
               const SizedBox(height: 10),
 
-              // City Field with validation
+              // City Field with oval shape and validation
               TextFormField(
                 controller: city,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'City',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -166,12 +180,14 @@ class _GuideDetailsState extends State<GuideDetails> {
               ),
               const SizedBox(height: 10),
 
-              // Nation Field with validation
+              // Nation Field with oval shape and validation
               TextFormField(
                 controller: nation,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Nation',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -186,24 +202,29 @@ class _GuideDetailsState extends State<GuideDetails> {
                 },
               ),
               const SizedBox(height: 10),
-               TextFormField(
-                  controller: Aadharnumber,
-                  decoration: const InputDecoration(
-                    labelText: 'Aadhra number',
-                    border: OutlineInputBorder(),
+
+              // Aadhar number field with oval shape and validation
+              TextFormField(
+                controller: Aadharnumber,
+                decoration: InputDecoration(
+                  labelText: 'Aadhar number',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
                   ),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your Aadhar number';
-                    } else if (value.length < 12) {
-                      return 'Phone number should be at least 10 digits';
-                    } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                      return 'Aadhar number can only contain digits';
-                    }
-                    return null;
-                  },
                 ),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Aadhar number';
+                  } else if (value.length < 12) {
+                    return 'Aadhar number should be at least 12 digits';
+                  } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                    return 'Aadhar number can only contain digits';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
 
               // Submit Button
               ElevatedButton(

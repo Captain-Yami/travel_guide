@@ -3,15 +3,12 @@ import 'package:travel_guide/home/user/screen/login_page.dart';
 import 'package:travel_guide/home/user/service/userfirebaseauthservice.dart';
 
 class Details extends StatefulWidget {
-  const Details({super.key, required this.username,required this.EmailAddress,required this.Phone_number,required this.password});
+  const Details({super.key, required this.username, required this.EmailAddress, required this.Phone_number, required this.password});
 
   final String username;
   final String EmailAddress;
   final String Phone_number;
   final String password;
-
-
-
 
   @override
   State<Details> createState() => _DetailsState();
@@ -56,25 +53,31 @@ class _DetailsState extends State<Details> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black, // Black color for AppBar
+        elevation: 0, // Remove shadow for a clean look
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey, // Attach the form key to the Form widget
           child: Column(
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Text(
                 'Details',
-                style: TextStyle(fontSize: 24, color: Colors.blue),
+                style: TextStyle(fontSize: 24, color: Colors.black),
               ),
-              const SizedBox(height: 200),
+              const SizedBox(height: 20),
 
               // Date of Birth Field with validation (DD/MM/YYYY)
               TextFormField(
                 controller: DOB,
                 decoration: const InputDecoration(
                   labelText: 'Date of Birth (DD/MM/YYYY)',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)), // Oval shape
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -89,14 +92,16 @@ class _DetailsState extends State<Details> {
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              // Address Field with validation
+              // Address Field with validation and oval shape
               TextFormField(
                 controller: address,
                 decoration: const InputDecoration(
                   labelText: 'Address',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)), // Oval shape
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -110,14 +115,16 @@ class _DetailsState extends State<Details> {
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              // Pincode Field with validation (6 digits)
+              // Pincode Field with validation (6 digits) and oval shape
               TextFormField(
                 controller: pincode,
                 decoration: const InputDecoration(
                   labelText: 'Pincode',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)), // Oval shape
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -130,14 +137,16 @@ class _DetailsState extends State<Details> {
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              // State Field with validation
+              // State Field with validation and oval shape
               TextFormField(
                 controller: state,
                 decoration: const InputDecoration(
                   labelText: 'State',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)), // Oval shape
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -151,14 +160,16 @@ class _DetailsState extends State<Details> {
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              // City Field with validation
+              // City Field with validation and oval shape
               TextFormField(
                 controller: city,
                 decoration: const InputDecoration(
                   labelText: 'City',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)), // Oval shape
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -172,14 +183,16 @@ class _DetailsState extends State<Details> {
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              // Nation Field with validation
+              // Nation Field with validation and oval shape
               TextFormField(
                 controller: nation,
                 decoration: const InputDecoration(
                   labelText: 'Nation',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)), // Oval shape
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -193,21 +206,25 @@ class _DetailsState extends State<Details> {
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
-              
+              const SizedBox(height: 20),
 
               // Submit Button
               ElevatedButton(
-                onPressed: (){ Userfirebaseauthservice().UserRegister(email:widget.EmailAddress,
-                username: 'username', 
-                password: widget.password, DOB: DOB.text,
-                address: address.text, 
-                pincode: pincode.text, 
-                state: state.text, 
-                city: city.text, 
-                nation: nation.text, 
-                context: context, ); 
-                },// Trigger form submission
+                onPressed: () {
+                  Userfirebaseauthservice().UserRegister(
+                    email: widget.EmailAddress,
+                    username: widget.username,
+                    Phone_number: widget.Phone_number,
+                    password: widget.password,
+                    DOB: DOB.text,
+                    address: address.text,
+                    pincode: pincode.text,
+                    state: state.text,
+                    city: city.text,
+                    nation: nation.text,
+                    context: context,
+                  );
+                }, // Trigger form submission
                 child: const Text('Sign Up'),
               ),
             ],
