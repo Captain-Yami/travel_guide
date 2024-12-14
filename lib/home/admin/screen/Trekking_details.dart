@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class AddLocationDetailsPage extends StatefulWidget {
+import 'package:travel_guide/home/admin/services/firebaseAddbeaches.dart';
+import 'package:travel_guide/home/admin/services/firebaseAddtemples.dart';
+import 'package:travel_guide/home/admin/services/firebaseAddtrekking.dart';
+
+class TrekkingDetails extends StatefulWidget {
   final String locationType;
 
   // Constructor to accept the location type (e.g., 'Beaches', 'Temples', etc.)
-  const AddLocationDetailsPage({super.key, required this.locationType});
+  const TrekkingDetails({super.key, required this.locationType});
 
   @override
-  State<AddLocationDetailsPage> createState() => _AddLocationDetailsPageState();
+  State<TrekkingDetails> createState() => _AddLocationDetailsPageState();
 }
 
-class _AddLocationDetailsPageState extends State<AddLocationDetailsPage> {
+class _AddLocationDetailsPageState extends State<TrekkingDetails> {
   // Controllers for each text field
   final _formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
@@ -34,6 +38,16 @@ class _AddLocationDetailsPageState extends State<AddLocationDetailsPage> {
         _image = File(pickedFile.path);
       });
     }
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    nameController.dispose();
+    descriptionController.dispose();
+    seasonalTimeController.dispose();
+    openingTimeController.dispose();
+    closingTimeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -169,21 +183,13 @@ class _AddLocationDetailsPageState extends State<AddLocationDetailsPage> {
               // Submit button
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    // Perform the action for saving the details.
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('${widget.locationType} added successfully')));
-
-                    // Clear the text fields after submission
-                    nameController.clear();
-                    descriptionController.clear();
-                    seasonalTimeController.clear();
-                    openingTimeController.clear();
-                    closingTimeController.clear();
-                    setState(() {
-                      _image = null; // Reset image after submission
-                    });
-                  }
+                  firebaseAddtrekking().addtrekking(locationName: nameController.text, 
+                  locationDescription: descriptionController.text,
+                   seasonalTime: seasonalTimeController.text, 
+                   openingTime: openingTimeController.text, 
+                   closingTime: closingTimeController.text);
+                   
+                  
                 },
                 child: Text('Submit'),
                 style: ElevatedButton.styleFrom(

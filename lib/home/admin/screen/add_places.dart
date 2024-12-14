@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/admin/screen/location_details.dart';
+import 'package:travel_guide/home/admin/screen/Beaches_details.dart';
+import 'package:travel_guide/home/admin/screen/Temples_details.dart';
+import 'package:travel_guide/home/admin/screen/Trekking_details.dart';
 
 class AddPlacesPage extends StatelessWidget {
   const AddPlacesPage({super.key});
@@ -21,7 +23,7 @@ class AddPlacesPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddLocationDetailsPage(locationType: 'Beaches')),
+                  MaterialPageRoute(builder: (context) => BeachesDetails(locationType: 'Beaches')),
                 );
               },
               child: Container(
@@ -56,7 +58,7 @@ class AddPlacesPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddLocationDetailsPage(locationType: 'Temples')),
+                  MaterialPageRoute(builder: (context) => TemplesDetails(locationType: 'Temples')),
                 );
               },
               child: Container(
@@ -91,7 +93,7 @@ class AddPlacesPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddLocationDetailsPage(locationType: 'Trekking')),
+                  MaterialPageRoute(builder: (context) => TrekkingDetails(locationType: 'Trekking')),
                 );
               },
               child: Container(
