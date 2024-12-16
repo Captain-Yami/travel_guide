@@ -309,7 +309,7 @@ import 'package:carousel_slider/carousel_slider.dart'; // Import the carousel_sl
 import 'package:travel_guide/home/guide/screen/guide_profile.dart';
 import 'package:travel_guide/home/guide/screen/list_of_guides.dart';
 import 'package:travel_guide/home/hotel.dart';
-import 'package:travel_guide/home/user/place/place.dart';
+import 'package:travel_guide/home/user/screen/place/place.dart';
 import 'package:travel_guide/home/recommended.dart';
 import 'package:travel_guide/home/user/seasons/season.dart';
 import 'package:travel_guide/home/start.dart';

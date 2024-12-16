@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminUsers extends StatefulWidget {
   const AdminUsers({super.key});
@@ -8,27 +9,21 @@ class AdminUsers extends StatefulWidget {
 }
 
 class _AdminUsersState extends State<AdminUsers> {
-  // Sample data for users (unchanged)
-  List<Map<String, String>> users = [
-    {'name': 'John Doe', 'gender': 'Male', 'image': 'assets/images/john_doe.jpg'},
-    {'name': 'Jane Smith', 'gender': 'Female', 'image': 'assets/images/jane_smith.jpg'},
-    {'name': 'Alex Green', 'gender': 'Other', 'image': 'assets/images/alex_green.jpg'},
-    {'name': 'Michael Brown', 'gender': 'Male', 'image': 'assets/images/michael_brown.jpg'},
-    {'name': 'Emily White', 'gender': 'Female', 'image': 'assets/images/emily_white.jpg'},
-  ];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  String selectedGender = 'All'; // Default gender filter (All)
+  String selectedGender = 'All'; // Default gender filter
 
-  // Filter users by gender (unchanged)
-  List<Map<String, String>> getFilteredUsers() {
+  // Stream to get users data from Firestore
+  Stream<QuerySnapshot> getUserStream() {
+    var userCollection = _firestore.collection('Users');
     if (selectedGender == 'All') {
-      return users;
+      return userCollection.snapshots(); // Get all users
     } else {
-      return users.where((user) => user['gender'] == selectedGender).toList();
+      return userCollection.where('gender', isEqualTo: selectedGender).snapshots(); // Filter by gender
     }
   }
 
-  // Show Gender Filter Dialog (unchanged)
+  // Show Gender Filter Dialog
   void showGenderFilterDialog() {
     showDialog(
       context: context,
@@ -56,43 +51,12 @@ class _AdminUsersState extends State<AdminUsers> {
     );
   }
 
-  // Show Search Dialog (unchanged)
-  void showSearchDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Search Users'),
-          content: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Enter name to search...',
-            ),
-            onChanged: (query) {
-              setState(() {
-                // Implement search functionality here
-                // This is just a placeholder for actual search logic.
-              });
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Navigate to a user-specific page (redirect to CardDetailsPage now)
-  void navigateToCardDetails(int index) {
+  // Navigate to the user details page
+  void navigateToUserDetails(Map<String, dynamic> user) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CardDetailsPage(cardNumber: index + 1), // Pass card number
+        builder: (context) => UserDetailsPage(user: user),
       ),
     );
   }
@@ -102,110 +66,174 @@ class _AdminUsersState extends State<AdminUsers> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin - Users'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.blueGrey[800],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Search Button (Outside AppBar)
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: showSearchDialog,
-            ),
-            // Filter Button
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: showGenderFilterDialog,
-            ),
-            // List of filtered users displayed in cards
-            Expanded(
-              child: ListView(
-                children: [
-                  // Display cards for filtered users, now labeled as Card 1, Card 2, etc.
-                  ...getFilteredUsers().asMap().entries.map((entry) {
-                    int index = entry.key;
-                    var user = entry.value;
-                    return GestureDetector(
-                      onTap: () => navigateToCardDetails(index), // Navigate to card details
-                      child: Card(
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
+      backgroundColor: Colors.grey[100],
+      body: StreamBuilder<QuerySnapshot>(
+        stream: getUserStream(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(child: Text('Something went wrong'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No Users found'));
+          }
+
+          var users = snapshot.data!.docs;
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(8.0),
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              var user = users[index].data() as Map<String, dynamic>;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: GestureDetector(
+                  onTap: () => navigateToUserDetails(user),
+                  child: Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          // Profile Image
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(
+                                user['image'] ?? 'https://example.com/default-avatar.png'),
+                          ),
+                          const SizedBox(width: 16),
+                          // Display user name
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Profile Image
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundImage: AssetImage(user['image']!),
+                              Text(
+                                user['name'] ?? 'No name',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueGrey[900],
+                                ),
                               ),
-                              const SizedBox(width: 16), // Space between image and text
-                              // Card Number as label
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Card ${index + 1}', // Display card number
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              Text(user['gender'] ?? 'No gender'),
                             ],
                           ),
-                        ),
+                        ],
                       ),
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
-          ],
-        ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: showGenderFilterDialog,
+        child: const Icon(Icons.filter_list),
+        backgroundColor: Colors.blueGrey[800],
       ),
     );
   }
 }
 
-// New Page for Card Details
-class CardDetailsPage extends StatelessWidget {
-  final int cardNumber;
+// User details page
+class UserDetailsPage extends StatelessWidget {
+  final Map<String, dynamic> user;
 
-  const CardDetailsPage({super.key, required this.cardNumber});
+  const UserDetailsPage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Card Details - $cardNumber'),
-        backgroundColor: Colors.blue,
+        title: Text('${user['name']} Details'),
+        backgroundColor: Colors.blueGrey[800],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Display the card number
+            // Display the user's name
             Text(
-              'Details for Card $cardNumber',
+              'Name: ${user['name']}',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            // Optionally, you can add more details here as needed
+            // Display more user details
             Text(
-              'This is where the details for Card $cardNumber would go.',
-              style: const TextStyle(
-                fontSize: 18,
-              ),
+              'Gender: ${user['gender']}',
+              style: const TextStyle(fontSize: 18),
             ),
+            const SizedBox(height: 10),
+            Text(
+              'Date of Birth: ${user['DOB'] ?? 'Not Available'}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Email: ${user['useremail']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Address: ${user['address']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'City: ${user['city']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'State: ${user['state']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Pincode: ${user['pincode']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Nation: ${user['nation']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            user['image'] != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      user['image'],
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Container(
+                    width: double.infinity,
+                    height: 200,
+                    color: Colors.blueGrey[100],
+                    child: const Icon(
+                      Icons.account_circle,
+                      size: 50,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
           ],
         ),
       ),
