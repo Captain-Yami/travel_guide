@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:travel_guide/home/user/home_page.dart'; // Ensure correct import path
 import 'package:travel_guide/home/user/service/userfirebaseauthservice.dart'; // Ensure correct import path
-import 'package:travel_guide/select_user.dart'; // Ensure correct import path
+import 'package:travel_guide/select_user.dart';
+import 'package:travel_guide/services/login_services.dart'; // Ensure correct import path
 
 class LoginPage extends StatefulWidget {
   @override
@@ -18,22 +19,25 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   // Method to handle login action
-  bool loading = false;
+ bool loading = false;
 
-  void _login() async {
-    print('failed');
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        loading = true;
-      });
-      // Only proceed if form is valid
+  void LoginHandler() async {
+    setState(() {
+      loading = true;
+    });
 
-      String email = _emailController.text;
-      String password = _passwordController.text;
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-      // Verify the credentials using Firebase Firestore
-      await Userfirebaseauthservice().userLogin(email: email, password: password, context: context);
-    }
+    // Call the login function
+    await LoginServiceFire().LoginService(
+      email: email,
+      password: password,
+      context: context,
+    );
+    setState(() {
+      loading = false;
+    });
   }
 
   // Method to handle navigation to Signup page
@@ -118,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
 
               // Login button
               ElevatedButton(
-                onPressed: _login, // Trigger login logic
+                onPressed: LoginHandler, // Trigger login logic
                 child: Text('Login'),
               ),
               SizedBox(height: 10),

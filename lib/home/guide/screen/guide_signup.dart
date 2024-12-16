@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/screen/guide_details.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
+import 'package:travel_guide/home/guide/service/guidefirebaseauthservice.dart';
 
 class GuideSignup extends StatefulWidget {
   const GuideSignup({super.key});
@@ -9,13 +12,16 @@ class GuideSignup extends StatefulWidget {
 }
 
 class _GuideSignupState extends State<GuideSignup> {
-  // TextEditingControllers for username, email, phone, password, and confirm password
+  // TextEditingControllers for username, email, phone, password, confirm password, and Aadhar number
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController Emailaddress = TextEditingController();
   TextEditingController Phone_number = TextEditingController();
   TextEditingController confirmpassword = TextEditingController();
+  TextEditingController aadharNumber = TextEditingController();
   bool show = true;
+
+  // Store selected file name (for demonstration purposes)
 
   // Create a GlobalKey to manage the form state
   final _formKey = GlobalKey<FormState>();
@@ -28,6 +34,7 @@ class _GuideSignupState extends State<GuideSignup> {
     Emailaddress.dispose();
     Phone_number.dispose();
     confirmpassword.dispose();
+    aadharNumber.dispose();
     super.dispose();
   }
 
@@ -44,6 +51,37 @@ class _GuideSignupState extends State<GuideSignup> {
     } else {
       // If the form is invalid, show a message or Snackbar
       print('Please correct the errors');
+    }
+  }
+
+  // Function to simulate file selection (In a real app, you would use a file picker package)
+Future<void> _pickDocument() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {});
+    }
+  }
+  void Registerguide() {
+    if (_formKey.currentState?.validate() ?? false) {
+      Guidefirebaseauthservice().guideRegister(
+                    email:Emailaddress.text,
+                    username: username.text,
+                    Phone_number:Phone_number.text,
+                    password:password.text,
+                    aadhar:aadharNumber.text,
+                    context: context,
+                  );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return const GuideHomepage();
+          },
+        ),
+      ); // Add further sign-up logic here, like calling an API
+    } else {
+      print('Form is invalid');
     }
   }
 
@@ -193,12 +231,58 @@ class _GuideSignupState extends State<GuideSignup> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
-              // Sign Up Button
+              // Aadhar number field with oval shape and validation
+              TextFormField(
+                controller: aadharNumber,
+                decoration: InputDecoration(
+                  labelText: 'Aadhar Number',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30), // Oval border
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Aadhar number';
+                  } else if (value.length != 12) {
+                    return 'Aadhar number should be 12 digits';
+                  } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                    return 'Aadhar number can only contain digits';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Upload File Button
               ElevatedButton(
-                onPressed: registrationHandler,
-                child: const Text('Nextzz'),
+                    onPressed: _pickDocument,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 60.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                       foregroundColor: Colors.black, // Text color set to black
+                    ),
+                    child: const Text('Upload License'),
+                  ),
+                  const SizedBox(height: 20),
+                   ElevatedButton(
+               onPressed:Registerguide,  // Trigger form submission
+                 style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 30.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                       foregroundColor: Colors.black, // Text color set to black
+                    ),
+                child: const Text('Sign Up'),
               ),
             ],
           ),

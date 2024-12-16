@@ -4,38 +4,29 @@ import 'package:flutter/material.dart';
 import 'package:travel_guide/home/user/screen/UserHomePage.dart';
 
 
-class Userfirebaseauthservice {
+class Guidefirebaseauthservice {
   final firebaseAuth = FirebaseAuth.instance;
   final firestoreDatabase= FirebaseFirestore.instance;
 
-  Future<void> UserRegister({required String email,
+  Future<void> guideRegister({required String email,
   required String Phone_number,
   required String username,
   required String password,
-  required String DOB,
-  required String address,
-  required String pincode,
-  required String state,
-  required String city,
-  required String nation,
+  required String aadhar,
   required BuildContext context}) async {
     try{
 
       final user= await firebaseAuth.createUserWithEmailAndPassword(email:email, password:password);
-      firestoreDatabase.collection('Users').doc(user.user?.uid).set({
+      firestoreDatabase.collection('Guide').doc(user.user?.uid).set({
         'name': username,
         'useremail': email,
-        'DOB': DOB,
-        'address' : address,
-        'pincode' : pincode,
-        'state' : state,
-        'city' : city,
-        'nation' : nation,
-        'password' :password,
+        'password' : password,
+        'aadhar': aadhar,
+        'phone number': Phone_number,
       });
       firestoreDatabase
           .collection('role_tb')
-          .add({'uid': user.user?.uid, 'role': 'Users'});
+          .add({'uid': user.user?.uid, 'role': 'Guide'});
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Registration Sucessfull')));
     }
     catch(e){
