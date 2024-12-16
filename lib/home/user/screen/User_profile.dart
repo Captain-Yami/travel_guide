@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
@@ -21,11 +22,117 @@ class _UserProfileState extends State<UserProfile> {
   TextEditingController nationController = TextEditingController();
   TextEditingController pincodeController = TextEditingController();
 
+  // To track whether the fields should be editable or not
+  bool isEditable = false;
+
+  // Function to save the profile data to Firestore
+  Future<void> saveProfile() async {
+    try {
+      // Get the current user's UID
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+
+      // Update the Firestore document with the new data
+      await FirebaseFirestore.instance.collection('Users').doc(uid).update({
+        'name': usernameController.text,
+        'useremail': emailController.text,
+        'phone_number': phoneController.text,
+        'DOB': dobController.text,
+        'address': addressController.text,
+        'city': cityController.text,
+        'state': stateController.text,
+        'nation': nationController.text,
+        'pincode': pincodeController.text,
+      });
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully!')),
+      );
+
+      // After saving, toggle back to non-editable state
+      setState(() {
+        isEditable = false;
+      });
+    } catch (e) {
+      // Handle any errors that occur during the save process
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 255, 254, 254), // App bar with black color
         title: const Text('Profile'),
+        actions: [
+          // Dropdown menu button
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Color.fromARGB(255, 0, 0, 0)),
+            onSelected: (String value) {
+              if (value == 'Feedback') {
+                // Handle feedback action
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Feedback'),
+                    content: TextField(
+                      decoration: const InputDecoration(hintText: 'Enter your feedback'),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // Submit feedback logic here
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('Submit'),
+                      ),
+                    ],
+                  ),
+                );
+              } else if (value == 'Logout') {
+                // Handle logout action
+                FirebaseAuth.instance.signOut().then((value) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => LoginPage()), // Replace with your login page
+                  );
+                });
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem<String>(
+                  value: 'Feedback',
+                  child: Row(
+                    children: const [
+                      Icon(Icons.feedback),
+                      SizedBox(width: 8),
+                      Text('Feedback'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'Logout',
+                  child: Row(
+                    children: const [
+                      Icon(Icons.exit_to_app),
+                      SizedBox(width: 8),
+                      Text('Logout'),
+                    ],
+                  ),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -35,11 +142,11 @@ class _UserProfileState extends State<UserProfile> {
         builder: (context, snapshot) {
           // Check connection state
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData) {
-            return Center(child: Text('No profile data available.'));
+            return const Center(child: Text('No profile data available.'));
           }
 
           // Get user profile data from snapshot
@@ -59,26 +166,28 @@ class _UserProfileState extends State<UserProfile> {
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: ListView(
-            
               children: [
-                // Profile picture section
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 80,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage: AssetImage('asset/background3.jpg') as ImageProvider,
-                    ),
-                  ],
+                // Profile picture section - Centered
+                Center(
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.grey.shade300,
+                        backgroundImage: const AssetImage('asset/background3.jpg'),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 20),
                 // Full Name field (streamed data)
                 TextField(
                   controller: usernameController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'Full Name',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.person),
                   ),
                 ),
@@ -86,9 +195,10 @@ class _UserProfileState extends State<UserProfile> {
                 // Email field (streamed data)
                 TextField(
                   controller: emailController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.email),
                   ),
                 ),
@@ -96,9 +206,10 @@ class _UserProfileState extends State<UserProfile> {
                 // Phone Number field (streamed data)
                 TextField(
                   controller: phoneController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'Phone Number',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.phone),
                   ),
                 ),
@@ -106,9 +217,10 @@ class _UserProfileState extends State<UserProfile> {
                 // Date of Birth field (streamed data)
                 TextField(
                   controller: dobController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'Date of Birth',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.calendar_today),
                   ),
                 ),
@@ -116,9 +228,10 @@ class _UserProfileState extends State<UserProfile> {
                 // Address field (streamed data)
                 TextField(
                   controller: addressController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'Address',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.location_on),
                   ),
                 ),
@@ -126,9 +239,10 @@ class _UserProfileState extends State<UserProfile> {
                 // City field (streamed data)
                 TextField(
                   controller: cityController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'City',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.location_city),
                   ),
                 ),
@@ -136,9 +250,10 @@ class _UserProfileState extends State<UserProfile> {
                 // State field (streamed data)
                 TextField(
                   controller: stateController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'State',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.flag),
                   ),
                 ),
@@ -146,9 +261,10 @@ class _UserProfileState extends State<UserProfile> {
                 // Nation field (streamed data)
                 TextField(
                   controller: nationController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'Nation',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.flag),
                   ),
                 ),
@@ -156,20 +272,27 @@ class _UserProfileState extends State<UserProfile> {
                 // Pincode field (streamed data)
                 TextField(
                   controller: pincodeController,
+                  enabled: isEditable, // Toggle editing
                   decoration: InputDecoration(
                     labelText: 'Pincode',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.pin_drop),
                   ),
-                ),
+                ), 
                 const SizedBox(height: 20),
-                // Save Button
+                // Edit Profile Button
                 ElevatedButton(
                   onPressed: () {
-                    // You can handle saving the profile information here
-                    // For example, you can send updated data back to Firestore
+                    if (isEditable) {
+                      saveProfile(); // Save the profile if in edit mode
+                    } else {
+                      setState(() {
+                        // Toggle the editable state
+                        isEditable = !isEditable;
+                      });
+                    }
                   },
-                  child: const Text('Save Profile'),
+                  child: Text(isEditable ? 'Save Profile' : 'Edit Profile'), // Button text changes
                 ),
               ],
             ),
