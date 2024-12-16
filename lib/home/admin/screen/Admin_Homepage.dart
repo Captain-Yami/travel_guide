@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Add Firebase import
 import 'package:fl_chart/fl_chart.dart'; // Import for PieChart
 import 'package:travel_guide/home/admin/screen/add_places.dart';
 import 'package:travel_guide/home/admin/screen/admin_guides.dart';
@@ -7,9 +8,6 @@ import 'package:travel_guide/home/admin/screen/admin_places.dart';
 import 'package:travel_guide/home/admin/screen/admin_ratings.dart';
 import 'package:travel_guide/home/admin/screen/admin_complaints.dart';
 import 'package:travel_guide/home/admin/screen/admin_users.dart'; // Make sure to import Complaints page
-
-// New AddPlacesPage class for the "Add Places" button
-
 
 class AdminHomepage extends StatefulWidget {
   const AdminHomepage({super.key});
@@ -79,6 +77,12 @@ class _AdminHomepageState extends State<AdminHomepage> {
           fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
     ),
   ];
+
+  // Fetch the total number of users from the "Users" collection
+  Future<int> fetchUserCount() async {
+    var snapshot = await FirebaseFirestore.instance.collection('Users').get();
+    return snapshot.size; // Return the number of documents in the collection
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -235,24 +239,49 @@ class _AdminHomepageState extends State<AdminHomepage> {
               mainAxisAlignment:
                   MainAxisAlignment.center, // Centers the children in the Row
               children: [
-                ElevatedButton(
-                  onPressed: navigateToPlaces,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(
-                        255, 220, 222, 224), // Button color
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    shadowColor: Colors.black.withOpacity(0.3),
-                    elevation: 5,
-                  ),
-                  child: Text(
-                    'User',
-                    style: TextStyle(
-                        color: const Color.fromARGB(255, 3, 3, 3),
-                        fontSize: 14),
-                  ),
+                // User button with dynamic count from Firestore
+                FutureBuilder<int>(
+                  future: fetchUserCount(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator(); // Loading indicator
+                    }
+                    if (snapshot.hasError) {
+                      return const Text('Error fetching user count');
+                    }
+                    int userCount = snapshot.data ?? 0;
+
+                    return ElevatedButton(
+                      onPressed: navigateToPlaces,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(
+                            255, 220, 222, 224), // Button color
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        shadowColor: Colors.black.withOpacity(0.3),
+                        elevation: 5,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Users',
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 3, 3, 3),
+                                fontSize: 14),
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            '($userCount)', // Display user count
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 3, 3, 3),
+                                fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(width: 10), // Space between the buttons
                 ElevatedButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:travel_guide/home/user/screen/UserHomePage.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
 import 'package:travel_guide/home/user/service/userfirebaseauthservice.dart';
 
@@ -47,6 +48,34 @@ class _DetailsState extends State<Details> {
       print('Registration Successful');
     } else {
       print('Please correct the errors');
+    }
+  }
+
+  void Registeruser() {
+    if (_formKey.currentState?.validate() ?? false) {
+      Userfirebaseauthservice().UserRegister(
+                    email: widget.EmailAddress,
+                    username: widget.username,
+                    Phone_number: widget.Phone_number,
+                    password: widget.password,
+                    DOB: DOB.text,
+                    address: address.text,
+                    pincode: pincode.text,
+                    state: state.text,
+                    city: city.text,
+                    nation: nation.text,
+                    context: context,
+                  );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return const MainPage();
+          },
+        ),
+      ); // Add further sign-up logic here, like calling an API
+    } else {
+      print('Form is invalid');
     }
   }
 
@@ -210,21 +239,7 @@ class _DetailsState extends State<Details> {
 
               // Submit Button
               ElevatedButton(
-                onPressed: () {
-                  Userfirebaseauthservice().UserRegister(
-                    email: widget.EmailAddress,
-                    username: widget.username,
-                    Phone_number: widget.Phone_number,
-                    password: widget.password,
-                    DOB: DOB.text,
-                    address: address.text,
-                    pincode: pincode.text,
-                    state: state.text,
-                    city: city.text,
-                    nation: nation.text,
-                    context: context,
-                  );
-                }, // Trigger form submission
+                onPressed: Registeruser,// Trigger form submission
                 child: const Text('Sign Up'),
               ),
             ],
