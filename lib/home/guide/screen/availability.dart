@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart'; // Import shared_preferences
 import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Availability extends StatefulWidget {
   const Availability({super.key});
@@ -33,54 +34,85 @@ class _AvailabilityState extends State<Availability> {
   }
 
   // Load the availability status from SharedPreferences
-  Future<void> _loadAvailabilityStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+ Future<void> _loadAvailabilityStatus() async {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    // Load isSelected
-    setState(() {
-      isSelected = prefs.getBool('isSelected') ?? false; // Default to false if not set
-    });
+  // Assuming that you have a Firebase user authentication and you can get the user ID
+  String userId = FirebaseAuth.instance.currentUser?.uid ?? ''; // Get the current user's UID
+  
+  try {
+    // Fetch the availability data from Firestore
+    DocumentSnapshot docSnapshot = await firestore
+        .collection('Guide')
+        .doc(userId) // Use the user's uid to retrieve their data
+        .collection('availability')
+        .doc('data') // Document ID
+        .get();
 
-    // Load saved start and end times (stored as integers)
-    int startHour = prefs.getInt('startHour') ?? 9;
-    int startMinute = prefs.getInt('startMinute') ?? 0;
-    int endHour = prefs.getInt('endHour') ?? 17;
-    int endMinute = prefs.getInt('endMinute') ?? 0;
+    if (docSnapshot.exists) {
+      var data = docSnapshot.data() as Map<String, dynamic>;
 
-    setState(() {
-      _startTime = TimeOfDay(hour: startHour, minute: startMinute);
-      _endTime = TimeOfDay(hour: endHour, minute: endMinute);
-    });
+      setState(() {
+        isSelected = data['isSelected'] ?? false;
 
-    // Load saved selected days (stored as a list of booleans)
-    List<String> days = prefs.getStringList('selectedDays') ?? [];
-    setState(() {
-      _selectedDays.setAll(0, List.generate(7, (index) {
-        return days.contains(_daysOfWeek[index]);
-      }));
-    });
+        _startTime = TimeOfDay(
+          hour: data['startTime']['hour'],
+          minute: data['startTime']['minute'],
+        );
+        _endTime = TimeOfDay(
+          hour: data['endTime']['hour'],
+          minute: data['endTime']['minute'],
+        );
+
+        List<String> days = List<String>.from(data['selectedDays']);
+        _selectedDays.setAll(0, List.generate(7, (index) {
+          return days.contains(_daysOfWeek[index]);
+        }));
+      });
+      print("Availability loaded successfully!");
+    }
+  } catch (e) {
+    print("Error loading availability: $e");
   }
+}
+
+
 
   // Save the availability status to SharedPreferences
   Future<void> _saveAvailabilityStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    // Save isSelected
-    prefs.setBool('isSelected', isSelected);
+  // Assuming that you have a Firebase user authentication and you can get the user ID
+  String userId = FirebaseAuth.instance.currentUser?.uid ?? ''; // Get the current user's UID
 
-    // Save start and end times as integers
-    prefs.setInt('startHour', _startTime.hour);
-    prefs.setInt('startMinute', _startTime.minute);
-    prefs.setInt('endHour', _endTime.hour);
-    prefs.setInt('endMinute', _endTime.minute);
+  try {
+    // Save availability data to Firestore
+    await firestore.collection('Guide')
+      .doc(userId)  // Use the user's uid to store their data
+      .collection('availability') // Sub-collection for availability
+      .doc('data') // You can use a static document name like 'data' for availability
+      .set({
+        'isSelected': isSelected,
+        'startTime': {
+          'hour': _startTime.hour,
+          'minute': _startTime.minute,
+        },
+        'endTime': {
+          'hour': _endTime.hour,
+          'minute': _endTime.minute,
+        },
+        'selectedDays': _selectedDays.asMap().entries
+          .where((entry) => entry.value)
+          .map((entry) => _daysOfWeek[entry.key])
+          .toList(),
+      });
 
-    // Save selected days as a list of strings
-    List<String> selectedDays = _selectedDays.asMap().entries
-        .where((entry) => entry.value)
-        .map((entry) => _daysOfWeek[entry.key])
-        .toList();
-    prefs.setStringList('selectedDays', selectedDays);
+    print("Availability saved successfully!");
+  } catch (e) {
+    print("Error saving availability: $e");
   }
+}
+
 
   // Function to show the time picker
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
@@ -114,53 +146,61 @@ class _AvailabilityState extends State<Availability> {
 
   // Function to show the dropdown with checkboxes to select days
   Future<void> _selectDays(BuildContext context) async {
-    if (!isSelected) {
-      return;
-    }
-await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Select Days"),
-          content: SingleChildScrollView(
-            child: Column(
-              children: List.generate(_daysOfWeek.length, (index) {
-                return CheckboxListTile(
-                  title: Text(_daysOfWeek[index]),
-                  value: _selectedDays[index],
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _selectedDays[index] = value ?? false;
-                    });
-                    _saveAvailabilityStatus(); // Save selected days
-                  },
-                );
-              }),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  // Reset selection
-                  _selectedDays.fillRange(0, _selectedDays.length, false);
-                });
-                _saveAvailabilityStatus(); // Save reset selection
-                Navigator.of(context).pop();
-              },
-              child: const Text("Cancel"),
-            ),
-          ],
-        );
-      },
-    );
+  if (!isSelected) {
+    return; // Do nothing if availability is not selected
   }
+
+  // Show the dialog with updated state handling
+  await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setStateDialog) {
+          return AlertDialog(
+            title: const Text("Select Days"),
+            content: SingleChildScrollView(
+              child: Column(
+                children: List.generate(_daysOfWeek.length, (index) {
+                  return CheckboxListTile(
+                    title: Text(_daysOfWeek[index]),
+                    value: _selectedDays[index],
+                    onChanged: (bool? value) {
+                      setStateDialog(() {
+                        _selectedDays[index] = value ?? false; // Update the state inside the dialog
+                      });
+                      _saveAvailabilityStatus(); // Save selected days
+                    },
+                  );
+                }),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("OK"),
+              ),
+              TextButton(
+                onPressed: () {
+                  setStateDialog(() {
+                    // Reset selection
+                    _selectedDays.fillRange(0, _selectedDays.length, false);
+                  });
+                  _saveAvailabilityStatus(); // Save reset selection
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+
 
   void _navigateToGuideHomepage() {
     Navigator.push(
@@ -283,29 +323,6 @@ height: 20,
             ElevatedButton(
               onPressed: isSelected ? () => _selectDays(context) : null, // Only enable if selected
               child: const Text('Select Days'),
-            ),
-            const SizedBox(height: 20),
-            // Display selected days
-            const Text(
-              'Selected Days:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 10.0,
-              children: _selectedDays.asMap().entries.map((entry) {
-                int index = entry.key;
-                if (_selectedDays[index]) {
-                  return Chip(
-                    label: Text(_daysOfWeek[index]),
-                    onDeleted: () => setState(() {
-                      _selectedDays[index] = false;
-                    }),
-                    deleteIcon: const Icon(Icons.close),
-                  );
-                }
-                return const SizedBox.shrink();
-              }).toList(),
             ),
           ],
         ),
