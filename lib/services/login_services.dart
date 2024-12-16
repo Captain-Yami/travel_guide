@@ -40,7 +40,7 @@ class LoginServiceFire {
                   builder: (context) => const MainPage(),
                 ));
             break;
-          case 'Guides':
+          case 'Guide':
             Navigator.push(
                 context,
                 MaterialPageRoute(

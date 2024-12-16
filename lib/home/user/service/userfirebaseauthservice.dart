@@ -30,8 +30,12 @@ class Userfirebaseauthservice {
         'pincode' : pincode,
         'state' : state,
         'city' : city,
-        'nation' : nation
+        'nation' : nation,
+        'password' :password,
       });
+      firestoreDatabase
+          .collection('role_tb')
+          .add({'uid': user.user?.uid, 'role': 'Users'});
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Registration Sucessfull')));
     }
     catch(e){

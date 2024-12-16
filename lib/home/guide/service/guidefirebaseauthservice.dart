@@ -24,6 +24,9 @@ class Guidefirebaseauthservice {
         'aadhar': aadhar,
         'phone number': Phone_number,
       });
+      firestoreDatabase
+          .collection('role_tb')
+          .add({'uid': user.user?.uid, 'role': 'Guide'});
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Registration Sucessfull')));
     }
     catch(e){
