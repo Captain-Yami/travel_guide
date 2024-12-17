@@ -135,12 +135,12 @@ class _AddLocationDetailsPageState extends State<TemplesDetails> {
               TextFormField(
                 controller: seasonalTimeController,
                 decoration: InputDecoration(
-                  labelText: 'Seasonal Time (e.g., Winter, Summer)',
+                  labelText: 'piligrimage Time',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the seasonal time';
+                    return 'Please enter the piligrimage time';
                   }
                   return null;
                 },
@@ -151,7 +151,7 @@ class _AddLocationDetailsPageState extends State<TemplesDetails> {
               TextFormField(
                 controller: openingTimeController,
                 decoration: InputDecoration(
-                  labelText: 'Opening Time',
+                  labelText: 'Time (morning time)',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -167,7 +167,7 @@ class _AddLocationDetailsPageState extends State<TemplesDetails> {
               TextFormField(
                 controller: closingTimeController,
                 decoration: InputDecoration(
-                  labelText: 'Closing Time',
+                  labelText: 'Time (evening time)',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {

@@ -19,7 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   // Method to handle login action
- bool loading = false;
+  bool loading = false;
 
   void LoginHandler() async {
     setState(() {
@@ -52,94 +52,96 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black, // Black color for AppBar // White color for text in AppBar
+        backgroundColor: Colors.black, // Black color for AppBar
         foregroundColor: Colors.white, // White color for text in AppBar
       ),
       backgroundColor: Colors.white, // Set background color to white
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey, // Attach the form key to the Form widget
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // Add the text at the top center
-              Text(
-                'LOGIN',
-                style: TextStyle(
-                  fontSize: 30, // Set font size
-                  color: Colors.black, // Set text color
-                  fontWeight: FontWeight.bold, // Bold text style
-                ),
-                textAlign: TextAlign.center, // Center align the text
-              ),
-              SizedBox(height: 100), // Add some spacing
-
-              // Email field with validation and oval shape
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email Address',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Oval shape
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email address';
-                  } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                      .hasMatch(value)) {
-                    return 'Please enter a valid email address';
-                  }
-                  return null; // Return null if the input is valid
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Password field with validation and oval shape
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Oval shape
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  } else if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
-                    // Password should contain at least one lowercase, one uppercase, and one digit
-                    return 'Password must include at least one uppercase letter, one lowercase letter, and one number';
-                  }
-                  return null; // Return null if the input is valid
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Login button
-              ElevatedButton(
-                onPressed: LoginHandler, // Trigger login logic
-                child: Text('Login'),
-              ),
-              SizedBox(height: 10),
-
-              // Redirect to Signup page
-              TextButton(
-                onPressed: _navigateToSignup, // Navigate to Signup page
-                child: Text(
-                  'Create account',
-                  textAlign: TextAlign.center,
+      body: SingleChildScrollView(  // Make the entire form scrollable
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey, // Attach the form key to the Form widget
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // Add the text at the top center
+                Text(
+                  'LOGIN',
                   style: TextStyle(
-                    fontSize: 14, // Increased font size for better readability
-                    color: const Color(0xFF123E03),
+                    fontSize: 30, // Set font size
+                    color: Colors.black, // Set text color
+                    fontWeight: FontWeight.bold, // Bold text style
+                  ),
+                  textAlign: TextAlign.center, // Center align the text
+                ),
+                SizedBox(height: 100), // Add some spacing
+
+                // Email field with validation and oval shape
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email Address',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30), // Oval shape
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email address';
+                    } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                        .hasMatch(value)) {
+                      return 'Please enter a valid email address';
+                    }
+                    return null; // Return null if the input is valid
+                  },
+                ),
+                SizedBox(height: 20),
+
+                // Password field with validation and oval shape
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30), // Oval shape
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    } else if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
+                      // Password should contain at least one lowercase, one uppercase, and one digit
+                      return 'Password must include at least one uppercase letter, one lowercase letter, and one number';
+                    }
+                    return null; // Return null if the input is valid
+                  },
+                ),
+                SizedBox(height: 20),
+
+                // Login button
+                ElevatedButton(
+                  onPressed: LoginHandler, // Trigger login logic
+                  child: Text('Login'),
+                ),
+                SizedBox(height: 10),
+
+                // Redirect to Signup page
+                TextButton(
+                  onPressed: _navigateToSignup, // Navigate to Signup page
+                  child: Text(
+                    'Create account',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14, // Increased font size for better readability
+                      color: const Color(0xFF123E03),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

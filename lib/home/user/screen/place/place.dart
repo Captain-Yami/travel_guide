@@ -37,7 +37,7 @@ class _PlaceState extends State<Place> {
   void _navigateToMuseumsAndForts() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const MuseumsAndFort()),
+      MaterialPageRoute(builder: (context) => const FortsAndMuseums()),
     );
   }
 

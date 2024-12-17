@@ -21,7 +21,7 @@ class firebaseAddtemples {
       await beaches.add({
         'location_name': locationName,
         'location_description': locationDescription,
-        'seasonal_time': seasonalTime,
+        'pilgrimage_time': seasonalTime,
         'opening_time': openingTime,
         'closing_time': closingTime,
       });

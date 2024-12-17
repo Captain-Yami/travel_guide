@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/guide/screen/guide_details.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
+import 'package:cloudinary/cloudinary.dart'; // Import Cloudinary package
 import 'package:travel_guide/home/guide/service/guidefirebaseauthservice.dart';
+import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
 
 class GuideSignup extends StatefulWidget {
   const GuideSignup({super.key});
@@ -12,21 +12,26 @@ class GuideSignup extends StatefulWidget {
 }
 
 class _GuideSignupState extends State<GuideSignup> {
-  // TextEditingControllers for username, email, phone, password, confirm password, and Aadhar number
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController Emailaddress = TextEditingController();
   TextEditingController Phone_number = TextEditingController();
   TextEditingController confirmpassword = TextEditingController();
   TextEditingController aadharNumber = TextEditingController();
+  TextEditingController License = TextEditingController();
   bool show = true;
 
-  // Store selected file name (for demonstration purposes)
+  // Cloudinary configuration
+  final Cloudinary cloudinary = Cloudinary.signedConfig(
+    cloudName: 'db2nki9dh',  // Replace with your Cloudinary cloud name
+    apiKey: '894239764992456',  // Replace with your API key
+    apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',  // Replace with your API secret
+  );
 
-  // Create a GlobalKey to manage the form state
+  XFile? _image;  // Store the picked image/file
+
   final _formKey = GlobalKey<FormState>();
 
-  // Dispose controllers to avoid memory leaks
   @override
   void dispose() {
     username.dispose();
@@ -35,51 +40,69 @@ class _GuideSignupState extends State<GuideSignup> {
     Phone_number.dispose();
     confirmpassword.dispose();
     aadharNumber.dispose();
+    License.dispose();
     super.dispose();
   }
 
-  // Handle the registration logic (form submission)
-  void registrationHandler() {
-    if (_formKey.currentState?.validate() ?? false) {
-      // If the form is valid, navigate to the next screen
-      Navigator.push(context, MaterialPageRoute(builder: (context) {
-        return GuideDetails(guideName: '',);  // Navigate to GuideDetails screen
-      }));
-      print('Registration Successful');
-      print('Username: ${username.text}');
-      print('Password: ${password.text}');
-    } else {
-      // If the form is invalid, show a message or Snackbar
-      print('Please correct the errors');
-    }
-  }
-
-  // Function to simulate file selection (In a real app, you would use a file picker package)
-Future<void> _pickDocument() async {
+  Future<void> _pickDocument() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {});
+      setState(() {
+        _image = pickedFile;
+      });
     }
   }
-  void Registerguide() {
+
+  Future<String?> _uploadFileToCloudinary(XFile file) async {
+    try {
+      // Upload file to Cloudinary
+      var response = await cloudinary.upload(
+        file: file.path, 
+        folder: 'license_photos', // Path to the file
+        resourceType: CloudinaryResourceType.image,  // Adjust according to file type
+      );
+      print('File uploaded to Cloudinary: ${response.secureUrl}');
+      return response.secureUrl;  // Return the secure URL
+    } catch (e) {
+      print('Error uploading file: $e');
+      return null;  // Return null in case of error
+    }
+  }
+
+  void Registerguide() async {
     if (_formKey.currentState?.validate() ?? false) {
-      Guidefirebaseauthservice().guideRegister(
-                    email:Emailaddress.text,
-                    username: username.text,
-                    Phone_number:Phone_number.text,
-                    password:password.text,
-                    aadhar:aadharNumber.text,
-                    context: context,
-                  );
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) {
-            return const GuideHomepage();
-          },
-        ),
-      ); // Add further sign-up logic here, like calling an API
+      // Proceed with Cloudinary file upload if an image is selected
+      String? imageUrl = '';
+      if (_image != null) {
+        imageUrl = await _uploadFileToCloudinary(_image!);  // Upload image to Cloudinary and get URL
+      }
+
+      // After file upload, continue with the registration logic
+      if (imageUrl != null) {
+        Guidefirebaseauthservice().guideRegister(
+          email: Emailaddress.text,
+          username: username.text,
+          Phone_number: Phone_number.text,
+          password: password.text,
+          aadhar: aadharNumber.text,
+          License: License.text,
+          licenseImageUrl: imageUrl, // Pass the license image URL to the guideRegister function
+          context: context,
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return const GuideHomepage();
+            },
+          ),
+        );
+      } else {
+        // Handle the case where image URL is null
+        print('Image upload failed or no image selected');
+      }
     } else {
       print('Form is invalid');
     }
@@ -88,20 +111,16 @@ Future<void> _pickDocument() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black, // Black color for AppBar
-        elevation: 0, // No elevation to keep it flat
-      ),
+      
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,  // Attach the form key here
+          key: _formKey,
           child: Column(
             children: [
-              // Circular logo image
               ClipOval(
                 child: Image.asset(
-                  'asset/logo3.jpg',  // Ensure this path is correct
+                  'asset/logo3.jpg',
                   width: 200,
                   height: 200,
                   fit: BoxFit.cover,
@@ -113,14 +132,14 @@ Future<void> _pickDocument() async {
                 style: TextStyle(fontSize: 24, color: Colors.black),
               ),
               const SizedBox(height: 20),
-
-              // Username field with oval shape
+              
+              // Username field
               TextFormField(
                 controller: username,
                 decoration: InputDecoration(
                   labelText: 'Username',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Oval border
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 validator: (value) {
@@ -131,14 +150,14 @@ Future<void> _pickDocument() async {
                 },
               ),
               const SizedBox(height: 10),
-
-              // Email field with oval shape and validation
+              
+              // Email field
               TextFormField(
                 controller: Emailaddress,
                 decoration: InputDecoration(
                   labelText: 'Email address',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Oval border
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 validator: (value) {
@@ -152,13 +171,13 @@ Future<void> _pickDocument() async {
               ),
               const SizedBox(height: 10),
 
-              // Phone number field with oval shape and validation
+              // Phone number field
               TextFormField(
                 controller: Phone_number,
                 decoration: InputDecoration(
                   labelText: 'Phone number',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Oval border
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 keyboardType: TextInputType.phone,
@@ -175,22 +194,63 @@ Future<void> _pickDocument() async {
               ),
               const SizedBox(height: 10),
 
-              // Password field with oval shape and validation
+              // Aadhar Number field
+              TextFormField(
+                controller: aadharNumber,
+                decoration: InputDecoration(
+                  labelText: 'Aadhar Number',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Aadhar Number';
+                  } else if (value.length != 12) {
+                    return 'Aadhar number must be 12 digits';
+                  } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                    return 'Aadhar number can only contain digits';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // License Number field
+              TextFormField(
+                controller: License,
+                decoration: InputDecoration(
+                  labelText: 'License Number',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your License Number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+
+              // Password field
               TextFormField(
                 controller: password,
                 obscureText: show,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Oval border
+                    borderRadius: BorderRadius.circular(30),
                   ),
                   suffixIcon: IconButton(
+                    icon: Icon(show ? Icons.visibility : Icons.visibility_off),
                     onPressed: () {
                       setState(() {
                         show = !show;
                       });
                     },
-                    icon: Icon(show ? Icons.visibility : Icons.visibility_off),
                   ),
                 ),
                 validator: (value) {
@@ -204,22 +264,14 @@ Future<void> _pickDocument() async {
               ),
               const SizedBox(height: 10),
 
-              // Confirm password field with oval shape and validation
+              // Confirm Password field
               TextFormField(
                 controller: confirmpassword,
                 obscureText: show,
                 decoration: InputDecoration(
-                  labelText: 'Confirm password',
+                  labelText: 'Confirm Password',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Oval border
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        show = !show;
-                      });
-                    },
-                    icon: Icon(show ? Icons.visibility : Icons.visibility_off),
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 validator: (value) {
@@ -233,55 +285,16 @@ Future<void> _pickDocument() async {
               ),
               const SizedBox(height: 10),
 
-              // Aadhar number field with oval shape and validation
-              TextFormField(
-                controller: aadharNumber,
-                decoration: InputDecoration(
-                  labelText: 'Aadhar Number',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30), // Oval border
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your Aadhar number';
-                  } else if (value.length != 12) {
-                    return 'Aadhar number should be 12 digits';
-                  } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                    return 'Aadhar number can only contain digits';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-
               // Upload File Button
               ElevatedButton(
-                    onPressed: _pickDocument,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15.0, horizontal: 60.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                       foregroundColor: Colors.black, // Text color set to black
-                    ),
-                    child: const Text('Upload License'),
-                  ),
-                  const SizedBox(height: 20),
-                   ElevatedButton(
-               onPressed:Registerguide,  // Trigger form submission
-                 style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15.0, horizontal: 30.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                       foregroundColor: Colors.black, // Text color set to black
-                    ),
+                onPressed: _pickDocument,
+                child: const Text('Upload License'),
+              ),
+              const SizedBox(height: 20),
+
+              // Sign Up Button
+              ElevatedButton(
+                onPressed: Registerguide,  // Trigger form submission
                 child: const Text('Sign Up'),
               ),
             ],

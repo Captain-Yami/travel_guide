@@ -14,7 +14,9 @@ class Guidefirebaseauthservice {
   required String username,
   required String password,
   required String aadhar,
-  required BuildContext context
+  required String License,
+  required String licenseImageUrl,
+  required BuildContext context,
 }) async {
   try {
     // Register the user with Firebase Authentication
@@ -30,6 +32,8 @@ class Guidefirebaseauthservice {
       'password': password,
       'aadhar': aadhar,
       'phone number': Phone_number,
+      'License': License,
+      'licenseImageUrl': licenseImageUrl,
     });
 
     // Add the role information to the 'role_tb' collection

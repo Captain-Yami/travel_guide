@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class GuideProfile extends StatefulWidget {
-  final bool isEditing;
-
-  const GuideProfile({super.key, required this.isEditing});
+  const GuideProfile({super.key, required bool isEditing});
 
   @override
   State<GuideProfile> createState() => _GuideProfileState();
 }
 
 class _GuideProfileState extends State<GuideProfile> {
-  late bool isEditing; 
+  late bool isEditing;
+  late String uid;
+
   // Guide details
-  String name = "John Doe";
-  String phoneNumber = "123-456-7890";
-  String email = "johndoe@example.com";
-  String licenseNumber = "AB123456";
-  String expertise = "Historical Tours, Adventure Trips";
-  int experience = 10;
-  double ratePerTrip = 150.0;
-  String additionalDetails = "Fluent in English and Spanish. Specialized in eco-friendly tours.";
+  String name = "";
+  String phoneNumber = "";
+  String email = "";
+  String licenseNumber = "";
+  String expertise = "";
+  int experience = 0;
+  double ratePerTrip = 0.0;
+  String additionalDetails = "";
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -32,30 +35,79 @@ class _GuideProfileState extends State<GuideProfile> {
   @override
   void initState() {
     super.initState();
-    isEditing = widget.isEditing; // Set isEditing from the widget
+    isEditing = false;  // Start in view mode by default
 
-    nameController.text = name;
-    phoneNumberController.text = phoneNumber;
-    emailController.text = email;
-    licenseNumberController.text = licenseNumber;
-    expertiseController.text = expertise;
-    experienceController.text = experience.toString();
-    ratePerTripController.text = ratePerTrip.toString();
-    additionalDetailsController.text = additionalDetails;
+    // Get the current user's UID
+    uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    if (uid.isNotEmpty) {
+      // Fetch the user's guide details from Firestore
+      _fetchGuideDetails();
+    }
   }
 
-  void saveChanges() {
-    setState(() {
-      name = nameController.text;
-      phoneNumber = phoneNumberController.text;
-      email = emailController.text;
-      licenseNumber = licenseNumberController.text;
-      expertise = expertiseController.text;
-      experience = int.parse(experienceController.text);
-      ratePerTrip = double.parse(ratePerTripController.text);
-      additionalDetails = additionalDetailsController.text;
-      isEditing = false;  // Set to false after saving
-    });
+  Future<void> _fetchGuideDetails() async {
+    try {
+      final docSnapshot = await FirebaseFirestore.instance.collection('Guide').doc(uid).get();
+
+      if (docSnapshot.exists) {
+        var data = docSnapshot.data()!;
+        setState(() {
+          name = data['name'] ?? '';
+          phoneNumber = data['phone number'] ?? '';
+          email = data['gideemail'] ?? '';
+          licenseNumber = data['License'] ?? '';
+          expertise = data['expertise'] ?? '';
+          experience = data['experience'] ?? 0;
+          ratePerTrip = data['ratePerTrip'] ?? 0.0;
+          additionalDetails = data['additionalDetails'] ?? '';
+
+          // Initialize controllers with the fetched data
+          nameController.text = name;
+          phoneNumberController.text = phoneNumber;
+          emailController.text = email;
+          licenseNumberController.text = licenseNumber;
+          expertiseController.text = expertise;
+          experienceController.text = experience.toString();
+          ratePerTripController.text = ratePerTrip.toString();
+          additionalDetailsController.text = additionalDetails;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to fetch guide details: $e')));
+    }
+  }
+
+  void saveChanges() async {
+    try {
+      setState(() {
+        name = nameController.text;
+        phoneNumber = phoneNumberController.text;
+        email = emailController.text;
+        licenseNumber = licenseNumberController.text;
+        expertise = expertiseController.text;
+        experience = int.parse(experienceController.text);
+        ratePerTrip = double.parse(ratePerTripController.text);
+        additionalDetails = additionalDetailsController.text;
+        isEditing = false;
+      });
+
+      // Update the guide details in Firestore
+      await FirebaseFirestore.instance.collection('Guide').doc(uid).update({
+        'name': name,
+        'phone number': phoneNumber,
+        'gideemail': email,
+        'License': licenseNumber,
+        'expertise': expertise,
+        'experience': experience,
+        'ratePerTrip': ratePerTrip,
+        'additionalDetails': additionalDetails,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+    }
   }
 
   Widget buildProfileDetail(String label, String value, {bool isEditable = true, TextEditingController? controller}) {
@@ -74,7 +126,7 @@ class _GuideProfileState extends State<GuideProfile> {
           const SizedBox(width: 8),
           Expanded(
             flex: 3,
-            child: isEditing && isEditable
+            child: isEditing
                 ? TextField(
                     controller: controller,
                     decoration: const InputDecoration(
@@ -93,8 +145,7 @@ class _GuideProfileState extends State<GuideProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return 
-    SingleChildScrollView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -116,7 +167,7 @@ class _GuideProfileState extends State<GuideProfile> {
                   color: Colors.grey.withOpacity(0.3),
                   spreadRadius: 3,
                   blurRadius: 5,
-                  offset: const Offset(0, 3), // changes position of shadow
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -136,13 +187,29 @@ class _GuideProfileState extends State<GuideProfile> {
           ),
 
           const SizedBox(height: 20),
+          if (!isEditing)
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isEditing = true; // Switch to edit mode
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 30),
+                textStyle: const TextStyle(fontSize: 16),
+                foregroundColor: Colors.black,
+              ),
+              child: const Text("Edit Profile"),
+            ),
           if (isEditing)
             ElevatedButton(
               onPressed: saveChanges,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 30),
                 textStyle: const TextStyle(fontSize: 16),
+                foregroundColor: Colors.black,
               ),
               child: const Text("Save Changes"),
             ),

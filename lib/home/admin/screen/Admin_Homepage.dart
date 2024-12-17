@@ -234,28 +234,64 @@ class _AdminHomepageState extends State<AdminHomepage> {
             SizedBox(
                 height:
                     20), // Space between the Pie chart and the next containers
-            // Row to hold "User," "Guide," and "Complaints" buttons side by side
-            Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.center, // Centers the children in the Row
+            // Column to hold buttons in two rows
+            Column(
               children: [
-                // User button with dynamic count from Firestore
-                FutureBuilder<int>(
-                  future: fetchUserCount(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator(); // Loading indicator
-                    }
-                    if (snapshot.hasError) {
-                      return const Text('Error fetching user count');
-                    }
-                    int userCount = snapshot.data ?? 0;
+                // First row of buttons
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Centers the children in the Row
+                  children: [
+                    // User button with dynamic count from Firestore
+                    FutureBuilder<int>(
+                      future: fetchUserCount(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator(); // Loading indicator
+                        }
+                        if (snapshot.hasError) {
+                          return const Text('Error fetching user count');
+                        }
+                        int userCount = snapshot.data ?? 0;
 
-                    return ElevatedButton(
-                      onPressed: navigateToPlaces,
+                        return ElevatedButton(
+                          onPressed: navigateToPlaces,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 220, 222, 224), // Button color
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            shadowColor: Colors.black.withOpacity(0.3),
+                            elevation: 5,
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Users',
+                                style: TextStyle(
+                                    color: const Color.fromARGB(255, 3, 3, 3),
+                                    fontSize: 14),
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                '($userCount)', // Display user count
+                                style: TextStyle(
+                                    color: const Color.fromARGB(255, 3, 3, 3),
+                                    fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(width: 10), // Space between the buttons
+                    ElevatedButton(
+                      onPressed: navigateToHotels,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(
-                            255, 220, 222, 224), // Button color
+                            255, 228, 233, 228), // Button color
                         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0),
@@ -263,90 +299,65 @@ class _AdminHomepageState extends State<AdminHomepage> {
                         shadowColor: Colors.black.withOpacity(0.3),
                         elevation: 5,
                       ),
-                      child: Row(
-                        children: [
-                          Text(
-                            'Users',
-                            style: TextStyle(
-                                color: const Color.fromARGB(255, 3, 3, 3),
-                                fontSize: 14),
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            '($userCount)', // Display user count
-                            style: TextStyle(
-                                color: const Color.fromARGB(255, 3, 3, 3),
-                                fontSize: 14),
-                          ),
-                        ],
+                      child: Text(
+                        'Guide',
+                        style: TextStyle(
+                            color: const Color.fromARGB(255, 9, 9, 9),
+                            fontSize: 14),
                       ),
-                    );
-                  },
-                ),
-                SizedBox(width: 10), // Space between the buttons
-                ElevatedButton(
-                  onPressed: navigateToHotels,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(
-                        255, 228, 233, 228), // Button color
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    shadowColor: Colors.black.withOpacity(0.3),
-                    elevation: 5,
-                  ),
-                  child: Text(
-                    'Guide',
-                    style: TextStyle(
-                        color: const Color.fromARGB(255, 9, 9, 9),
-                        fontSize: 14),
-                  ),
+                  ],
                 ),
-                SizedBox(width: 10), // Space between the buttons
-                ElevatedButton(
-                  onPressed: navigateToComplaints,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(
-                        255, 234, 230, 230), // Button color
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                SizedBox(height: 10), // Space between rows
+                // Second row of buttons
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Centers the children in the Row
+                  children: [
+                    ElevatedButton(
+                      onPressed: navigateToComplaints,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(
+                            255, 234, 230, 230), // Button color
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        shadowColor: Colors.black.withOpacity(0.3),
+                        elevation: 5,
+                      ),
+                      child: Text(
+                        'Complaints',
+                        style: TextStyle(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            fontSize: 14),
+                      ),
                     ),
-                    shadowColor: Colors.black.withOpacity(0.3),
-                    elevation: 5,
-                  ),
-                  child: Text(
-                    'Complaints',
-                    style: TextStyle(
-                        color: const Color.fromARGB(255, 0, 0, 0),
-                        fontSize: 14),
-                  ),
-                ),
-                // Add Places Button
-                SizedBox(width: 10), // Space between the buttons
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AddPlacesPage()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 240, 240, 240),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                    SizedBox(width: 10), // Space between the buttons
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AddPlacesPage()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        shadowColor: Colors.black.withOpacity(0.3),
+                        elevation: 5,
+                      ),
+                      child: Text(
+                        'Add Places',
+                        style: TextStyle(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            fontSize: 14),
+                      ),
                     ),
-                    shadowColor: Colors.black.withOpacity(0.3),
-                    elevation: 5,
-                  ),
-                  child: Text(
-                    'Add Places',
-                    style: TextStyle(
-                        color: const Color.fromARGB(255, 0, 0, 0),
-                        fontSize: 14),
-                  ),
+                  ],
                 ),
               ],
             ),

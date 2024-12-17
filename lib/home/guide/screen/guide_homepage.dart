@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/activities.dart';
 import 'package:travel_guide/home/guide/screen/availability.dart';
@@ -13,6 +14,7 @@ import 'package:travel_guide/home/start.dart';
 import 'package:travel_guide/home/user/screen/Recent.dart';
 import 'package:travel_guide/home/user/screen/User_profile.dart';
 import 'package:travel_guide/home/user/screen/favorites.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';
 
 
 class GuideHomepage extends StatefulWidget {
@@ -66,14 +68,9 @@ class _MainPageState extends State<GuideHomepage> {
     super.dispose();
   }
 
-   void handleMenuSelection(String option) {
+   Future<void> handleMenuSelection(String option) async {
     switch (option) {
       case 'Edit Profile':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const GuideProfile(isEditing: true)),
-        );
-        break;
       case 'Change Password':
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Change Password feature coming soon!")),
@@ -90,10 +87,27 @@ class _MainPageState extends State<GuideHomepage> {
         );
         break;
       case 'Logout':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Logged out")),
-        );
-        break;
+  try {
+    // Log out the user from Firebase Authentication
+    await FirebaseAuth.instance.signOut();
+
+    // Show the logout confirmation message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Logged out")),
+    );
+
+    // Navigate to the login page after logging out
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()), // Replace with your login page
+    );
+  } catch (e) {
+    // Handle any errors that occur during the logout process
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error logging out: $e')),
+    );
+  }
+  break;
       default:
         break;
     }
@@ -183,125 +197,133 @@ class _MainPageState extends State<GuideHomepage> {
   }
   
   // Dynamically build AppBar based on the selected index
-  AppBar _buildAppBar() {
-    String title = '';
-    double logoTextSpacing = 20.0; // Default spacing
+AppBar _buildAppBar() {
+  String title = '';
+  double logoTextSpacing = 20.0; // Default spacing
 
-    List<Widget> appBarActions = []; // Store dynamic actions for the AppBar
+  List<Widget> appBarActions = []; // Store dynamic actions for the AppBar
 
-    // Set the title, logo-text spacing, and appBar actions based on selected index
-    switch (_selectedIndex) {
-      case 0: // Home Page
-        title = 'Travel Chronicles';
-        logoTextSpacing = 120.0; // Normal space
-        appBarActions = [
-          IconButton(
-            icon: const Icon(Icons.notifications_active),
-            color: Colors.white,
-            onPressed: () {
-             Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Notifications()), // Replace with actual destination widget
-    );
-            },
-          ),
-        ];
-        break;
-      case 1: // Activities
-        title = 'Activities';
-        logoTextSpacing = 150.0; // More space for Activities
-        appBarActions = [PopupMenuButton<String>(
-            onSelected: _handleMenuSelection,
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem(
-                  value: 'Filter Activities',
-                  child: Text('Filter Activities'),
-                ),
-                const PopupMenuItem(
-                  value: 'Sort Activities',
-                  child: Text('Sort Activities'),
-                ),
-                const PopupMenuItem(
-                  value: 'View Activity History',
-                  child: Text('View Activity History'),
-                ),
-              ];
-            },
-          ),
-        ];
-        break;
-      case 2: // Chats
-        title = 'Chats';
-        logoTextSpacing = 165.0; // Larger space for Chats
-        appBarActions = [
-          PopupMenuButton<String>(
-            onSelected: handleMenuSelection,
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem(
-                  value: 'Mark all as unread',
-                  child: Text('Mark all as unread'),
-                ),
-                const PopupMenuItem(
-                  value: 'Chat Settings',
-                  child: Text('Chat Settings'),
-                ),
-                const PopupMenuItem(
-                  value: 'Search Chats',
-                  child: Text('Search Chats'),
-                ),
-              ];
-            },
-          ),
-        ];
-        break;
-      case 3: // Profile
-        title = 'Profile';
-        logoTextSpacing = 165.0; // Smaller space for Profile
-        appBarActions =  [
-          PopupMenuButton<String>(
-            onSelected: handleMenuSelection,
-            icon: const Icon(Icons.settings,color: Colors.white),
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem(
-                  value: 'Edit Profile',
-                  child: Text('Edit Profile'),
-                ),
-                const PopupMenuItem(
-                  value: 'Change Password',
-                  child: Text('Change Password'),
-                ),
-                const PopupMenuItem(
-                  value: 'Privacy Settings',
-                  child: Text('Privacy Settings'),
-                ),
-                const PopupMenuItem(
-                  value: 'Notifications',
-                  child: Text('Notifications'),
-                ),
-                const PopupMenuItem(
-                  value: 'Logout',
-                  child: Text('Logout'),
-                ),
-              ];
-            },
-          ),
-        ];
-        break;
-      default:
-        title = 'Travel Chronicles';
-        logoTextSpacing = 120.0;
-        break;
-    }
+  // Set the title, logo-text spacing, and appBar actions based on selected index
+  switch (_selectedIndex) {
+    case 0: // Home Page
+      title = 'Travel Chronicles';
+      logoTextSpacing = 120.0; // Normal space
+      appBarActions = [
+        IconButton(
+          icon: const Icon(Icons.notifications_active),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Notifications()), // Replace with actual destination widget
+            );
+          },
+        ),
+      ];
+      break;
+    case 1: // Activities
+      title = 'Activities';
+      logoTextSpacing = 150.0; // More space for Activities
+      appBarActions = [
+        PopupMenuButton<String>(
+          onSelected: _handleMenuSelection,
+          icon: const Icon(Icons.more_vert, color: Colors.white),
+          itemBuilder: (BuildContext context) {
+            return [
+              const PopupMenuItem(
+                value: 'Filter Activities',
+                child: Text('Filter Activities'),
+              ),
+              const PopupMenuItem(
+                value: 'Sort Activities',
+                child: Text('Sort Activities'),
+              ),
+              const PopupMenuItem(
+                value: 'View Activity History',
+                child: Text('View Activity History'),
+              ),
+            ];
+          },
+        ),
+      ];
+      break;
+    case 2: // Chats
+      title = 'Chats';
+      logoTextSpacing = 165.0; // Larger space for Chats
+      appBarActions = [
+        PopupMenuButton<String>(
+          onSelected: handleMenuSelection,
+          icon: const Icon(Icons.more_vert, color: Colors.white),
+          itemBuilder: (BuildContext context) {
+            return [
+              const PopupMenuItem(
+                value: 'Mark all as unread',
+                child: Text('Mark all as unread'),
+              ),
+              const PopupMenuItem(
+                value: 'Chat Settings',
+                child: Text('Chat Settings'),
+              ),
+              const PopupMenuItem(
+                value: 'Search Chats',
+                child: Text('Search Chats'),
+              ),
+            ];
+          },
+        ),
+      ];
+      break;
+    case 3: // Profile
+      title = 'Profile';
+      logoTextSpacing = 165.0; // Smaller space for Profile
+      appBarActions = [
+        PopupMenuButton<String>(
+          onSelected: handleMenuSelection,
+          icon: const Icon(Icons.settings, color: Colors.white),
+          itemBuilder: (BuildContext context) {
+            return [
+              const PopupMenuItem(
+                value: 'Edit Profile',
+                child: Text('Edit Profile'),
+              ),
+              const PopupMenuItem(
+                value: 'Change Password',
+                child: Text('Change Password'),
+              ),
+              const PopupMenuItem(
+                value: 'Privacy Settings',
+                child: Text('Privacy Settings'),
+              ),
+              const PopupMenuItem(
+                value: 'Notifications',
+                child: Text('Notifications'),
+              ),
+              const PopupMenuItem(
+                value: 'Logout',
+                child: Text('Logout'),
+              ),
+            ];
+          },
+        ),
+      ];
+      break;
+    default:
+      title = 'Travel Chronicles';
+      logoTextSpacing = 120.0;
+      break;
+  }
 
-    return AppBar(
-      backgroundColor: const Color.fromARGB(255, 42, 41, 41),
-      title: Row(
+  return AppBar(
+    backgroundColor: const Color.fromARGB(255, 42, 41, 41),
+    title: null, // Set title to null as we will use flexibleSpace to center everything
+    flexibleSpace: Container(
+      height: 200, // Make sure the flexible space matches the AppBar height
+      alignment: Alignment.bottomCenter, // Align everything to the bottom
+      padding: const EdgeInsets.only(bottom: 0), // Adjust the padding to push content down closer to the bottom line
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between logo, title, and actions
         children: [
+          // Logo
           ClipOval(
             child: Image.asset(
               'asset/logo3.jpg', // Replace with your logo path
@@ -310,20 +332,32 @@ class _MainPageState extends State<GuideHomepage> {
               width: 40, // Make the width and height equal for a perfect circle
             ),
           ),
-          SizedBox(width: logoTextSpacing), // Dynamic spacing based on selected tab
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 253, 253, 253),
+          // Title in the center
+          Expanded(
+            child: Center(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 253, 253, 253),
+                ),
+              ),
             ),
+          ),
+          // Action button(s)
+          Row(
+            children: appBarActions,
           ),
         ],
       ),
-      actions: appBarActions,
-    );
-  }
+    ),
+  );
+}
+
+
+
+
 
   Widget _buildHomePage() {
     return SingleChildScrollView(

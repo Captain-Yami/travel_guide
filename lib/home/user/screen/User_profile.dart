@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
+
 
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
@@ -25,11 +29,23 @@ class _UserProfileState extends State<UserProfile> {
   // To track whether the fields should be editable or not
   bool isEditable = false;
 
+  // To store the profile image file
+  File? _profileImage;
+
+  // Cloudinary configuration
+  final Cloudinary cloudinary = Cloudinary.signedConfig ( cloudName: 'db2nki9dh',apiKey: '894239764992456', apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',);
+
   // Function to save the profile data to Firestore
   Future<void> saveProfile() async {
     try {
       // Get the current user's UID
       String uid = FirebaseAuth.instance.currentUser!.uid;
+      String imageUrl = '';
+
+      // If the user uploaded a new profile image, upload it to Cloudinary
+      if (_profileImage != null) {
+        imageUrl = await uploadImageToCloudinary(_profileImage!); // Upload to Cloudinary
+      }
 
       // Update the Firestore document with the new data
       await FirebaseFirestore.instance.collection('Users').doc(uid).update({
@@ -42,6 +58,7 @@ class _UserProfileState extends State<UserProfile> {
         'state': stateController.text,
         'nation': nationController.text,
         'pincode': pincodeController.text,
+        if (imageUrl.isNotEmpty) 'profile_picture': imageUrl,  // Add profile image URL if available
       });
 
       // Show a success message
@@ -58,6 +75,38 @@ class _UserProfileState extends State<UserProfile> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
+    }
+  }
+
+  // Function to pick the profile image
+  Future<void> _pickProfileImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  // Function to upload image to Cloudinary
+  Future<String> uploadImageToCloudinary(File imageFile) async {
+    try {
+      // Upload the image to Cloudinary
+      final response = await cloudinary.upload(
+        file: imageFile.path,
+        folder: 'profile_pictures/', // Optional: You can specify a folder
+      );
+
+      // Return the URL of the uploaded image
+      if (response.isSuccessful) {
+        return response.secureUrl!;
+      } else {
+        throw Exception('Cloudinary upload failed: ${response.error}');
+      }
+    } catch (e) {
+      throw Exception('Error uploading image to Cloudinary: $e');
     }
   }
 
@@ -163,6 +212,12 @@ class _UserProfileState extends State<UserProfile> {
           nationController.text = profileData['nation'] ?? '';
           pincodeController.text = profileData['pincode'] ?? '';
 
+          // Load the profile image if available
+          String profileImageUrl = profileData['profile_picture'] ?? '';
+          ImageProvider profileImage = profileImageUrl.isEmpty
+              ? const AssetImage('asset/background3.jpg') as ImageProvider
+              : NetworkImage(profileImageUrl);
+
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: ListView(
@@ -175,7 +230,12 @@ class _UserProfileState extends State<UserProfile> {
                       CircleAvatar(
                         radius: 80,
                         backgroundColor: Colors.grey.shade300,
-                        backgroundImage: const AssetImage('asset/background3.jpg'),
+                        backgroundImage: profileImage,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.camera_alt),
+                        onPressed: _pickProfileImage, // Allow user to pick an image
+                        color: Colors.blue,
                       ),
                     ],
                   ),

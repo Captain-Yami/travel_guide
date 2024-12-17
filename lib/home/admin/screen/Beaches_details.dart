@@ -1,13 +1,13 @@
+import 'package:cloudinary/cloudinary.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
-import 'package:travel_guide/home/admin/services/firebaseAddbeaches.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:travel_guide/home/admin/services/firebaseAddbeaches.dart'; // Add firebase service for Firestore
 
 class BeachesDetails extends StatefulWidget {
   final String locationType;
 
-  // Constructor to accept the location type (e.g., 'Beaches', 'Temples', etc.)
   const BeachesDetails({super.key, required this.locationType});
 
   @override
@@ -15,7 +15,6 @@ class BeachesDetails extends StatefulWidget {
 }
 
 class _AddLocationDetailsPageState extends State<BeachesDetails> {
-  // Controllers for each text field
   final _formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -23,29 +22,103 @@ class _AddLocationDetailsPageState extends State<BeachesDetails> {
   TextEditingController openingTimeController = TextEditingController();
   TextEditingController closingTimeController = TextEditingController();
 
-  // Variable to store the selected image
   File? _image;
-
+  bool isUploading = false;
+final Cloudinary cloudinary = Cloudinary.signedConfig(
+    cloudName: 'db2nki9dh',  // Replace with your Cloudinary cloud name
+    apiKey: '894239764992456',  // Replace with your API key
+    apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',  // Replace with your API secret
+  );
   // Function to pick an image from the gallery or camera
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
       });
     }
   }
+
   @override
   void dispose() {
-    // TODO: implement dispose
     nameController.dispose();
     descriptionController.dispose();
     seasonalTimeController.dispose();
     openingTimeController.dispose();
     closingTimeController.dispose();
     super.dispose();
+  }
+
+  // Function to upload image to Cloudinary and return the image URL
+  Future<String?> _uploadImageToCloudinary() async {
+    if (_image == null) return null;
+
+    setState(() {
+      isUploading = true;
+    });
+
+    // Uploading the image to Cloudinary
+    final response = await cloudinary.upload(
+      file: _image!.path,
+      resourceType: CloudinaryResourceType.image,
+      folder: 'beaches',  // Specify folder as 'beaches'
+      fileName: 'beach_${DateTime.now().millisecondsSinceEpoch}',
+    );
+
+    setState(() {
+      isUploading = false;
+    });
+
+    if (response.isSuccessful) {
+      return response.secureUrl;  // Return the secure URL of the uploaded image
+    } else {
+      // Handle error in uploading image
+      return null;
+    }
+  }
+
+  // Function to submit the form and add the data to Firestore
+  void _submitForm() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      // Upload the image first and get the URL
+      final imageUrl = await _uploadImageToCloudinary();
+
+      if (imageUrl != null) {
+        // Now store the data in Firestore
+        FirebaseFirestore.instance.collection('Places').doc('Locations').collection('Beaches').add({
+          'name': nameController.text,
+          'description': descriptionController.text,
+          'seasonalTime': seasonalTimeController.text,
+          'openingTime': openingTimeController.text,
+          'closingTime': closingTimeController.text,
+          'imageUrl': imageUrl,  // Save the image URL
+          'createdAt': Timestamp.now(),
+        }).then((value) {
+          // Show success message and reset the form
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Beach details added successfully!')));
+          _clearForm();
+        }).catchError((error) {
+          // Handle error while adding data to Firestore
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add data: $error')));
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Image upload failed!')));
+      }
+    }
+  }
+
+  // Clear the form fields
+  void _clearForm() {
+    nameController.clear();
+    descriptionController.clear();
+    seasonalTimeController.clear();
+    openingTimeController.clear();
+    closingTimeController.clear();
+    setState(() {
+      _image = null;
+    });
   }
 
   @override
@@ -55,7 +128,7 @@ class _AddLocationDetailsPageState extends State<BeachesDetails> {
         backgroundColor: Colors.black,
         title: Text('Add ${widget.locationType} Details'),
       ),
-      body: SingleChildScrollView(  // Wrapping the entire body in a SingleChildScrollView
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -90,7 +163,7 @@ class _AddLocationDetailsPageState extends State<BeachesDetails> {
                 ),
               ),
               SizedBox(height: 20),
-
+              
               Text(
                 'Enter details for ${widget.locationType}:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -180,16 +253,10 @@ class _AddLocationDetailsPageState extends State<BeachesDetails> {
 
               // Submit button
               ElevatedButton(
-                onPressed: () {
-                  firebaseAddbeaches().addbeaches(locationName: nameController.text, 
-                  locationDescription: descriptionController.text,
-                   seasonalTime: seasonalTimeController.text, 
-                   openingTime: openingTimeController.text, 
-                   closingTime: closingTimeController.text);
-                   
-                  
-                },
-                child: Text('Submit'),
+                onPressed: isUploading ? null : _submitForm,  // Disable when uploading
+                child: isUploading
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text('Submit'),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
