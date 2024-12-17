@@ -32,26 +32,6 @@ class Guidefirebaseauthservice {
       'phone number': Phone_number,
     });
 
-<<<<<<< HEAD
-      final user= await firebaseAuth.createUserWithEmailAndPassword(email:email, password:password);
-      firestoreDatabase.collection('Guide').doc(user.user?.uid).set({
-        'name': username,
-        'useremail': email,
-        'password' : password,
-        'aadhar': aadhar,
-        'phone number': Phone_number,
-      });
-      firestoreDatabase
-          .collection('role_tb')
-          .add({'uid': user.user?.uid, 'role': 'Guide'});
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Registration Sucessfull')));
-    }
-    catch(e){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Registration Failed')));
-    }
-  }
-  
-=======
     // Add the role information to the 'role_tb' collection
     await firestoreDatabase.collection('role_tb').add({
       'uid': user.user?.uid,
@@ -64,7 +44,6 @@ class Guidefirebaseauthservice {
     // Show error message
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registration Failed')));
   }
->>>>>>> 8e56816c496b5298c726fcaff38b1996d29c8ab0
 }
 
   Future<void> userLogin({
