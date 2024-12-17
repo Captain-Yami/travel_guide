@@ -61,6 +61,44 @@ class _AdminUsersState extends State<AdminUsers> {
     );
   }
 
+  // Delete User from Firestore
+  Future<void> deleteUser(String userId) async {
+    try {
+      await _firestore.collection('Users').doc(userId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User deleted successfully')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to delete user')));
+    }
+  }
+
+  // Show confirmation dialog before deleting
+  void showDeleteConfirmationDialog(String userId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete this user?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                deleteUser(userId); // Delete user if confirmed
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +129,7 @@ class _AdminUsersState extends State<AdminUsers> {
             itemCount: users.length,
             itemBuilder: (context, index) {
               var user = users[index].data() as Map<String, dynamic>;
+              String userId = users[index].id; // Get the user ID
 
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -126,6 +165,12 @@ class _AdminUsersState extends State<AdminUsers> {
                               ),
                               Text(user['gender'] ?? 'No gender'),
                             ],
+                          ),
+                          const Spacer(),
+                          // Delete Icon
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => showDeleteConfirmationDialog(userId),
                           ),
                         ],
                       ),

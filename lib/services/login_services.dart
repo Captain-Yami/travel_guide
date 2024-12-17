@@ -31,6 +31,7 @@ class LoginServiceFire {
             .get();
 
         final roledata = role.docs.first.data();
+        print(roledata);
 
         switch (roledata['role']) {
           case 'Users':
