@@ -309,6 +309,7 @@ import 'package:carousel_slider/carousel_slider.dart'; // Import the carousel_sl
 import 'package:travel_guide/home/guide/screen/guide_profile.dart';
 import 'package:travel_guide/home/guide/screen/list_of_guides.dart';
 import 'package:travel_guide/home/hotel.dart';
+import 'package:travel_guide/home/user/screen/guidedetails.dart';
 import 'package:travel_guide/home/user/screen/place/place.dart';
 import 'package:travel_guide/home/recommended.dart';
 import 'package:travel_guide/home/user/seasons/season.dart';
@@ -343,13 +344,13 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  /*void _navigateToGuideDetails() {
+  void _navigateToGuideDetails() {
     print('Navigating to Guide page');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ),
+      MaterialPageRoute(builder: (context) => const Guidedetails()),
     );
-  }*/
+  }
 
   void _navigateToSeason() {
     print('Navigating to Season page');
@@ -582,9 +583,7 @@ class _MainPageState extends State<MainPage> {
                           child: _buildElevatedButton(
                             icon: Icons.map,
                             label: 'Guide',
-                            onPressed: () {
-                              
-                            },
+                            onPressed: _navigateToGuideDetails,
                           ),
                         ),
                       ],

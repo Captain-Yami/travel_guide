@@ -37,6 +37,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:AdminHomepage()));}
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:LoginPage()));}
   
  

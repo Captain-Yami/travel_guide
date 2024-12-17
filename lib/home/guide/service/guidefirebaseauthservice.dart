@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
+import 'package:travel_guide/home/user/screen/guidedetails.dart';
 
 
 class Guidefirebaseauthservice {
@@ -103,4 +104,3 @@ class Guidefirebaseauthservice {
   }
 }
 }
-

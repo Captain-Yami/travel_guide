@@ -18,13 +18,13 @@ class _AvailabilityState extends State<Availability> {
   // Track selected days of the week
   final List<bool> _selectedDays = List.generate(7, (index) => false); // 7 days of the week
   final List<String> _daysOfWeek = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
   ];
 
   @override

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
 
 class GuideDetails extends StatefulWidget {
-  const GuideDetails({super.key, required String guideName});
+  const GuideDetails({super.key, required String guideName, required String uid});
 
   @override
   State<GuideDetails> createState() => _GuideDetailsState();
