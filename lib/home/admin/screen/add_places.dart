@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:travel_guide/home/admin/screen/Beaches_details.dart';
 import 'package:travel_guide/home/admin/screen/Temples_details.dart';
 import 'package:travel_guide/home/admin/screen/Trekking_details.dart';
+import 'package:travel_guide/home/admin/screen/forts_museum.dart'; // Import the FortsMuseum details screen
 
 class AddPlacesPage extends StatelessWidget {
   const AddPlacesPage({super.key});
@@ -114,6 +115,41 @@ class AddPlacesPage extends StatelessWidget {
                 child: Center(
                   child: Text(
                     'Trekking',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Forts Museum Button (Newly added)
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FortsMuseumDetails(locationType: 'FortsMuseum')),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 50),
+                margin: EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      offset: Offset(0, 3),
+                      blurRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    'Forts Museum',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.black,
