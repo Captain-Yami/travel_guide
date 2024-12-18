@@ -82,11 +82,11 @@ class _AddLocationDetailsPageState extends State<TrekkingDetails> {
         try {
           // Save the trekking details to Firestore
           await FirebaseFirestore.instance.collection('Places').doc('Locations').collection('Trekking').add({
-            'location_name': nameController.text,
-            'location_description': descriptionController.text,
-            'seasonal_time': seasonalTimeController.text,
-            'opening_time': openingTimeController.text,
-            'closing_time': closingTimeController.text,
+            'name': nameController.text,
+            'description': descriptionController.text,
+            'seasonalTime': seasonalTimeController.text,
+            'openingTime': openingTimeController.text,
+            'closingTime': closingTimeController.text,
             'imageUrl': imageUrl, // Store the image URL
             'createdAt': Timestamp.now(),
           });

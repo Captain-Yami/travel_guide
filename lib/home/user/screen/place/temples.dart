@@ -86,7 +86,7 @@ class _TemplesState extends State<Temples> {
                       // Temple name with overflow handling
                       Flexible(
                         child: Text(
-                          temple['location_name'] ?? 'No name',
+                          temple['name'] ?? 'No name',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -145,7 +145,7 @@ class TempleDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(temple['location_name'] ?? 'Temple Details'),
+        title: Text(temple['name'] ?? 'Temple Details'),
         backgroundColor: Colors.blueGrey[800],
       ),
       backgroundColor: Colors.grey[100],
@@ -156,7 +156,7 @@ class TempleDetailsScreen extends StatelessWidget {
           children: [
             // Name of the temple
             Text(
-              temple['location_name'] ?? 'No name',
+              temple['name'] ?? 'No name',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -167,7 +167,7 @@ class TempleDetailsScreen extends StatelessWidget {
 
             // Description of the temple
             Text(
-              temple['location_description'] ?? 'No description',
+              temple['description'] ?? 'No description',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.blueGrey[700],
@@ -176,11 +176,11 @@ class TempleDetailsScreen extends StatelessWidget {
             const SizedBox(height: 16.0), // Space between description and image
 
             // Image of the temple (if available)
-            temple['image_url'] != null
+            temple['imageUrl'] != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      temple['image_url'],
+                      temple['imageUrl'],
                       width: double.infinity,
                       height: 300,
                       fit: BoxFit.cover,

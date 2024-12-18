@@ -86,7 +86,7 @@ class _TrekkingSpotsState extends State<TrekkingSpots> {
                       // Trekking spot name with overflow handling
                       Flexible(
                         child: Text(
-                          trekkingSpot['location_name'] ?? 'No name',
+                          trekkingSpot['name'] ?? 'No name',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -145,7 +145,7 @@ class TrekkingSpotDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(trekkingSpot['location_name'] ?? 'Trekking Spot Details'),
+        title: Text(trekkingSpot['name'] ?? 'Trekking Spot Details'),
         backgroundColor: Colors.blueGrey[800],
       ),
       backgroundColor: Colors.grey[100],
@@ -156,7 +156,7 @@ class TrekkingSpotDetailsScreen extends StatelessWidget {
           children: [
             // Name of the trekking spot
             Text(
-              trekkingSpot['location_name'] ?? 'No name',
+              trekkingSpot['name'] ?? 'No name',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -167,7 +167,7 @@ class TrekkingSpotDetailsScreen extends StatelessWidget {
 
             // Description of the trekking spot
             Text(
-              trekkingSpot['location_description'] ?? 'No description',
+              trekkingSpot['description'] ?? 'No description',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.blueGrey[700],
@@ -176,11 +176,11 @@ class TrekkingSpotDetailsScreen extends StatelessWidget {
             const SizedBox(height: 16.0), // Space between description and image
 
             // Image of the trekking spot (if available)
-            trekkingSpot['image_url'] != null
+            trekkingSpot['imageUrl'] != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      trekkingSpot['image_url'],
+                      trekkingSpot['imageUrl'],
                       width: double.infinity,
                       height: 300,
                       fit: BoxFit.cover,

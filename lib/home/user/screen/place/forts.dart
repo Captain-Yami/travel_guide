@@ -86,7 +86,7 @@ class _FortsAndMuseumsState extends State<FortsAndMuseums> {
                       // Name with overflow handling
                       Flexible(
                         child: Text(
-                          place['location_name'] ?? 'No name',
+                          place['name'] ?? 'No name',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -145,7 +145,7 @@ class FortOrMuseumDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(place['location_name'] ?? 'Fort or Museum Details'),
+        title: Text(place['name'] ?? 'Fort or Museum Details'),
         backgroundColor: Colors.blueGrey[800],
       ),
       backgroundColor: Colors.grey[100],
@@ -156,7 +156,7 @@ class FortOrMuseumDetailsScreen extends StatelessWidget {
           children: [
             // Name of the place (fort or museum)
             Text(
-              place['location_name'] ?? 'No name',
+              place['name'] ?? 'No name',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -167,7 +167,7 @@ class FortOrMuseumDetailsScreen extends StatelessWidget {
 
             // Description of the place
             Text(
-              place['location_description'] ?? 'No description',
+              place['description'] ?? 'No description',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.blueGrey[700],
@@ -176,11 +176,11 @@ class FortOrMuseumDetailsScreen extends StatelessWidget {
             const SizedBox(height: 16.0), // Space between description and image
 
             // Image of the place (if available)
-            place['image_url'] != null
+            place['imageUrl'] != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      place['image_url'],
+                      place['imageUrl'],
                       width: double.infinity,
                       height: 300,
                       fit: BoxFit.cover,

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+/*import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 class firebaseAddbeaches {
@@ -19,11 +19,11 @@ class firebaseAddbeaches {
       
       // Creating a new document in the 'beaches' collection
       await beaches.add({
-        'location_name': locationName,
-        'location_description': locationDescription,
-        'seasonal_time': seasonalTime,
-        'opening_time': openingTime,
-        'closing_time': closingTime,
+        'name': locationName,
+        'description': locationDescription,
+        'seasonalTime': seasonalTime,
+        'openingTime': openingTime,
+        'closingtime': closingTime,
       });
 
       print('Place added successfully!');
@@ -31,5 +31,5 @@ class firebaseAddbeaches {
       print('Error adding place: $e');
     }
   }
-}
+}*/
 

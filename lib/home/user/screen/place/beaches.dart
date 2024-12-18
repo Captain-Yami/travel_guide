@@ -85,7 +85,7 @@ class _BeachesState extends State<Beaches> {
                     children: [
                       // Beach name
                       Text(
-                        beach['location_name'] ?? 'No name',
+                        beach['name'] ?? 'No name',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -142,7 +142,7 @@ class BeachDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(beach['location_name'] ?? 'Beach Details'),
+        title: Text(beach['name'] ?? 'Beach Details'),
         backgroundColor: Colors.blueGrey[800],
       ),
       backgroundColor: Colors.grey[100],
@@ -153,7 +153,7 @@ class BeachDetailsScreen extends StatelessWidget {
           children: [
             // Name of the beach
             Text(
-              beach['location_name'] ?? 'No name',
+              beach['name'] ?? 'No name',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -164,20 +164,40 @@ class BeachDetailsScreen extends StatelessWidget {
 
             // Description of the beach
             Text(
-              beach['location_description'] ?? 'No description',
+              beach['description'] ?? 'No description',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.blueGrey[700],
               ),
             ),
-            const SizedBox(height: 16.0), // Space between description and image
+           
+            const SizedBox(height: 16.0),
+
+            // Seasonal Time Section
+            Text(
+              'Seasonal Time: ${beach['seasonalTime'] ?? 'Not available'}',
+              style: TextStyle(fontSize: 18, color: Colors.blueGrey[700]),
+            ),
+            const SizedBox(height: 8.0),
+
+            // Opening and Closing Time Section
+            Text(
+              'Opening Time: ${beach['openingTime'] ?? 'Not available'}',
+              style: TextStyle(fontSize: 18, color: Colors.blueGrey[700]),
+            ),
+            const SizedBox(height: 8.0),
+            Text(
+              'Closing Time: ${beach['closingTime'] ?? 'Not available'}',
+              style: TextStyle(fontSize: 18, color: Colors.blueGrey[700]),
+            ),
+             const SizedBox(height: 16.0), // Space between description and image
 
             // Image of the beach (if available)
-            beach['image_url'] != null
+            beach['imageUrl'] != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      beach['image_url'],
+                      beach['imageUrl'],
                       width: double.infinity,
                       height: 300,
                       fit: BoxFit.cover,
