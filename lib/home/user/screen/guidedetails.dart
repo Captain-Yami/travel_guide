@@ -11,10 +11,6 @@ class Guide {
   final String ratePerTrip;
   final String details;
   final String profileImage;
-  final bool isAvailable; // Availability status
-  final TimeOfDay startTime;
-  final TimeOfDay endTime;
-  final List<String> selectedDays;
 
   Guide({
     required this.name,
@@ -26,67 +22,22 @@ class Guide {
     required this.ratePerTrip,
     required this.details,
     required this.profileImage,
-    required this.isAvailable,
-    required this.startTime,
-    required this.endTime,
-    required this.selectedDays,
   });
 
-  // Factory constructor to handle Firestore data and null fields
+  // Factory constructor to handle Firestore data
   factory Guide.fromFirestore(Map<String, dynamic> data) {
-  // Extracting availability data from Firestore
-  List<String> selectedDays = List<String>.from(data['selectedDays'] ?? []);
-  
-  // Safely extract the startTime and endTime or use defaults
-  var startTimeData = data['startTime'] ?? {};
-  TimeOfDay startTime = TimeOfDay(
-    hour: startTimeData['hour'] ?? 9,  // Use default hour if missing
-    minute: startTimeData['minute'] ?? 0, // Use default minute if missing
-  );
-
-  var endTimeData = data['endTime'] ?? {};
-  TimeOfDay endTime = TimeOfDay(
-    hour: endTimeData['hour'] ?? 17,  // Use default hour if missing
-    minute: endTimeData['minute'] ?? 0, // Use default minute if missing
-  );
-
-  bool isAvailable = data['isSelected'] ?? false;
-
-  return Guide(
-    name: data['name']?.toString() ?? '',
-    phoneNumber: data['phone number']?.toString() ?? '',
-    email: data['gideemail']?.toString() ?? '',
-    licenseNumber: data['License']?.toString() ?? '',
-    expertise: data['expertise']?.toString() ?? '',
-    experience: data['experience']?.toString() ?? '',
-    ratePerTrip: data['ratePerTrip']?.toString() ?? '',
-    details: data['additionalDetails']?.toString() ?? '',
-    profileImage: data['licenseImageUrl']?.toString() ?? '',
-    isAvailable: isAvailable,
-    startTime: startTime,
-    endTime: endTime,
-    selectedDays: selectedDays,
-  );
-}
-
-
-  // Check if the guide is available based on the current date and time
- bool isGuideAvailable(DateTime currentTime) {
-  if (!isAvailable) return false; // If not available, return false
-
-  // Get current day in lowercase (e.g., "monday")
-  String currentDay = currentTime.weekday.toString().toLowerCase();
-  
-  // Check if current day is in selected days list
-  bool isDaySelected = selectedDays.contains(currentDay);
-
-  // Check if current time is within the start and end time
-  bool isTimeValid = currentTime.isAfter(DateTime(currentTime.year, currentTime.month, currentTime.day, startTime.hour, startTime.minute)) &&
-                     currentTime.isBefore(DateTime(currentTime.year, currentTime.month, currentTime.day, endTime.hour, endTime.minute));
-
-  return isDaySelected && isTimeValid;
-}
-
+    return Guide(
+      name: data['name']?.toString() ?? '',
+      phoneNumber: data['phone number']?.toString() ?? '',
+      email: data['gideemail']?.toString() ?? '',
+      licenseNumber: data['License']?.toString() ?? '',
+      expertise: data['expertise']?.toString() ?? '',
+      experience: data['experience']?.toString() ?? '',
+      ratePerTrip: data['ratePerTrip']?.toString() ?? '',
+      details: data['additionalDetails']?.toString() ?? '',
+      profileImage: data['licenseImageUrl']?.toString() ?? '',
+    );
+  }
 }
 
 class Guidedetails extends StatefulWidget {
@@ -106,32 +57,24 @@ class _GuidedetailsState extends State<Guidedetails> {
   }
 
   Future<void> _fetchGuides() async {
-  try {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('Guide')
-        .get();
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Guide')
+          .get();
 
-    List<Guide> fetchedGuides = querySnapshot.docs.map((doc) {
-      var data = doc.data();
-      print('Guide Data: $data');  // Debugging line
-      return Guide.fromFirestore(data);
-    }).toList();
+      List<Guide> fetchedGuides = querySnapshot.docs.map((doc) {
+        var data = doc.data();
+        print('Guide Data: $data');  // Debugging line
+        return Guide.fromFirestore(data);
+      }).toList();
 
-    DateTime currentTime = DateTime.now();
-    List<Guide> availableGuides = fetchedGuides
-        .where((guide) => guide.isGuideAvailable(currentTime))
-        .toList();
-
-    print('Available Guides: ${availableGuides.length}');  // Debugging line
-
-    setState(() {
-      guides = availableGuides;
-    });
-  } catch (e) {
-    print('Error fetching guides: $e');
+      setState(() {
+        guides = fetchedGuides;
+      });
+    } catch (e) {
+      print('Error fetching guides: $e');
+    }
   }
-}
-
 
   void _navigateToGuideDetails(Guide guide) {
     Navigator.push(
@@ -267,7 +210,6 @@ class GuideDetailPage extends StatelessWidget {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20), // Add spacing before buttons
-                // Row to position the buttons left and right
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -280,8 +222,8 @@ class GuideDetailPage extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          backgroundColor: const Color.fromARGB(255, 240, 240, 240), 
-                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),// Customize color
+                          backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -300,8 +242,8 @@ class GuideDetailPage extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
-                           backgroundColor: const Color.fromARGB(255, 240, 240, 240), 
-                          foregroundColor: const Color.fromARGB(255, 0, 0, 0), // Customize color
+                          backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -345,4 +287,3 @@ class GuideDetailPage extends StatelessWidget {
     );
   }
 }
-

@@ -33,7 +33,9 @@ class _UserProfileState extends State<UserProfile> {
   File? _profileImage;
 
   // Cloudinary configuration
-  final Cloudinary cloudinary = Cloudinary.signedConfig ( cloudName: 'db2nki9dh',apiKey: '894239764992456', apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',);
+  final Cloudinary cloudinary = Cloudinary.signedConfig ( cloudName: 'db2nki9dh',
+  apiKey: '894239764992456', 
+  apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',);
 
   // Function to save the profile data to Firestore
   Future<void> saveProfile() async {
