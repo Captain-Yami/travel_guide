@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -11,6 +12,7 @@ class Guide {
   final String ratePerTrip;
   final String details;
   final String profileImage;
+  final String id;
 
   Guide({
     required this.name,
@@ -22,10 +24,11 @@ class Guide {
     required this.ratePerTrip,
     required this.details,
     required this.profileImage,
+    required this.id,
   });
 
   // Factory constructor to handle Firestore data
-  factory Guide.fromFirestore(Map<String, dynamic> data) {
+  factory Guide.fromFirestore(Map<String, dynamic> data, String id) {
     return Guide(
       name: data['name']?.toString() ?? '',
       phoneNumber: data['phone number']?.toString() ?? '',
@@ -36,6 +39,7 @@ class Guide {
       ratePerTrip: data['ratePerTrip']?.toString() ?? '',
       details: data['additionalDetails']?.toString() ?? '',
       profileImage: data['licenseImageUrl']?.toString() ?? '',
+      id: id, // Add the guide ID to the model
     );
   }
 }
@@ -64,8 +68,7 @@ class _GuidedetailsState extends State<Guidedetails> {
 
       List<Guide> fetchedGuides = querySnapshot.docs.map((doc) {
         var data = doc.data();
-        print('Guide Data: $data');  // Debugging line
-        return Guide.fromFirestore(data);
+        return Guide.fromFirestore(data, doc.id); // Pass doc.id as guideId
       }).toList();
 
       setState(() {
@@ -217,8 +220,8 @@ class GuideDetailPage extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          // Handle the request action here
-                          print('Request button pressed');
+                          // Show a dialog when clicking "Request Guide"
+                          _showRequestDialog(context);
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -284,6 +287,72 @@ class GuideDetailPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showRequestDialog(BuildContext context) {
+    final TextEditingController tripController = TextEditingController();
+    final TextEditingController categoriesController = TextEditingController();
+    final TextEditingController placesController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Request Guide'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: tripController,
+                decoration: const InputDecoration(labelText: 'About Trip'),
+                maxLines: 3,
+              ),
+              TextField(
+                controller: categoriesController,
+                decoration: const InputDecoration(labelText: 'Interested Categories (Expertise)'),
+                maxLines: 2,
+              ),
+              TextField(
+                controller: placesController,
+                decoration: const InputDecoration(labelText: 'Places to Visit'),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Send the request to Firestore with the guideId
+                FirebaseFirestore.instance.collection('requests').add({
+                  'guideId': guide.id,  // Add guideId to the request
+                  'aboutTrip': tripController.text,
+                  'categories': categoriesController.text,
+                  'places': placesController.text,
+                  'user': FirebaseAuth.instance.currentUser?.uid,
+                  'requestDate': Timestamp.now(),
+                }).then((_) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Request sent successfully!')),
+                  );
+                }).catchError((e) {
+                  print('Error sending request: $e');
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to send request.')),
+                  );
+                });
+              },
+              child: const Text('Send Request'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
