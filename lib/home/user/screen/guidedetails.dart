@@ -291,68 +291,88 @@ class GuideDetailPage extends StatelessWidget {
   }
 
   void _showRequestDialog(BuildContext context) {
-    final TextEditingController tripController = TextEditingController();
-    final TextEditingController categoriesController = TextEditingController();
-    final TextEditingController placesController = TextEditingController();
+  final TextEditingController tripController = TextEditingController();
+  final TextEditingController categoriesController = TextEditingController();
+  final TextEditingController placesController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Request Guide'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: tripController,
-                decoration: const InputDecoration(labelText: 'About Trip'),
-                maxLines: 3,
-              ),
-              TextField(
-                controller: categoriesController,
-                decoration: const InputDecoration(labelText: 'Interested Categories (Expertise)'),
-                maxLines: 2,
-              ),
-              TextField(
-                controller: placesController,
-                decoration: const InputDecoration(labelText: 'Places to Visit'),
-                maxLines: 3,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // Send the request to Firestore with the guideId
-                FirebaseFirestore.instance.collection('requests').add({
-                  'guideId': guide.id,  // Add guideId to the request
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Request Guide'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: tripController,
+              decoration: const InputDecoration(labelText: 'About Trip'),
+              maxLines: 3,
+            ),
+            TextField(
+              controller: categoriesController,
+              decoration: const InputDecoration(labelText: 'Interested Categories (Expertise)'),
+              maxLines: 2,
+            ),
+            TextField(
+              controller: placesController,
+              decoration: const InputDecoration(labelText: 'Places to Visit'),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              try {
+                // Fetch the current user's ID
+                final userId = FirebaseAuth.instance.currentUser?.uid;
+                if (userId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('User not logged in.')),
+                  );
+                  return;
+                }
+
+                // Fetch the user's name from Firestore
+                final userDoc = await FirebaseFirestore.instance
+                    .collection('Users')
+                    .doc(userId)
+                    .get();
+
+                final userName = userDoc.data()?['name'] ?? 'Unknown User';
+
+                // Send the request to Firestore with the user's name and guideId
+                await FirebaseFirestore.instance.collection('requests').add({
+                  'guideId': guide.id, // Add guideId to the request
                   'aboutTrip': tripController.text,
                   'categories': categoriesController.text,
                   'places': placesController.text,
-                  'user': FirebaseAuth.instance.currentUser?.uid,
+                  'user': userId,
+                  'userName': userName, // Add the user's name
                   'requestDate': Timestamp.now(),
-                }).then((_) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Request sent successfully!')),
-                  );
-                }).catchError((e) {
-                  print('Error sending request: $e');
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to send request.')),
-                  );
                 });
-              },
-              child: const Text('Send Request'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Request sent successfully!')),
+                );
+              } catch (e) {
+                print('Error sending request: $e');
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Failed to send request.')),
+                );
+              }
+            },
+            child: const Text('Send Request'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+}
 }
