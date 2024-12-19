@@ -67,6 +67,7 @@ class _GuideDashboardState extends State<GuideDashboard>
       'places': _parseList(data['places']),
       'status': data['status'] ?? 'Pending',
       'image': 'assets/background3.jpg',
+      'user': data['user'] ?? '',
     };
   }
 
@@ -159,7 +160,8 @@ class _GuideDashboardState extends State<GuideDashboard>
                       placesToVisit: List<String>.from(request['places']),
                       interestedCategories: List<String>.from(request['categories']),
                       details: request['details'],
-                      onConfirm: () => _removeConfirmedRequest(request['id']),  // Pass the callback here
+                      user: request['user'],
+                      onConfirm: () => _removeConfirmedRequest(request['id']),   // Pass the callback here
                       onDecline: () => _removeRequest(request['id']),  // Callback for Decline
                     ),
                   ),
@@ -215,5 +217,4 @@ class _GuideDashboardState extends State<GuideDashboard>
     },
   );
 }
-
     }

@@ -9,65 +9,72 @@ class RequestDetailsPage extends StatelessWidget {
   final List<String> placesToVisit;
   final List<String> interestedCategories;
   final String details;
+  final String user; // The user field
+  final VoidCallback onConfirm;
+  final VoidCallback onDecline;
 
   const RequestDetailsPage({
+    Key? key,
     required this.requestId,
     required this.name,
     required this.image,
     required this.placesToVisit,
     required this.interestedCategories,
-    required this.details, required Function() onConfirm, required Function() onDecline,
-  });
+    required this.details,
+    required this.user, // Include user field
+    required this.onConfirm,
+    required this.onDecline,
+  }) : super(key: key);
 
   Future<void> handleConfirmation(BuildContext context) async {
-  try {
-    // Concatenate the details into a single string
-    String placesStr = placesToVisit.join(', ');  // Concatenate places as a string
-    String aboutTripStr = details;  // Use details as a single string for the aboutTrip
-    String expertiseStr = interestedCategories.join(', ');  // Concatenate expertise as a string
+    try {
+      // Concatenate fields into strings for saving
+      String placesStr = placesToVisit.join(', ');
+      String aboutTripStr = details;
+      String expertiseStr = interestedCategories.join(', ');
 
-    // Create a map with the concatenated string values
-    final confirmedRequestDetails = {
-      'userName': name,
-      'image': image,
-      'places': placesStr,  // Save places as a single string
-      'aboutTrip': aboutTripStr,  // Save aboutTrip as a single string
-      'expertise': expertiseStr,  // Save expertise as a single string
-      'status': 'Confirmed',  // Mark status as Confirmed
-      'requestDate': FieldValue.serverTimestamp(),  // Add a timestamp for when the request is confirmed
-    };
+      // Create the confirmation data
+      final confirmedRequestDetails = {
+        'userName': name,
+        'image': image,
+        'places': placesStr,
+        'aboutTrip': aboutTripStr,
+        'expertise': expertiseStr,
+        'status': 'Confirmed',
+        'requestDate': FieldValue.serverTimestamp(),
+        'user': user, // Include the user field in Firestore
+      };
 
-    // Store the details in the confirmed_requests collection
-    await FirebaseFirestore.instance
-        .collection('confirmed_requests')
-        .doc(requestId)  // Use the requestId to ensure consistency
-        .set(confirmedRequestDetails);
+      // Add the data to the confirmed_requests collection
+      await FirebaseFirestore.instance
+          .collection('confirmed_requests')
+          .doc(requestId)
+          .set(confirmedRequestDetails);
 
-    // Update the status of the request in the original requests collection
-    await FirebaseFirestore.instance
-        .collection('requests')
-        .doc(requestId)
-        .update({'status': 'Confirmed'});
+      // Update the status in the requests collection
+      await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(requestId)
+          .update({'status': 'Confirmed'});
 
-    // Show a success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Request for $name has been confirmed!')),
-    );
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Request for $name has been confirmed!')),
+      );
 
-    // Pop the current page and navigate back to the previous screen (GuideDashboard)
-    Navigator.pop(context);  // This will remove the current RequestDetailsPage from the stack
-
-  } catch (e) {
-    print('Error confirming request: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to confirm request.')),
-    );
+      // Navigate back to the previous screen
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error confirming request: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to confirm request.')),
+      );
+    }
   }
-}
-
 
   Future<void> handleDecline(BuildContext context) async {
     try {
+      // Update the status in the requests collection
       await FirebaseFirestore.instance
           .collection('requests')
           .doc(requestId)
@@ -76,6 +83,8 @@ class RequestDetailsPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Request from $name has been declined.')),
       );
+
+      // Navigate back to the previous screen
       Navigator.pop(context);
     } catch (e) {
       print('Error declining request: $e');
