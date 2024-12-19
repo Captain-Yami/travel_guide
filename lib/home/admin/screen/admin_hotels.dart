@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HotelsDetails extends StatefulWidget {
-  const HotelsDetails({super.key});
+  const HotelsDetails({super.key, required String locationType});
 
   @override
   State<HotelsDetails> createState() => _HotelsDetailsState();
