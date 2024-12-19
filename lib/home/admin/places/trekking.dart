@@ -50,31 +50,50 @@ class _TrekkingState extends State<adminTrekking> {
 
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: Card(
-                  elevation: 6,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Trek name
-                        Text(
-                          trek['name'] ?? 'No name',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueGrey[900],
+                child: InkWell(
+                  onTap: () {
+                    // Navigate to the details page when the card is tapped
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TrekkingDetailsPage(
+                          trekId: trekId,
+                          name: trek['name'] ?? 'No name',
+                          description: trek['description'] ?? 'No description',
+                          seasonalTime: trek['seasonalTime'] ?? 'No seasonal time',
+                          openingTime: trek['openingTime'] ?? 'No opening time',
+                          closingTime: trek['closingTime'] ?? 'No closing time',
+                          imageUrl: trek['imageUrl'] ?? '',
+                        ),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    elevation: 6,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Trek name
+                          Text(
+                            trek['name'] ?? 'No name',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey[900],
+                            ),
                           ),
-                        ),
-                        // Delete button
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            // Show confirmation dialog before deleting
-                            _showDeleteConfirmationDialog(context, trekId);
-                          },
-                        ),
-                      ],
+                          // Delete button
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              // Show confirmation dialog before deleting
+                              _showDeleteConfirmationDialog(context, trekId);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -138,6 +157,244 @@ class _TrekkingState extends State<adminTrekking> {
           ],
         );
       },
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+class TrekkingDetailsPage extends StatefulWidget {
+  final String trekId;
+  final String name;
+  final String description;
+  final String seasonalTime;
+  final String openingTime;
+  final String closingTime;
+  final String imageUrl;
+
+  const TrekkingDetailsPage({
+    super.key,
+    required this.trekId,
+    required this.name,
+    required this.description,
+    required this.seasonalTime,
+    required this.openingTime,
+    required this.closingTime,
+    required this.imageUrl,
+  });
+
+  @override
+  State<TrekkingDetailsPage> createState() => _TrekkingDetailsPageState();
+}
+
+class _TrekkingDetailsPageState extends State<TrekkingDetailsPage> {
+  late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _seasonalTimeController;
+  late TextEditingController _openingTimeController;
+  late TextEditingController _closingTimeController;
+
+  bool _isEditing = false; // Flag to toggle between edit and view mode
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with the initial data
+    _nameController = TextEditingController(text: widget.name);
+    _descriptionController = TextEditingController(text: widget.description);
+    _seasonalTimeController = TextEditingController(text: widget.seasonalTime);
+    _openingTimeController = TextEditingController(text: widget.openingTime);
+    _closingTimeController = TextEditingController(text: widget.closingTime);
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers when not needed
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _seasonalTimeController.dispose();
+    _openingTimeController.dispose();
+    _closingTimeController.dispose();
+    super.dispose();
+  }
+
+  // Function to save updated data to Firestore
+  Future<void> _updateTrekkingDetails() async {
+    await FirebaseFirestore.instance
+        .collection('Places')
+        .doc('Locations')
+        .collection('Trekking')
+        .doc(widget.trekId)
+        .update({
+      'name': _nameController.text,
+      'description': _descriptionController.text,
+      'seasonalTime': _seasonalTimeController.text,
+      'openingTime': _openingTimeController.text,
+      'closingTime': _closingTimeController.text,
+      'imageUrl': widget.imageUrl, // If you don't want to edit image, keep it as is
+    });
+
+    // Show a confirmation message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Trekking details updated successfully!')),
+    );
+
+    setState(() {
+      // Switch to view mode
+      _isEditing = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_nameController.text), // Show the name here dynamically
+        backgroundColor: Colors.blueGrey[800],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('Places')
+              .doc('Locations')
+              .collection('Trekking')
+              .doc(widget.trekId)
+              .snapshots(), // Listen for real-time updates
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return const Center(child: Text('Trekking details not found.'));
+            }
+
+            var trekData = snapshot.data!;
+            // Set the fetched data dynamically
+            String name = trekData['name'];
+            String description = trekData['description'];
+            String seasonalTime = trekData['seasonalTime'];
+            String openingTime = trekData['openingTime'];
+            String closingTime = trekData['closingTime'];
+
+            // Update controllers with fetched data if not in edit mode
+            if (!_isEditing) {
+              _nameController.text = name;
+              _descriptionController.text = description;
+              _seasonalTimeController.text = seasonalTime;
+              _openingTimeController.text = openingTime;
+              _closingTimeController.text = closingTime;
+            }
+
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Trekking image
+                  widget.imageUrl.isNotEmpty
+                      ? Image.network(widget.imageUrl) // Display image if available
+                      : Container(),
+                  const SizedBox(height: 16),
+                  // Editable fields if in edit mode
+                  _isEditing
+                      ? Column(
+                          children: [
+                            TextField(
+                              controller: _nameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Name',
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _descriptionController,
+                              maxLines: 3,
+                              decoration: const InputDecoration(
+                                labelText: 'Description',
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _seasonalTimeController,
+                              decoration: const InputDecoration(
+                                labelText: 'Seasonal Time',
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _openingTimeController,
+                              decoration: const InputDecoration(
+                                labelText: 'Opening Time',
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _closingTimeController,
+                              decoration: const InputDecoration(
+                                labelText: 'Closing Time',
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Display details when not in edit mode
+                             const SizedBox(height: 16),
+                            Text(
+                              'name: $name',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'description : $description',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            
+                            const SizedBox(height: 16),
+                            Text(
+                              'Seasonal Time: $seasonalTime',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Opening Time: $openingTime',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Closing Time: $closingTime',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            // Toggle between edit mode and view mode
+            _isEditing = !_isEditing;
+          });
+          if (!_isEditing) {
+            // If switching from edit mode to view mode, save the changes
+            _updateTrekkingDetails();
+          }
+        },
+        child: Icon(_isEditing ? Icons.save : Icons.edit),
+        backgroundColor: Colors.blueGrey[800],
+      ),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:travel_guide/home/admin/screen/Temples_details.dart';
+import 'package:travel_guide/home/admin/screen/Temples_details.dart'; // Import the TempleDetails page
 
 class adminTemples extends StatefulWidget {
   const adminTemples({super.key, required String locationType});
@@ -39,42 +39,61 @@ class _BeachesState extends State<adminTemples> {
             return const Center(child: Text('No Temples found'));
           }
 
-          var beaches = snapshot.data!.docs;
+          var temples = snapshot.data!.docs;
 
           return ListView.builder(
             padding: const EdgeInsets.all(8.0),
-            itemCount: beaches.length,
+            itemCount: temples.length,
             itemBuilder: (context, index) {
-              var beach = beaches[index].data() as Map<String, dynamic>;
-              String beachId = beaches[index].id;  // Get the document ID
+              var temple = temples[index].data() as Map<String, dynamic>;
+              String templeId = temples[index].id;  // Get the document ID
 
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: Card(
-                  elevation: 6,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Beach name
-                        Text(
-                          beach['name'] ?? 'No name',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueGrey[900],
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigate to the TempleDetails screen and pass the data
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TempleDetails(
+                          templeId: templeId,
+                          name: temple['name'],
+                          description: temple['description'],
+                          seasonalTime: temple['seasonalTime'],
+                          openingTime: temple['openingTime'],
+                          closingTime: temple['closingTime'],
+                          imageUrl: temple['imageUrl'],
+                        ),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    elevation: 6,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Temple name
+                          Text(
+                            temple['name'] ?? 'No name',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey[900],
+                            ),
                           ),
-                        ),
-                        // Delete button
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            // Show confirmation dialog before deleting
-                            _showDeleteConfirmationDialog(context, beachId);
-                          },
-                        ),
-                      ],
+                          // Delete button
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              // Show confirmation dialog before deleting
+                              _showDeleteConfirmationDialog(context, templeId);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -99,7 +118,7 @@ class _BeachesState extends State<adminTemples> {
     );
   }
 
-  // Function to show the confirmation dialog before deleting a beach
+  // Function to show the confirmation dialog before deleting a temple
   Future<void> _showDeleteConfirmationDialog(BuildContext context, String templeId) {
     return showDialog(
       context: context,
@@ -117,7 +136,7 @@ class _BeachesState extends State<adminTemples> {
             ),
             TextButton(
               onPressed: () async {
-                // Delete the beach document from Firestore
+                // Delete the temple document from Firestore
                 await _firestore
                     .collection('Places')
                     .doc('Locations')
@@ -138,6 +157,191 @@ class _BeachesState extends State<adminTemples> {
           ],
         );
       },
+    );
+  }
+}
+
+
+
+
+
+
+class TempleDetails extends StatefulWidget {
+  final String templeId;
+  final String name;
+  final String description;
+  final String seasonalTime;
+  final String openingTime;
+  final String closingTime;
+  final String imageUrl;
+
+  // Constructor to receive data from the previous screen
+  const TempleDetails({
+    super.key,
+    required this.templeId,
+    required this.name,
+    required this.description,
+    required this.seasonalTime,
+    required this.openingTime,
+    required this.closingTime,
+    required this.imageUrl,
+  });
+
+  @override
+  _TempleDetailsState createState() => _TempleDetailsState();
+}
+
+class _TempleDetailsState extends State<TempleDetails> {
+  late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _seasonalTimeController;
+  late TextEditingController _openingTimeController;
+  late TextEditingController _closingTimeController;
+  late TextEditingController _imageUrlController;
+
+  bool _isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with the current temple data
+    _nameController = TextEditingController(text: widget.name);
+    _descriptionController = TextEditingController(text: widget.description);
+    _seasonalTimeController = TextEditingController(text: widget.seasonalTime);
+    _openingTimeController = TextEditingController(text: widget.openingTime);
+    _closingTimeController = TextEditingController(text: widget.closingTime);
+    _imageUrlController = TextEditingController(text: widget.imageUrl);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _seasonalTimeController.dispose();
+    _openingTimeController.dispose();
+    _closingTimeController.dispose();
+    _imageUrlController.dispose();
+    super.dispose();
+  }
+
+  // Function to save the updated details to Firestore
+  Future<void> _saveChanges() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Places')
+          .doc('Locations')
+          .collection('Temples')
+          .doc(widget.templeId)
+          .update({
+        'name': _nameController.text,
+        'description': _descriptionController.text,
+        'seasonalTime': _seasonalTimeController.text,
+        'openingTime': _openingTimeController.text,
+        'closingTime': _closingTimeController.text,
+        'imageUrl': _imageUrlController.text,
+      });
+
+      // Show confirmation message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Temple details updated successfully!')),
+      );
+
+      // Update state to reflect changes
+      setState(() {
+        _isEditing = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update temple details: $e')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Edit Temple' : widget.name),
+        backgroundColor: Colors.blueGrey[800],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Temple image
+              widget.imageUrl.isNotEmpty
+                  ? Image.network(widget.imageUrl) // Display image if available
+                  : Container(),
+              const SizedBox(height: 16),
+              // Editable fields
+              _isEditing
+                  ? Column(
+                      children: [
+                        _buildTextField(_nameController, 'Temple Name'),
+                        _buildTextField(_descriptionController, 'Description'),
+                        _buildTextField(_seasonalTimeController, 'Seasonal Time'),
+                        _buildTextField(_openingTimeController, 'Opening Time'),
+                        _buildTextField(_closingTimeController, 'Closing Time'),
+                        
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        _buildDetailText('Name: ${_nameController.text}'),
+                        _buildDetailText('Description: ${_descriptionController.text}'),
+                        _buildDetailText('Seasonal Time: ${_seasonalTimeController.text}'),
+                        _buildDetailText('Opening Time: ${_openingTimeController.text}'),
+                        _buildDetailText('Closing Time: ${_closingTimeController.text}'),
+                       
+                      ],
+                    ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_isEditing) {
+            // Save changes if editing
+            _saveChanges();
+          } else {
+            // Enable editing if not already in editing mode
+            setState(() {
+              _isEditing = true;
+            });
+          }
+        },
+        child: Icon(_isEditing ? Icons.save : Icons.edit),
+        backgroundColor: Colors.blueGrey[800],
+      ),
+    );
+  }
+
+  // Helper widget to create a TextField
+  Widget _buildTextField(TextEditingController controller, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+        ),
+        maxLines: label == 'Description' ? null : 1, // Multiline for Description
+      ),
+    );
+  }
+
+  // Helper widget to display the details
+  Widget _buildDetailText(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 16),
+      ),
     );
   }
 }
