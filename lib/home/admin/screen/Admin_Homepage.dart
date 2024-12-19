@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Add Firebase import
 import 'package:fl_chart/fl_chart.dart'; // Import for PieChart
+import 'package:travel_guide/home/admin/places/hotels.dart';
 import 'package:travel_guide/home/admin/screen/add_places.dart';
 import 'package:travel_guide/home/admin/screen/admin_guides.dart';
-import 'package:travel_guide/home/admin/screen/admin_hotels.dart';
 import 'package:travel_guide/home/admin/screen/admin_ratings.dart';
 import 'package:travel_guide/home/admin/screen/admin_complaints.dart';
 import 'package:travel_guide/home/admin/screen/admin_users.dart'; // Make sure to import Complaints page
@@ -53,7 +53,7 @@ class _AdminHomepageState extends State<AdminHomepage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => HotelsDetails()), // Navigate to AdminComplaints page
+          builder: (context) => Hotels()), // Navigate to AdminComplaints page
     );
   }
 
