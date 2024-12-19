@@ -11,44 +11,10 @@ class AdminUsers extends StatefulWidget {
 class _AdminUsersState extends State<AdminUsers> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  String selectedGender = 'All'; // Default gender filter
-
-  // Stream to get users data from Firestore
+  // Stream to get users data from Firestore without gender filter
   Stream<QuerySnapshot> getUserStream() {
     var userCollection = _firestore.collection('Users');
-    if (selectedGender == 'All') {
-      return userCollection.snapshots(); // Get all users
-    } else {
-      return userCollection.where('gender', isEqualTo: selectedGender).snapshots(); // Filter by gender
-    }
-  }
-
-  // Show Gender Filter Dialog
-  void showGenderFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Gender'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: ['All', 'Male', 'Female', 'Other'].map((gender) {
-              return RadioListTile<String>(
-                title: Text(gender),
-                value: gender,
-                groupValue: selectedGender,
-                onChanged: (value) {
-                  setState(() {
-                    selectedGender = value!;
-                    Navigator.pop(context);
-                  });
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
+    return userCollection.snapshots(); // Get all users without filtering by gender
   }
 
   // Navigate to the user details page
@@ -163,7 +129,8 @@ class _AdminUsersState extends State<AdminUsers> {
                                   color: Colors.blueGrey[900],
                                 ),
                               ),
-                              Text(user['gender'] ?? 'No gender'),
+                              // Gender removed
+                              // Text(user['gender'] ?? 'No gender'),
                             ],
                           ),
                           const Spacer(),
@@ -181,11 +148,6 @@ class _AdminUsersState extends State<AdminUsers> {
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: showGenderFilterDialog,
-        child: const Icon(Icons.filter_list),
-        backgroundColor: Colors.blueGrey[800],
       ),
     );
   }
@@ -219,10 +181,11 @@ class UserDetailsPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             // Display more user details
-            Text(
-              'Gender: ${user['gender']}',
-              style: const TextStyle(fontSize: 18),
-            ),
+            // Gender removed
+            // Text(
+            //   'Gender: ${user['gender']}',
+            //   style: const TextStyle(fontSize: 18),
+            // ),
             const SizedBox(height: 10),
             Text(
               'Date of Birth: ${user['DOB'] ?? 'Not Available'}',

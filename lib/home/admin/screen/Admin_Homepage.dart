@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Add Firebase import
 import 'package:fl_chart/fl_chart.dart'; // Import for PieChart
 import 'package:travel_guide/home/admin/screen/add_places.dart';
 import 'package:travel_guide/home/admin/screen/admin_guides.dart';
+import 'package:travel_guide/home/admin/screen/admin_hotels.dart';
 import 'package:travel_guide/home/admin/screen/admin_ratings.dart';
 import 'package:travel_guide/home/admin/screen/admin_complaints.dart';
 import 'package:travel_guide/home/admin/screen/admin_users.dart'; // Make sure to import Complaints page
@@ -19,14 +20,14 @@ class _AdminHomepageState extends State<AdminHomepage> {
   int touchedIndex = -1;
 
   // Navigation functions
-  void navigateToPlaces() {
+  void navigateToUsers() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AdminUsers()),
     );
   }
 
-  void navigateToHotels() {
+  void navigateToGuides() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AdminGuides()),
@@ -45,6 +46,14 @@ class _AdminHomepageState extends State<AdminHomepage> {
       context,
       MaterialPageRoute(
           builder: (context) => AdminComplaints()), // Navigate to AdminComplaints page
+    );
+  }
+
+  void navigateToHotels() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => HotelsDetails()), // Navigate to AdminComplaints page
     );
   }
 
@@ -253,7 +262,7 @@ class _AdminHomepageState extends State<AdminHomepage> {
                         int userCount = snapshot.data ?? 0;
 
                         return ElevatedButton(
-                          onPressed: navigateToPlaces,
+                          onPressed: navigateToUsers,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color.fromARGB(
                                 255, 220, 222, 224), // Button color
@@ -286,7 +295,7 @@ class _AdminHomepageState extends State<AdminHomepage> {
                     ),
                     SizedBox(width: 10), // Space between the buttons
                     ElevatedButton(
-                      onPressed: navigateToHotels,
+                      onPressed: navigateToGuides,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(
                             255, 228, 233, 228), // Button color
@@ -355,6 +364,28 @@ class _AdminHomepageState extends State<AdminHomepage> {
                             fontSize: 14),
                       ),
                     ),
+                    SizedBox(height: 10),
+                     ElevatedButton(
+                      onPressed: navigateToHotels,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(
+                            255, 234, 230, 230), // Button color
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        shadowColor: Colors.black.withOpacity(0.3),
+                        elevation: 5,
+                      ),
+                      
+                      child: Text(
+                        'Hotels',
+                        style: TextStyle(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            fontSize: 14),
+                      ),
+                    ),
+                    SizedBox(height: 10),
                   ],
                 ),
               ],

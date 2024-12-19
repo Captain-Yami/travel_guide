@@ -1,152 +1,276 @@
+import 'package:cloudinary/cloudinary.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; 
+import 'dart:io'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Define a model to represent the hotel
-class Hotel {
-  final String name;
-  final String description;
-
-  Hotel({required this.name, required this.description});
-}
-
-class AdminHotels extends StatefulWidget {
-  const AdminHotels({super.key});
+class HotelsDetails extends StatefulWidget {
+  const HotelsDetails({super.key});
 
   @override
-  State<AdminHotels> createState() => _AdminHotelsState();
+  State<HotelsDetails> createState() => _HotelsDetailsState();
 }
 
-class _AdminHotelsState extends State<AdminHotels> {
-  // Sample list of hotels
-  List<Hotel> hotels = [
-    Hotel(name: 'Hotel Sunshine', description: 'A luxury hotel with great amenities.'),
-    Hotel(name: 'Mountain Retreat', description: 'A peaceful getaway in the mountains.'),
-    Hotel(name: 'Seaside Resort', description: 'A beautiful resort by the beach.'),
-  ];
+class _HotelsDetailsState extends State<HotelsDetails> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // Function to delete a hotel
-  void deleteHotel(int index) {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _openingTimeController = TextEditingController();
+  final TextEditingController _closingTimeController = TextEditingController();
+
+  File? _image;
+  bool isUploading = false;
+
+  final Cloudinary cloudinary = Cloudinary.signedConfig(
+    cloudName: 'db2nki9dh',
+    apiKey: '894239764992456',
+    apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',
+  );
+
+  // Function to pick an image from the gallery or camera
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  // Function to upload image to Cloudinary and return the image URL
+  Future<String?> _uploadImageToCloudinary() async {
+    if (_image == null) return null;
+
     setState(() {
-      hotels.removeAt(index);
+      isUploading = true;
+    });
+
+    final response = await cloudinary.upload(
+      file: _image!.path,
+      resourceType: CloudinaryResourceType.image,
+      folder: 'hotels',  // Specify folder as 'hotels'
+      fileName: 'hotel_${DateTime.now().millisecondsSinceEpoch}',
+    );
+
+    setState(() {
+      isUploading = false;
+    });
+
+    if (response.isSuccessful) {
+      return response.secureUrl;
+    } else {
+      return null;
+    }
+  }
+
+  // Function to store the hotel data in Firestore
+  Future<void> _storeHotelData(String imageUrl) async {
+    final hotelData = {
+      'name': _nameController.text,
+      'description': _descriptionController.text,
+      'location': _locationController.text,
+      'openingTime': _openingTimeController.text,
+      'closingTime': _closingTimeController.text,
+      'imageUrl': imageUrl,
+    };
+
+    try {
+      await FirebaseFirestore.instance.collection('Hotels').add(hotelData);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Hotel Data Submitted Successfully')),
+      );
+      _clearForm();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to submit hotel data')),
+      );
+    }
+  }
+
+  // Clear the form fields
+  void _clearForm() {
+    _nameController.clear();
+    _descriptionController.clear();
+    _locationController.clear();
+    _openingTimeController.clear();
+    _closingTimeController.clear();
+    setState(() {
+      _image = null;
     });
   }
 
-  // Function to navigate to hotel details page
-  void navigateToHotelDetails(Hotel hotel) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HotelDetailsPage(hotel: hotel),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Hotel Details'),
+        backgroundColor: Colors.black,
       ),
-    );
-  }
-
-  // Function to show a dialog for adding a new hotel
-  void showAddHotelDialog() {
-    TextEditingController nameController = TextEditingController();
-    TextEditingController descriptionController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Add New Hotel'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: 'Hotel Name'),
+              // Image upload section
+              GestureDetector(
+                onTap: _pickImage,
+                child: Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                    image: _image != null
+                        ? DecorationImage(
+                            image: FileImage(_image!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: _image == null
+                      ? Center(
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.black.withOpacity(0.5),
+                            size: 50,
+                          ),
+                        )
+                      : null,
+                ),
               ),
-              TextField(
-                controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Hotel Description'),
+              const SizedBox(height: 20),
+              
+              Text(
+                'Enter details for the hotel:',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              
+              // Name text field
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Hotel Name',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the hotel name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Description text field
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  labelText: 'Hotel Description',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a description';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Location text field
+              TextFormField(
+                controller: _locationController,
+                decoration: const InputDecoration(
+                  labelText: 'Hotel Location',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the location';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Opening Time text field
+              TextFormField(
+                controller: _openingTimeController,
+                decoration: const InputDecoration(
+                  labelText: 'Opening Time',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the opening time';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Closing Time text field
+              TextFormField(
+                controller: _closingTimeController,
+                decoration: const InputDecoration(
+                  labelText: 'Closing Time',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the closing time';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Submit button
+              ElevatedButton(
+                onPressed: isUploading ? null : () async {
+                  if (_formKey.currentState!.validate()) {
+                    if (_image != null) {
+                      try {
+                        // Upload image and get the URL
+                        String? imageUrl = await _uploadImageToCloudinary();
+                        if (imageUrl != null) {
+                          // Store data in Firestore
+                          await _storeHotelData(imageUrl);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Image upload failed')),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Failed to upload image')),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please select an image')),
+                      );
+                    }
+                  }
+                },
+                child: isUploading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Submit Hotel'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // Close the dialog
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Add the new hotel
-                setState(() {
-                  hotels.add(Hotel(
-                    name: nameController.text,
-                    description: descriptionController.text,
-                  ));
-                });
-                // Close the dialog
-                Navigator.pop(context);
-              },
-              child: Text('Add Hotel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Admin Hotels')),
-      body: ListView.builder(
-        itemCount: hotels.length,
-        itemBuilder: (context, index) {
-          final hotel = hotels[index];
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            child: ListTile(
-              title: Text(hotel.name),
-              subtitle: Text(hotel.description),
-              trailing: IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () => deleteHotel(index), // Delete the hotel
-              ),
-              onTap: () => navigateToHotelDetails(hotel), // Navigate to details
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: showAddHotelDialog, // Show the add hotel dialog
-        child: Icon(Icons.add),
-        tooltip: 'Add Hotel',
-      ),
-    );
-  }
-}
-
-class HotelDetailsPage extends StatelessWidget {
-  final Hotel hotel;
-
-  const HotelDetailsPage({Key? key, required this.hotel}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(hotel.name)),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              hotel.name,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              hotel.description,
-              style: TextStyle(fontSize: 18),
-            ),
-            // Add any other details you need here
-          ],
         ),
       ),
     );
