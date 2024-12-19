@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:travel_guide/home/admin/services/firebaseAddbeaches.dart'; // Add firebase service for Firestore
 
 class BeachesDetails extends StatefulWidget {
   final String locationType;

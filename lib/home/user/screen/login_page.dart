@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:travel_guide/home/user/home_page.dart'; // Ensure correct import path
-import 'package:travel_guide/home/user/service/userfirebaseauthservice.dart'; // Ensure correct import path
 import 'package:travel_guide/select_user.dart';
-import 'package:travel_guide/services/login_services.dart'; // Ensure correct import path
+import 'package:travel_guide/services/login_services.dart'; 
 
 class LoginPage extends StatefulWidget {
   @override

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../service/userfirebaseFavourites.dart';
-import '../../service/favorite_service.dart'; // Import the FavoriteService class
 
 class TrekkingSpots extends StatefulWidget {
   const TrekkingSpots({super.key});

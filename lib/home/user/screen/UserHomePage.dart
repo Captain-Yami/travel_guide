@@ -304,10 +304,7 @@ class _MainPageState extends State<MainPage> {
   }
 }*/
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart'; // Import the carousel_slider package
-import 'package:travel_guide/home/guide/screen/guide_profile.dart';
-import 'package:travel_guide/home/guide/screen/list_of_guides.dart';
 import 'package:travel_guide/home/hotel.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
 import 'package:travel_guide/home/user/screen/place/place.dart';

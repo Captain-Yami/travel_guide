@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/admin/screen/Beaches_details.dart';
-import 'package:travel_guide/home/admin/screen/Temples_details.dart';
-import 'package:travel_guide/home/admin/screen/Trekking_details.dart';
-import 'package:travel_guide/home/admin/screen/forts_museum.dart'; // Import the FortsMuseum details screen
+import 'package:travel_guide/home/admin/places/beaches.dart';
+import 'package:travel_guide/home/admin/places/forts_museum.dart';
+import 'package:travel_guide/home/admin/places/temples.dart';
+import 'package:travel_guide/home/admin/places/trekking.dart';
 
 class AddPlacesPage extends StatelessWidget {
   const AddPlacesPage({super.key});
@@ -24,7 +24,7 @@ class AddPlacesPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => BeachesDetails(locationType: 'Beaches')),
+                  MaterialPageRoute(builder: (context) => adminBeaches(locationType: 'Beaches')),
                 );
               },
               child: Container(
@@ -59,7 +59,7 @@ class AddPlacesPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => TemplesDetails(locationType: 'Temples')),
+                  MaterialPageRoute(builder: (context) => adminTemples(locationType: 'Temples')),
                 );
               },
               child: Container(
@@ -94,7 +94,7 @@ class AddPlacesPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => TrekkingDetails(locationType: 'Trekking')),
+                  MaterialPageRoute(builder: (context) => adminTrekking(locationType: 'Trekking')),
                 );
               },
               child: Container(
@@ -129,7 +129,7 @@ class AddPlacesPage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => FortsMuseumDetails(locationType: 'FortsMuseum')),
+                  MaterialPageRoute(builder: (context) => adminFortsMuseum(locationType: 'FortsMuseum')),
                 );
               },
               child: Container(
