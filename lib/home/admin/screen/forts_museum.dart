@@ -85,7 +85,7 @@ class _AddLocationDetailsPageState extends State<FortsMuseumDetails> {
             'name': nameController.text,
             'description': descriptionController.text,
             'seasonalTime': seasonalTimeController.text,
-            'openingYime': openingTimeController.text,
+            'openingTime': openingTimeController.text,
             'closingTime': closingTimeController.text,
             'imageUrl': imageUrl, // Store the image URL
             'createdAt': Timestamp.now(),

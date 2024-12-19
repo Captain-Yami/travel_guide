@@ -30,7 +30,7 @@ class _FortsAndMuseumsState extends State<FortsAndMuseums> {
         stream: _firestore
             .collection('Places')
             .doc('Locations')
-            .collection('FortsAndMuseums') // Changed collection name to 'FortsAndMuseums'
+            .collection('FortsMuseum')
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -42,7 +42,7 @@ class _FortsAndMuseumsState extends State<FortsAndMuseums> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No Forts or Museums found')); // Changed text
+            return const Center(child: Text('No Forts or Museums found'));
           }
 
           var places = snapshot.data!.docs;
@@ -74,7 +74,7 @@ class _FortsAndMuseumsState extends State<FortsAndMuseums> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => FortOrMuseumDetailsScreen(
-                          place: place,
+                          place: place, // Passing place data including name and description
                         ),
                       ),
                     );
@@ -85,7 +85,7 @@ class _FortsAndMuseumsState extends State<FortsAndMuseums> {
                       // Name with overflow handling
                       Flexible(
                         child: Text(
-                          place['name'] ?? 'No name',
+                          place['name'] ?? 'No name', // Display name of fort or museum
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -166,13 +166,43 @@ class FortOrMuseumDetailsScreen extends StatelessWidget {
 
             // Description of the place
             Text(
-              place['description'] ?? 'No description',
+              place['description'] ?? 'No description available',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.blueGrey[700],
               ),
             ),
             const SizedBox(height: 16.0), // Space between description and image
+             // Description of the place
+            Text(
+              place['openingTime'] ?? 'No opening available',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.blueGrey[700],
+              ),
+            ),
+            const SizedBox(height: 16.0), // Space between description and image
+             // Description of the place
+            Text(
+              place['closingTime'] ?? 'No closingtime available',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.blueGrey[700],
+              ),
+            ),
+            const SizedBox(height: 16.0), // Space between description and image
+             // Description of the place
+            Text(
+              place['seasonalTime'] ?? 'No Season time available',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.blueGrey[700],
+              ),
+            ),
+            const SizedBox(height: 16.0), // Space between description and image
+
+
+
 
             // Image of the place (if available)
             place['imageUrl'] != null
