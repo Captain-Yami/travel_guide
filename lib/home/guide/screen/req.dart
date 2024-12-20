@@ -94,20 +94,6 @@ class _GuideDashboardState extends State<GuideDashboard>
     return [];
   }
 
-    // Callback method to remove confirmed request from the list
-  void _removeConfirmedRequest(String requestId) {
-    setState(() {
-      requests.removeWhere((request) => request['id'] == requestId);
-    });
-  }
-
-   // Callback method to remove confirmed/declined request from the list
-  void _removeRequest(String requestId) {
-    setState(() {
-      requests.removeWhere((request) => request['id'] == requestId);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -161,8 +147,6 @@ class _GuideDashboardState extends State<GuideDashboard>
                       interestedCategories: List<String>.from(request['categories']),
                       details: request['details'],
                       user: request['user'],
-                      onConfirm: () => _removeConfirmedRequest(request['id']),   // Pass the callback here
-                      onDecline: () => _removeRequest(request['id']),  // Callback for Decline
                     ),
                   ),
                 );
@@ -217,4 +201,4 @@ class _GuideDashboardState extends State<GuideDashboard>
     },
   );
 }
-    }
+}

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:travel_guide/home/guide/screen/req.dart';
 import 'package:travel_guide/home/guide/userchat.dart';
 
 class RequestDetailsPage extends StatelessWidget {
@@ -9,11 +10,9 @@ class RequestDetailsPage extends StatelessWidget {
   final List<String> placesToVisit;
   final List<String> interestedCategories;
   final String details;
-  final String user; // The user field
-  final VoidCallback onConfirm;
-  final VoidCallback onDecline;
+  final String user;
 
-  const RequestDetailsPage({
+  RequestDetailsPage({
     Key? key,
     required this.requestId,
     required this.name,
@@ -21,19 +20,24 @@ class RequestDetailsPage extends StatelessWidget {
     required this.placesToVisit,
     required this.interestedCategories,
     required this.details,
-    required this.user, // Include user field
-    required this.onConfirm,
-    required this.onDecline,
+    required this.user,
   }) : super(key: key);
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> deleterequest(String requestId) async {
+    try {
+      await _firestore.collection('requests').doc(requestId).delete();
+    } catch (e) {
+      debugPrint('Error deleting request: $e');
+    }
+  }
 
   Future<void> handleConfirmation(BuildContext context) async {
     try {
-      // Concatenate fields into strings for saving
       String placesStr = placesToVisit.join(', ');
       String aboutTripStr = details;
       String expertiseStr = interestedCategories.join(', ');
 
-      // Create the confirmation data
       final confirmedRequestDetails = {
         'userName': name,
         'image': image,
@@ -42,30 +46,28 @@ class RequestDetailsPage extends StatelessWidget {
         'expertise': expertiseStr,
         'status': 'Confirmed',
         'requestDate': FieldValue.serverTimestamp(),
-        'user': user, // Include the user field in Firestore
+        'user': user,
       };
 
-      // Add the data to the confirmed_requests collection
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('confirmed_requests')
           .doc(requestId)
           .set(confirmedRequestDetails);
 
-      // Update the status in the requests collection
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('requests')
           .doc(requestId)
           .update({'status': 'Confirmed'});
 
-      // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Request for $name has been confirmed!')),
       );
 
-      // Navigate back to the previous screen
+      await deleterequest(requestId);
+
       Navigator.pop(context);
     } catch (e) {
-      print('Error confirming request: $e');
+      debugPrint('Error confirming request: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to confirm request.')),
       );
@@ -74,8 +76,7 @@ class RequestDetailsPage extends StatelessWidget {
 
   Future<void> handleDecline(BuildContext context) async {
     try {
-      // Update the status in the requests collection
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('requests')
           .doc(requestId)
           .update({'status': 'Declined'});
@@ -84,14 +85,40 @@ class RequestDetailsPage extends StatelessWidget {
         SnackBar(content: Text('Request from $name has been declined.')),
       );
 
-      // Navigate back to the previous screen
       Navigator.pop(context);
     } catch (e) {
-      print('Error declining request: $e');
+      debugPrint('Error declining request: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to decline request.')),
       );
     }
+  }
+
+  void showDeleteConfirmationDialog(BuildContext context, String requestId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm decline'),
+          content: const Text('Are you sure you want to decline this request?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                deleterequest(requestId); // Delete user if confirmed
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Decline'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -113,7 +140,10 @@ class RequestDetailsPage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: AssetImage(image),
+                  backgroundImage:
+                      AssetImage(image), // Use NetworkImage if applicable
+                  onBackgroundImageError: (_, __) =>
+                      const Icon(Icons.error), // Fallback for invalid images
                 ),
                 const SizedBox(width: 16),
                 Column(
@@ -129,7 +159,8 @@ class RequestDetailsPage extends StatelessWidget {
                     const SizedBox(height: 4),
                     const Text(
                       'Status: Pending',
-                      style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 10, 10, 10)),
+                      style: TextStyle(
+                          fontSize: 16, color: Color.fromARGB(255, 10, 10, 10)),
                     ),
                   ],
                 ),
@@ -162,7 +193,8 @@ class RequestDetailsPage extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () => handleConfirmation(context),
-                  child: const Text('Confirm', style: TextStyle(color: Colors.black)),
+                  child: const Text('Confirm',
+                      style: TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 240, 240, 240),
                     padding: const EdgeInsets.symmetric(
@@ -172,8 +204,10 @@ class RequestDetailsPage extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () => handleDecline(context),
-                  child: const Text('Decline', style: TextStyle(color: Colors.black)),
+                  onPressed: () =>
+                      showDeleteConfirmationDialog(context, requestId),
+                  child: const Text('Decline',
+                      style: TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 240, 240, 240),
                     padding: const EdgeInsets.symmetric(

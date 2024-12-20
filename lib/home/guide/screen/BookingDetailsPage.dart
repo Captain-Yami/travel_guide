@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:travel_guide/home/guide/screen/req.dart';
 import 'package:travel_guide/home/guide/userchat.dart';
 
 class BookingDetailsPage extends StatefulWidget {
@@ -24,7 +25,7 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
   bool isConfirmed = false;  // To track if the booking is confirmed
-
+   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   @override
   void initState() {
     super.initState();
@@ -68,6 +69,39 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
     }
   }
 
+    void showDeleteConfirmationDialog(BuildContext context, String requestId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm cancel'),
+          content: const Text('Are you sure you want to cancel this request?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                deleterequest(requestId); // Delete user if confirmed
+                Navigator.pop(context); // Close the dialog
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+    Future<void> deleterequest(String requestId) async {
+    try {
+      await _firestore.collection('confirmed_requests').doc(requestId).delete();
+    } catch (e) {
+      debugPrint('Error deleting request: $e');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -141,12 +175,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Booking cancelled successfully.')),
-                    );
-                    Navigator.pop(context);
-                  },
+                  onPressed: () =>
+                      showDeleteConfirmationDialog(context, widget.requestId),
                   child: const Text('Cancel Booking', style: TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 240, 240, 240),
