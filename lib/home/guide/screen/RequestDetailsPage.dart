@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:travel_guide/home/guide/screen/req.dart';
-import 'package:travel_guide/home/guide/userchat.dart';
 
-class RequestDetailsPage extends StatelessWidget {
+class RequestDetailsPage extends StatefulWidget {
   final String requestId;
   final String name;
   final String image;
@@ -11,8 +9,9 @@ class RequestDetailsPage extends StatelessWidget {
   final List<String> interestedCategories;
   final String details;
   final String user;
+  final Function(String) onRemoveRequest;
 
-  RequestDetailsPage({
+  const RequestDetailsPage({
     Key? key,
     required this.requestId,
     required this.name,
@@ -21,104 +20,92 @@ class RequestDetailsPage extends StatelessWidget {
     required this.interestedCategories,
     required this.details,
     required this.user,
+    required this.onRemoveRequest,
   }) : super(key: key);
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> deleterequest(String requestId) async {
+  @override
+  _RequestDetailsPageState createState() => _RequestDetailsPageState();
+}
+
+class _RequestDetailsPageState extends State<RequestDetailsPage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String status = "Pending";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStatus();
+  }
+
+  Future<void> _loadStatus() async {
     try {
-      await _firestore.collection('requests').doc(requestId).delete();
+      final doc = await _firestore.collection('requests').doc(widget.requestId).get();
+      if (doc.exists) {
+        setState(() {
+          status = doc['status'] ?? "Pending";
+        });
+      }
     } catch (e) {
-      debugPrint('Error deleting request: $e');
+      debugPrint('Error loading status: $e');
     }
   }
 
   Future<void> handleConfirmation(BuildContext context) async {
     try {
-      String placesStr = placesToVisit.join(', ');
-      String aboutTripStr = details;
-      String expertiseStr = interestedCategories.join(', ');
+      String placesStr = widget.placesToVisit.join(', ');
+      String aboutTripStr = widget.details;
+      String expertiseStr = widget.interestedCategories.join(', ');
 
       final confirmedRequestDetails = {
-        'userName': name,
-        'image': image,
+        'userName': widget.name,
+        'image': widget.image,
         'places': placesStr,
         'aboutTrip': aboutTripStr,
         'expertise': expertiseStr,
         'status': 'Confirmed',
         'requestDate': FieldValue.serverTimestamp(),
-        'user': user,
+        'user': widget.user,
       };
 
       await _firestore
           .collection('confirmed_requests')
-          .doc(requestId)
+          .doc(widget.requestId)
           .set(confirmedRequestDetails);
 
-      await _firestore
-          .collection('requests')
-          .doc(requestId)
-          .update({'status': 'Confirmed'});
+      await _firestore.collection('requests').doc(widget.requestId).delete();
+
+      widget.onRemoveRequest(widget.requestId); // Remove from local UI
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Request for $name has been confirmed!')),
+        SnackBar(content: Text('Request for ${widget.name} has been confirmed!')),
       );
 
-      await deleterequest(requestId);
-
-      Navigator.pop(context);
+      Navigator.pop(context); // Navigate back after confirmation
     } catch (e) {
       debugPrint('Error confirming request: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to confirm request.')),
+        const SnackBar(content: Text('Failed to confirm request.')),
       );
     }
   }
 
   Future<void> handleDecline(BuildContext context) async {
     try {
-      await _firestore
-          .collection('requests')
-          .doc(requestId)
-          .update({'status': 'Declined'});
+      await _firestore.collection('requests').doc(widget.requestId).delete();
+
+      widget.onRemoveRequest(widget.requestId); // Remove from local UI
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Request from $name has been declined.')),
+        SnackBar(content: Text('Request from ${widget.name} has been declined.')),
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context); // Navigate back after decline
     } catch (e) {
       debugPrint('Error declining request: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to decline request.')),
+        const SnackBar(content: Text('Failed to decline request.')),
       );
     }
-  }
-
-  void showDeleteConfirmationDialog(BuildContext context, String requestId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm decline'),
-          content: const Text('Are you sure you want to decline this request?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                deleterequest(requestId); // Delete user if confirmed
-                Navigator.pop(context); // Close the dialog
-              },
-              child: const Text('Decline'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -126,7 +113,7 @@ class RequestDetailsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '$name\'s Request Details',
+          '${widget.name}\'s Request Details',
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 41, 41, 41),
@@ -140,27 +127,27 @@ class RequestDetailsPage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage:
-                      AssetImage(image), // Use NetworkImage if applicable
-                  onBackgroundImageError: (_, __) =>
-                      const Icon(Icons.error), // Fallback for invalid images
+                  backgroundImage: AssetImage(widget.image),
+                  onBackgroundImageError: (_, __) => const Icon(Icons.error),
                 ),
                 const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      widget.name,
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Status: Pending',
-                      style: TextStyle(
-                          fontSize: 16, color: Color.fromARGB(255, 10, 10, 10)),
+                    Text(
+                      'Status: $status',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color.fromARGB(255, 10, 10, 10),
+                      ),
                     ),
                   ],
                 ),
@@ -172,21 +159,21 @@ class RequestDetailsPage extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(details),
+            Text(widget.details),
             const SizedBox(height: 16),
             const Text(
               'Interested Categories:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(interestedCategories.join(', ')),
+            Text(widget.interestedCategories.join(', ')),
             const SizedBox(height: 16),
             const Text(
               'Places to Visit:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(placesToVisit.join(', ')),
+            Text(widget.placesToVisit.join(', ')),
             const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -204,8 +191,7 @@ class RequestDetailsPage extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () =>
-                      showDeleteConfirmationDialog(context, requestId),
+                  onPressed: () => handleDecline(context),
                   child: const Text('Decline',
                       style: TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(

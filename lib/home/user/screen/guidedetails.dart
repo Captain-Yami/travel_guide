@@ -14,6 +14,7 @@ class Guide {
   final String details;
   final String profileImage;
   final String id;
+  final bool isAvailable; // New field for availability
 
   Guide({
     required this.name,
@@ -26,10 +27,11 @@ class Guide {
     required this.details,
     required this.profileImage,
     required this.id,
+    required this.isAvailable,
   });
 
   // Factory constructor to handle Firestore data
-  factory Guide.fromFirestore(Map<String, dynamic> data, String id) {
+  factory Guide.fromFirestore(Map<String, dynamic> data, String id, bool isAvailable) {
     return Guide(
       name: data['name']?.toString() ?? '',
       phoneNumber: data['phone number']?.toString() ?? '',
@@ -40,7 +42,8 @@ class Guide {
       ratePerTrip: data['ratePerTrip']?.toString() ?? '',
       details: data['additionalDetails']?.toString() ?? '',
       profileImage: data['licenseImageUrl']?.toString() ?? '',
-      id: id, // Add the guide ID to the model
+      id: id,
+      isAvailable: isAvailable, // Include availability status
     );
   }
 }
@@ -63,14 +66,48 @@ class _GuidedetailsState extends State<Guidedetails> {
 
   Future<void> _fetchGuides() async {
     try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('Guide')
-          .get();
+      final querySnapshot = await FirebaseFirestore.instance.collection('Guide').get();
 
-      List<Guide> fetchedGuides = querySnapshot.docs.map((doc) {
+      List<Guide> fetchedGuides = [];
+      for (var doc in querySnapshot.docs) {
         var data = doc.data();
-        return Guide.fromFirestore(data, doc.id); // Pass doc.id as guideId
-      }).toList();
+
+        // Fetch availability details
+        var availabilitySnapshot = await FirebaseFirestore.instance
+            .collection('Guide')
+            .doc(doc.id)
+            .collection('availability')
+            .doc('data')
+            .get();
+
+        if (availabilitySnapshot.exists) {
+          var availabilityData = availabilitySnapshot.data()!;
+          bool isSelected = availabilityData['isSelected'] ?? false;
+
+          if (isSelected) {
+            // Check if the guide is available today
+            final dayOfWeek = DateTime.now().weekday - 1; // Monday = 0
+            final today = availabilityData['selectedDays'] as List<dynamic>? ?? [];
+
+            if (today.contains(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayOfWeek])) {
+              // Check time interval
+              final now = TimeOfDay.now();
+              final startTime = TimeOfDay(
+                hour: availabilityData['startTime']['hour'],
+                minute: availabilityData['startTime']['minute'],
+              );
+              final endTime = TimeOfDay(
+                hour: availabilityData['endTime']['hour'],
+                minute: availabilityData['endTime']['minute'],
+              );
+
+              if (_isTimeWithinRange(now, startTime, endTime)) {
+                fetchedGuides.add(Guide.fromFirestore(data, doc.id, true));
+              }
+            }
+          }
+        }
+      }
 
       setState(() {
         guides = fetchedGuides;
@@ -78,6 +115,14 @@ class _GuidedetailsState extends State<Guidedetails> {
     } catch (e) {
       print('Error fetching guides: $e');
     }
+  }
+
+  // Helper function to check if current time is within the start and end time
+  bool _isTimeWithinRange(TimeOfDay current, TimeOfDay start, TimeOfDay end) {
+    final nowMinutes = current.hour * 60 + current.minute;
+    final startMinutes = start.hour * 60 + start.minute;
+    final endMinutes = end.hour * 60 + end.minute;
+    return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
   }
 
   void _navigateToGuideDetails(Guide guide) {
@@ -108,7 +153,7 @@ class _GuidedetailsState extends State<Guidedetails> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'No guides available at the moment.',
+                  'No available guides at the moment.',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -118,8 +163,7 @@ class _GuidedetailsState extends State<Guidedetails> {
               itemBuilder: (context, index) {
                 final guide = guides[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.all(16),
@@ -291,7 +335,7 @@ class GuideDetailPage extends StatelessWidget {
     );
   }
 
-  void _showRequestDialog(BuildContext context) {
+void _showRequestDialog(BuildContext context) {
   final TextEditingController tripController = TextEditingController();
   final TextEditingController categoriesController = TextEditingController();
   final TextEditingController placesController = TextEditingController();
@@ -301,25 +345,27 @@ class GuideDetailPage extends StatelessWidget {
     builder: (context) {
       return AlertDialog(
         title: const Text('Request Guide'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: tripController,
-              decoration: const InputDecoration(labelText: 'About Trip'),
-              maxLines: 3,
-            ),
-            TextField(
-              controller: categoriesController,
-              decoration: const InputDecoration(labelText: 'Interested Categories (Expertise)'),
-              maxLines: 2,
-            ),
-            TextField(
-              controller: placesController,
-              decoration: const InputDecoration(labelText: 'Places to Visit'),
-              maxLines: 3,
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: tripController,
+                decoration: const InputDecoration(labelText: 'About Trip'),
+                maxLines: 3,
+              ),
+              TextField(
+                controller: categoriesController,
+                decoration: const InputDecoration(labelText: 'Interested Categories (Expertise)'),
+                maxLines: 2,
+              ),
+              TextField(
+                controller: placesController,
+                decoration: const InputDecoration(labelText: 'Places to Visit'),
+                maxLines: 3,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(

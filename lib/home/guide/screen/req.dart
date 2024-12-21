@@ -56,6 +56,14 @@ class _GuideDashboardState extends State<GuideDashboard>
     }
   }
 
+  void _removeRequest(String requestId) {
+    setState(() {
+      requests.removeWhere((request) => request['id'] == requestId);
+    });
+    // Refresh bookings as a confirmed request may be added here
+    _fetchBookings();
+  }
+
   Map<String, dynamic> _parseRequestData(QueryDocumentSnapshot doc) {
     var data = doc.data() as Map<String, dynamic>;
 
@@ -77,7 +85,7 @@ class _GuideDashboardState extends State<GuideDashboard>
     return {
       'id': doc.id,
       'name': data['userName'] ?? 'Unknown User',
-      'details': data['tripDetails'] ?? '',
+      'details': data['aboutTrip'] ?? '',
       'places': _parseList(data['places']),
       'image': 'assets/background3.jpg',
     };
@@ -147,6 +155,7 @@ class _GuideDashboardState extends State<GuideDashboard>
                       interestedCategories: List<String>.from(request['categories']),
                       details: request['details'],
                       user: request['user'],
+                      onRemoveRequest: _removeRequest, // Pass callback
                     ),
                   ),
                 );
@@ -165,12 +174,8 @@ class _GuideDashboardState extends State<GuideDashboard>
     itemCount: bookings.length,
     itemBuilder: (context, index) {
       final booking = bookings[index];
-      
-      // Assuming you want to get the corresponding requestId based on the booking data.
-      // If requestId is available in the booking data, use that. 
-      // Otherwise, fetch or set it accordingly.
-      final String requestId = booking['id'];  // or fetch from Firestore if needed
-      
+      final String requestId = booking['id'];
+
       return Card(
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         child: ListTile(
@@ -188,8 +193,13 @@ class _GuideDashboardState extends State<GuideDashboard>
                   builder: (context) => BookingDetailsPage(
                     name: booking['name'],
                     image: booking['image'],
-                    requestId: requestId,  // Ensure requestId is passed here
-                    places: List<String>.from(booking['places']),  // Pass places here
+                    requestId: requestId,
+                    places: List<String>.from(booking['places']),
+                    onRemoveBooking: (String id) {
+                      setState(() {
+                        bookings.removeWhere((booking) => booking['id'] == id);
+                      });
+                    },
                   ),
                 ),
               );
@@ -201,4 +211,4 @@ class _GuideDashboardState extends State<GuideDashboard>
     },
   );
 }
-}
+    }

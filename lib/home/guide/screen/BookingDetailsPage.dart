@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:travel_guide/home/guide/screen/req.dart';
 import 'package:travel_guide/home/guide/userchat.dart';
 
 class BookingDetailsPage extends StatefulWidget {
   final String name;
   final String image;
   final String requestId;
-  final List<String> places;  // Add this line
+  final List<String> places;
+  final Function(String) onRemoveBooking; // Callback to update parent widget
 
   const BookingDetailsPage({
     Key? key,
     required this.name,
     required this.image,
     required this.requestId,
-    required this.places,  // Accept places in constructor
+    required this.places,
+    required this.onRemoveBooking, // Ensure this is correctly passed
   }) : super(key: key);
 
   @override
@@ -24,8 +25,10 @@ class BookingDetailsPage extends StatefulWidget {
 class _BookingDetailsPageState extends State<BookingDetailsPage> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
-  bool isConfirmed = false;  // To track if the booking is confirmed
-   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool isConfirmed = false;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   @override
   void initState() {
     super.initState();
@@ -34,30 +37,27 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
 
   Future<void> _fetchUserData() async {
     try {
-      final requestDoc = await FirebaseFirestore.instance
+      final requestDoc = await _firestore
           .collection('confirmed_requests')
           .doc(widget.requestId)
           .get();
 
       if (requestDoc.exists) {
         final userId = requestDoc.data()?['user'];
-        final status = requestDoc.data()?['status'];  // Get the booking status
-        if (userId != null && status == 'Confirmed') {  // Check if the status is 'Confirmed'
-          final userDoc = await FirebaseFirestore.instance
-              .collection('Users')
-              .doc(userId)
-              .get();
+        final status = requestDoc.data()?['status'];
+        if (userId != null && status == 'Confirmed') {
+          final userDoc = await _firestore.collection('Users').doc(userId).get();
           if (userDoc.exists) {
             setState(() {
               userData = userDoc.data();
               isLoading = false;
-              isConfirmed = true;  // Set the booking status as confirmed
+              isConfirmed = true;
             });
           }
         } else {
           setState(() {
             isLoading = false;
-            isConfirmed = false;  // If not confirmed, set isConfirmed to false
+            isConfirmed = false;
           });
         }
       }
@@ -69,39 +69,32 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
     }
   }
 
-    void showDeleteConfirmationDialog(BuildContext context, String requestId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm cancel'),
-          content: const Text('Are you sure you want to cancel this request?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: const Text('No'),
-            ),
-            TextButton(
-              onPressed: () {
-                deleterequest(requestId); // Delete user if confirmed
-                Navigator.pop(context); // Close the dialog
-              },
-              child: const Text('Yes'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-    Future<void> deleterequest(String requestId) async {
+  Future<void> _cancelBooking(String requestId) async {
     try {
+      // Delete the booking from Firestore
       await _firestore.collection('confirmed_requests').doc(requestId).delete();
+
+      // Call the callback to update the parent widget
+      widget.onRemoveBooking(requestId);
+
+      // Immediately update the UI
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Booking canceled successfully!')),
+        );
+
+        Navigator.pop(context); // Navigate back to the previous screen
+      }
     } catch (e) {
-      debugPrint('Error deleting request: $e');
+      print('Error canceling booking: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to cancel booking.')),
+        );
+      }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -160,14 +153,14 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Places Section
             const Text(
               'Places to visit:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ...widget.places.map((place) => Text(place)).toList(),  // Correct access to places
+            ...widget.places.map((place) => Text(place)).toList(),
             const SizedBox(height: 32),
 
             // Action Buttons
@@ -175,8 +168,7 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () =>
-                      showDeleteConfirmationDialog(context, widget.requestId),
+                  onPressed: () => _cancelBooking(widget.requestId),
                   child: const Text('Cancel Booking', style: TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 240, 240, 240),
