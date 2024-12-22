@@ -4,16 +4,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:travel_guide/home/guide/userchat.dart'; // Ensure this import points to your ChatScreen file
 import 'package:intl/intl.dart'; // For formatting the time
 
-class ChatsPage extends StatefulWidget {
-  const ChatsPage({Key? key}) : super(key: key);
+class ChatsPageguide extends StatefulWidget {
+  const ChatsPageguide({Key? key}) : super(key: key);
 
   @override
   _ChatsPageState createState() => _ChatsPageState();
 }
 
-class _ChatsPageState extends State<ChatsPage> {
+class _ChatsPageState extends State<ChatsPageguide> {
   final String _currentUserId =
-      FirebaseAuth.instance.currentUser!.uid; // The guide's user ID
+      FirebaseAuth.instance.currentUser!.uid; // The users's user ID
 
   List<Map<String, dynamic>> _chats = [];
   List<Map<String, dynamic>> _filteredChats = [];
@@ -31,7 +31,7 @@ class _ChatsPageState extends State<ChatsPage> {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Chats')
-          .where('guideId', isEqualTo: _currentUserId)
+          .where('userId', isEqualTo: _currentUserId)
           .get();
 
       List<Map<String, dynamic>> fetchedChats = [];
@@ -80,7 +80,7 @@ class _ChatsPageState extends State<ChatsPage> {
 
         fetchedChats.add({
           'chatId': chatId,
-          'userId': data['userId'] ?? 'Unknown User',
+          'guideId': data['guideId'] ?? 'Guide',
           'userName': data['userName'] ?? 'Unknown User',
           'guideName': data['guideName'] ?? 'Guide',
           'lastMessage': lastMessage,
@@ -104,7 +104,7 @@ class _ChatsPageState extends State<ChatsPage> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _filteredChats = _chats
-          .where((chat) => chat['userName'].toLowerCase().contains(query))
+          .where((chat) => chat['guideName'].toLowerCase().contains(query))
           .toList();
     });
   }
@@ -129,7 +129,7 @@ class _ChatsPageState extends State<ChatsPage> {
             child: TextFormField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search by user name', // Optional hint text
+                hintText: 'Search by guide name', // Optional hint text
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30), // Oval shape
                   borderSide: const BorderSide(
@@ -172,15 +172,15 @@ class _ChatsPageState extends State<ChatsPage> {
                         child: ListTile(
                           leading: CircleAvatar(
                             radius: 30,
-                            backgroundImage: chat['profilePicture']
+                            backgroundImage: chat['guideProfilePicture']
                                     .toString()
                                     .startsWith('http')
-                                ? NetworkImage(chat['profilePicture'])
-                                : AssetImage(chat['profilePicture'])
+                                ? NetworkImage(chat['guideProfilePicture'])
+                                : AssetImage(chat['guideProfilePicture'])
                                     as ImageProvider,
                           ),
                           title: Text(
-                            chat['userName'],
+                            chat['guideName'],
                             style: const TextStyle(
                                 color: Colors.black, fontWeight: FontWeight.bold),
                           ),
@@ -212,10 +212,10 @@ class _ChatsPageState extends State<ChatsPage> {
                               MaterialPageRoute(
                                 builder: (context) => ChatScreen(
                                   chatId: chat['chatId'],
-                                  userId: chat['userId'],
+                                  userId: _currentUserId,
                                   userName: chat['userName'],
                                   guideName: chat['guideName'],
-                                  guideId: _currentUserId,// Send guideId here
+                                  guideId: chat['guideId'],// Send guideId here
                                    userProfilePic: chat['profilePicture'],
                                     guideProfilePic: chat['guideProfilePicture'],
                                 ),

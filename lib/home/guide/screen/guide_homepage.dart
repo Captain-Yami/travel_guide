@@ -250,8 +250,8 @@ void _showPrivacySettingsDialog(BuildContext context, String guideId) {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
+                      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                      foregroundColor: Colors.black,
                     ),
                     child: const Text('Delete Account'),
                   ),
@@ -352,7 +352,7 @@ void _showPrivacySettingsDialog(BuildContext context, String guideId) {
           children: [
             _buildHomePage(),
             const Activities(),
-            const Chats(),
+            const ChatsPage(),
             const GuideProfile(isEditing: false),
           ],
         ),
@@ -412,26 +412,36 @@ AppBar _buildAppBar() {
         ),
       ];
       break;
-    case 2: // Chats
-      title = 'Chats';
-      logoTextSpacing = 165.0; // Larger space for Chats
+    case 1: // Profile
+      title = 'Activites';
+      logoTextSpacing = 165.0; // Smaller space for Profile
       appBarActions = [
         PopupMenuButton<String>(
           onSelected: handleMenuSelection,
-          icon: const Icon(Icons.more_vert, color: Colors.white),
+          icon: const Icon(Icons.more, color: Colors.white),
           itemBuilder: (BuildContext context) {
             return [
               const PopupMenuItem(
-                value: 'Mark all as unread',
-                child: Text('Mark all as unread'),
+                value: 'Settings',
+                child: Text('Settings'),
               ),
+            ];
+          },
+        ),
+      ];
+      break;
+    case 2: // Profile
+      title = 'Chats';
+      logoTextSpacing = 165.0; // Smaller space for Profile
+      appBarActions = [
+        PopupMenuButton<String>(
+          onSelected: handleMenuSelection,
+          icon: const Icon(Icons.more, color: Colors.white),
+          itemBuilder: (BuildContext context) {
+            return [
               const PopupMenuItem(
-                value: 'Chat Settings',
-                child: Text('Chat Settings'),
-              ),
-              const PopupMenuItem(
-                value: 'Search Chats',
-                child: Text('Search Chats'),
+                value: 'Settings',
+                child: Text('Settings'),
               ),
             ];
           },
