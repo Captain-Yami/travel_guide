@@ -37,6 +37,8 @@ class _GuideProfileState extends State<GuideProfile> {
     super.initState();
     isEditing = false;  // Start in view mode by default
 
+    
+
     // Get the current user's UID
     uid = FirebaseAuth.instance.currentUser?.uid ?? '';
 

@@ -41,7 +41,7 @@ class Guide {
       experience: data['experience']?.toString() ?? '',
       ratePerTrip: data['ratePerTrip']?.toString() ?? '',
       details: data['additionalDetails']?.toString() ?? '',
-      profileImage: data['licenseImageUrl']?.toString() ?? '',
+      profileImage: data['profile_picture']?.toString() ?? '',
       id: id,
       isAvailable: isAvailable, // Include availability status
     );

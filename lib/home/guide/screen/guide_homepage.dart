@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/activities.dart';
@@ -62,6 +63,219 @@ class _MainPageState extends State<GuideHomepage> {
     );
   }
 
+  void _showChangePasswordDialog() {
+  final currentPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Change Password'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: currentPasswordController,
+                decoration: const InputDecoration(labelText: 'Current Password'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: newPasswordController,
+                decoration: const InputDecoration(labelText: 'New Password'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: confirmPasswordController,
+                decoration: const InputDecoration(labelText: 'Confirm New Password'),
+                obscureText: true,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final currentPassword = currentPasswordController.text;
+              final newPassword = newPasswordController.text;
+              final confirmPassword = confirmPasswordController.text;
+
+              if (newPassword != confirmPassword) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Passwords do not match!')),
+                );
+                return;
+              }
+
+              try {
+                final user = FirebaseAuth.instance.currentUser;
+
+                if (user != null && user.email != null) {
+                  // Reauthenticate the user
+                  final credential = EmailAuthProvider.credential(
+                    email: user.email!,
+                    password: currentPassword,
+                  );
+
+                  await user.reauthenticateWithCredential(credential);
+
+                   // Update the password in Firebase Authentication
+                  await user.updatePassword(newPassword);
+
+                  // Update the password in the Guide collection
+                   final guideId = user.uid;
+                  await FirebaseFirestore.instance
+                      .collection('Guide')
+                      .doc(guideId)
+                      .update({'password': newPassword});
+
+
+                  Navigator.of(context).pop(); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password changed successfully!')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No user is signed in.')),
+                  );
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: $e')),
+                );
+              }
+            },
+            child: const Text('Change Password'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _showPrivacySettingsDialog(BuildContext context, String guideId) {
+  bool shareContactInfo = true;
+  bool allowChat = true;
+
+  void _deleteAccount(BuildContext context, String guideId) async {
+    try {
+      // Delete the guide's document from Firestore
+      await FirebaseFirestore.instance.collection('Guide').doc(guideId).delete();
+
+      // Delete the guide's authentication account
+      await FirebaseAuth.instance.currentUser?.delete();
+
+      Navigator.of(context).pop(); // Close the dialog
+      Navigator.of(context).pop(); // Navigate back to login screen
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account deleted successfully')),
+      );
+
+      // Navigate to login page (replace with your login page widget)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting account: $e')),
+      );
+    }
+  }
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Privacy Settings'),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Data Sharing Preferences
+                  SwitchListTile(
+                    title: const Text('Share Contact Information'),
+                    value: shareContactInfo,
+                    onChanged: (value) {
+                      setState(() => shareContactInfo = value);
+                      FirebaseFirestore.instance
+                          .collection('Guide')
+                          .doc(guideId)
+                          .update({'shareContact': value});
+                    },
+                  ),
+                  // Communication Preferences
+                  SwitchListTile(
+                    title: const Text('Allow Chat Requests'),
+                    value: allowChat,
+                    onChanged: (value) {
+                      setState(() => allowChat = value);
+                      FirebaseFirestore.instance
+                          .collection('Guide')
+                          .doc(guideId)
+                          .update({'allowChat': value});
+                    },
+                  ),
+                  // Delete Account
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Delete Account'),
+                            content: const Text(
+                                'Are you sure you want to delete your account? This action cannot be undone.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => _deleteAccount(context, guideId),
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Delete Account'),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Privacy Settings Updated')),
+                  );
+                },
+                child: const Text('Save Settings'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
   @override
   void dispose() {
     _pageController.dispose(); // Dispose of the PageController to avoid memory leaks
@@ -71,15 +285,19 @@ class _MainPageState extends State<GuideHomepage> {
    Future<void> handleMenuSelection(String option) async {
     switch (option) {
       case 'Change Password':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Change Password feature coming soon!")),
-        );
+        _showChangePasswordDialog();
+        
         break;                                         
       case 'Privacy Settings':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Privacy Settings feature coming soon!")),
-        );
-        break;
+         final guideId = FirebaseAuth.instance.currentUser?.uid; // Replace with actual guide ID
+  if (guideId != null) {
+    _showPrivacySettingsDialog(context, guideId);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error: Guide ID not found')),
+    );
+  }
+      break;
       case 'Logout':
   try {
     // Log out the user from Firebase Authentication
