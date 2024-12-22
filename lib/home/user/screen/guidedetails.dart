@@ -63,59 +63,83 @@ class _GuidedetailsState extends State<Guidedetails> {
     super.initState();
     _fetchGuides();
   }
+  
+Future<void> _fetchGuides() async {
+  try {
+    final querySnapshot = await FirebaseFirestore.instance.collection('Guide').get();
 
-  Future<void> _fetchGuides() async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance.collection('Guide').get();
+    List<Guide> fetchedGuides = [];
 
-      List<Guide> fetchedGuides = [];
-      for (var doc in querySnapshot.docs) {
-        var data = doc.data();
+    for (var doc in querySnapshot.docs) {
+      var data = doc.data();
 
-        // Fetch availability details
-        var availabilitySnapshot = await FirebaseFirestore.instance
-            .collection('Guide')
-            .doc(doc.id)
-            .collection('availability')
-            .doc('data')
-            .get();
+      // Fetch availability details for each guide
+      var availabilitySnapshot = await FirebaseFirestore.instance
+          .collection('Guide')
+          .doc(doc.id)
+          .collection('availability')
+          .doc('data')
+          .get();
 
-        if (availabilitySnapshot.exists) {
-          var availabilityData = availabilitySnapshot.data()!;
-          bool isSelected = availabilityData['isSelected'] ?? false;
+      if (availabilitySnapshot.exists) {
+        var availabilityData = availabilitySnapshot.data()!;
+        bool isSelected = availabilityData['isSelected'] ?? false;
 
-          if (isSelected) {
-            // Check if the guide is available today
-            final dayOfWeek = DateTime.now().weekday - 1; // Monday = 0
-            final today = availabilityData['selectedDays'] as List<dynamic>? ?? [];
+        // Debug: Log availability data
+        print('Guide ID: ${doc.id}');
+        print('Availability Data: $availabilityData');
 
-            if (today.contains(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayOfWeek])) {
-              // Check time interval
-              final now = TimeOfDay.now();
-              final startTime = TimeOfDay(
-                hour: availabilityData['startTime']['hour'],
-                minute: availabilityData['startTime']['minute'],
-              );
-              final endTime = TimeOfDay(
-                hour: availabilityData['endTime']['hour'],
-                minute: availabilityData['endTime']['minute'],
-              );
+        if (isSelected) {
+          // Check if the guide is available today
+          final dayOfWeek = DateTime.now().weekday - 1; // Monday = 0
+          final today = availabilityData['selectedDays'] as List<dynamic>? ?? [];
 
-              if (_isTimeWithinRange(now, startTime, endTime)) {
-                fetchedGuides.add(Guide.fromFirestore(data, doc.id, true));
-              }
+          // Debug: Log day comparison
+          print('Today: ${['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayOfWeek]}');
+          print('Selected Days: $today');
+
+          if (today.contains(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayOfWeek])) {
+            // Check time interval
+            final now = TimeOfDay.now();
+            final startTime = TimeOfDay(
+              hour: availabilityData['startTime']['hour'],
+              minute: availabilityData['startTime']['minute'],
+            );
+            final endTime = TimeOfDay(
+              hour: availabilityData['endTime']['hour'],
+              minute: availabilityData['endTime']['minute'],
+            );
+
+            // Debug: Log time comparison
+            print('Now: $now');
+            print('Start Time: $startTime, End Time: $endTime');
+
+            if (_isTimeWithinRange(now, startTime, endTime)) {
+              fetchedGuides.add(Guide.fromFirestore(data, doc.id, true));
+            } else {
+              print('Guide ${doc.id} is not available within the time range.');
             }
+          } else {
+            print('Guide ${doc.id} is not available today.');
           }
+        } else {
+          print('Guide ${doc.id} is not selected for availability.');
         }
+      } else {
+        print('No availability data for Guide ${doc.id}.');
       }
-
-      setState(() {
-        guides = fetchedGuides;
-      });
-    } catch (e) {
-      print('Error fetching guides: $e');
     }
+
+    setState(() {
+      guides = fetchedGuides;
+    });
+
+    // Debug: Log fetched guides
+    print('Fetched Guides: ${guides.length}');
+  } catch (e) {
+    print('Error fetching guides: $e');
   }
+}
 
   // Helper function to check if current time is within the start and end time
   bool _isTimeWithinRange(TimeOfDay current, TimeOfDay start, TimeOfDay end) {

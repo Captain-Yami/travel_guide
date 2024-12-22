@@ -70,20 +70,14 @@ class _MainPageState extends State<GuideHomepage> {
 
    Future<void> handleMenuSelection(String option) async {
     switch (option) {
-      case 'Edit Profile':
       case 'Change Password':
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Change Password feature coming soon!")),
         );
-        break;
+        break;                                         
       case 'Privacy Settings':
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Privacy Settings feature coming soon!")),
-        );
-        break;
-      case 'Notifications':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Notifications feature coming soon!")),
         );
         break;
       case 'Logout':
@@ -113,27 +107,6 @@ class _MainPageState extends State<GuideHomepage> {
     }
   }
 
-   void _handleMenuSelection(String option) {
-    switch (option) {
-      case 'Filter Activities':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Filter activities feature coming soon!")),
-        );
-        break;
-      case 'Sort Activities':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Sort activities feature coming soon!")),
-        );
-        break;
-      case 'View Activity History':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Viewing activity history")),
-        );
-        break;
-      default:
-        break;
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -221,32 +194,6 @@ AppBar _buildAppBar() {
         ),
       ];
       break;
-    case 1: // Activities
-      title = 'Activities';
-      logoTextSpacing = 150.0; // More space for Activities
-      appBarActions = [
-        PopupMenuButton<String>(
-          onSelected: _handleMenuSelection,
-          icon: const Icon(Icons.more_vert, color: Colors.white),
-          itemBuilder: (BuildContext context) {
-            return [
-              const PopupMenuItem(
-                value: 'Filter Activities',
-                child: Text('Filter Activities'),
-              ),
-              const PopupMenuItem(
-                value: 'Sort Activities',
-                child: Text('Sort Activities'),
-              ),
-              const PopupMenuItem(
-                value: 'View Activity History',
-                child: Text('View Activity History'),
-              ),
-            ];
-          },
-        ),
-      ];
-      break;
     case 2: // Chats
       title = 'Chats';
       logoTextSpacing = 165.0; // Larger space for Chats
@@ -283,20 +230,12 @@ AppBar _buildAppBar() {
           itemBuilder: (BuildContext context) {
             return [
               const PopupMenuItem(
-                value: 'Edit Profile',
-                child: Text('Edit Profile'),
-              ),
-              const PopupMenuItem(
                 value: 'Change Password',
                 child: Text('Change Password'),
               ),
               const PopupMenuItem(
                 value: 'Privacy Settings',
                 child: Text('Privacy Settings'),
-              ),
-              const PopupMenuItem(
-                value: 'Notifications',
-                child: Text('Notifications'),
               ),
               const PopupMenuItem(
                 value: 'Logout',
@@ -323,13 +262,16 @@ AppBar _buildAppBar() {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between logo, title, and actions
         children: [
-          // Logo
-          ClipOval(
-            child: Image.asset(
-              'asset/logo3.jpg', // Replace with your logo path
-              fit: BoxFit.cover,
-              height: 40,
-              width: 40, // Make the width and height equal for a perfect circle
+          // Logo with left padding for space
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0), // Add space to the left of the logo
+            child: ClipOval(
+              child: Image.asset(
+                'asset/logo3.jpg', // Replace with your logo path
+                fit: BoxFit.cover,
+                height: 40,
+                width: 40, // Make the width and height equal for a perfect circle
+              ),
             ),
           ),
           // Title in the center
@@ -345,15 +287,19 @@ AppBar _buildAppBar() {
               ),
             ),
           ),
-          // Action button(s)
-          Row(
-            children: appBarActions,
+          // Action button(s) with right padding for space
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0), // Add space to the right of the action buttons
+            child: Row(
+              children: appBarActions,
+            ),
           ),
         ],
       ),
     ),
   );
 }
+
 
 
 
