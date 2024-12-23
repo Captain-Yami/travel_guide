@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloudinary/cloudinary.dart';
+import 'package:image_picker/image_picker.dart';
 
 class GuideProfile extends StatefulWidget {
-  const GuideProfile({super.key, required bool isEditing});
+  const GuideProfile({super.key, required this.isEditing});
+  final bool isEditing;
 
   @override
   State<GuideProfile> createState() => _GuideProfileState();
@@ -12,6 +17,10 @@ class GuideProfile extends StatefulWidget {
 class _GuideProfileState extends State<GuideProfile> {
   late bool isEditing;
   late String uid;
+
+  // Profile image variables
+  File? _profileImage;
+  ImageProvider profileImage = const AssetImage('assets/background3.jpg'); // Default profile image
 
   // Guide details
   String name = "";
@@ -32,16 +41,20 @@ class _GuideProfileState extends State<GuideProfile> {
   final TextEditingController ratePerTripController = TextEditingController();
   final TextEditingController additionalDetailsController = TextEditingController();
 
+  // Cloudinary configuration
+  final Cloudinary cloudinary = Cloudinary.signedConfig(
+    cloudName: 'db2nki9dh',
+    apiKey: '894239764992456',
+    apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',
+  );
+
   @override
   void initState() {
     super.initState();
-    isEditing = false;  // Start in view mode by default
-
-    // Get the current user's UID
+    isEditing = widget.isEditing;
     uid = FirebaseAuth.instance.currentUser?.uid ?? '';
 
     if (uid.isNotEmpty) {
-      // Fetch the user's guide details from Firestore
       _fetchGuideDetails();
     }
   }
@@ -62,7 +75,7 @@ class _GuideProfileState extends State<GuideProfile> {
           ratePerTrip = data['ratePerTrip'] ?? 0.0;
           additionalDetails = data['additionalDetails'] ?? '';
 
-          // Initialize controllers with the fetched data
+          // Initialize controllers with fetched data
           nameController.text = name;
           phoneNumberController.text = phoneNumber;
           emailController.text = email;
@@ -71,14 +84,28 @@ class _GuideProfileState extends State<GuideProfile> {
           experienceController.text = experience.toString();
           ratePerTripController.text = ratePerTrip.toString();
           additionalDetailsController.text = additionalDetails;
+
+          String profileImageUrl = data['profile_picture'] ?? '';
+          profileImage = profileImageUrl.isEmpty
+              ? const AssetImage('assets/background3.jpg') as ImageProvider
+              : NetworkImage(profileImageUrl);
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to fetch guide details: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch guide details: $e')),
+      );
     }
   }
 
   void saveChanges() async {
+    String imageUrl = '';
+
+    // Upload the profile image to Cloudinary if a new image is selected
+    if (_profileImage != null) {
+      imageUrl = await uploadImageToCloudinary(_profileImage!);
+    }
+
     try {
       setState(() {
         name = nameController.text;
@@ -92,7 +119,7 @@ class _GuideProfileState extends State<GuideProfile> {
         isEditing = false;
       });
 
-      // Update the guide details in Firestore
+      // Update Firestore with the updated details
       await FirebaseFirestore.instance.collection('Guide').doc(uid).update({
         'name': name,
         'phone number': phoneNumber,
@@ -102,15 +129,57 @@ class _GuideProfileState extends State<GuideProfile> {
         'experience': experience,
         'ratePerTrip': ratePerTrip,
         'additionalDetails': additionalDetails,
+        if (imageUrl.isNotEmpty) 'profile_picture': imageUrl,
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile updated successfully!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully!')),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update profile: $e')),
+      );
     }
   }
 
-  Widget buildProfileDetail(String label, String value, {bool isEditable = true, TextEditingController? controller}) {
+  Future<void> _pickProfileImage() async {
+    if (!isEditing) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enable edit mode to change the profile picture.')),
+      );
+      return;
+    }
+
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+        profileImage = FileImage(_profileImage!);
+      });
+    }
+  }
+
+  Future<String> uploadImageToCloudinary(File imageFile) async {
+    try {
+      final response = await cloudinary.upload(
+        file: imageFile.path,
+        folder: 'profile_pictures/',
+      );
+
+      if (response.isSuccessful) {
+        return response.secureUrl!;
+      } else {
+        throw Exception('Cloudinary upload failed: ${response.error}');
+      }
+    } catch (e) {
+      throw Exception('Error uploading image to Cloudinary: $e');
+    }
+  }
+
+  Widget buildProfileDetail(String label, String value,
+      {bool isEditable = true, TextEditingController? controller}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -150,14 +219,24 @@ class _GuideProfileState extends State<GuideProfile> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Profile Picture
-          CircleAvatar(
-            radius: 70,
-            backgroundImage: AssetImage('asset/background3.jpg'), // Replace with your asset path
+          Center(
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                CircleAvatar(
+                  radius: 80,
+                  backgroundColor: Colors.grey.shade300,
+                  backgroundImage: profileImage,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.camera_alt),
+                  onPressed: _pickProfileImage,
+                  color: isEditing ? Colors.blue : Colors.grey,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 20),
-
-          // Profile Details Container
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -185,32 +264,19 @@ class _GuideProfileState extends State<GuideProfile> {
               ],
             ),
           ),
-
           const SizedBox(height: 20),
           if (!isEditing)
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  isEditing = true; // Switch to edit mode
+                  isEditing = true;
                 });
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 30),
-                textStyle: const TextStyle(fontSize: 16),
-                foregroundColor: Colors.black,
-              ),
               child: const Text("Edit Profile"),
             ),
           if (isEditing)
             ElevatedButton(
               onPressed: saveChanges,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 30),
-                textStyle: const TextStyle(fontSize: 16),
-                foregroundColor: Colors.black,
-              ),
               child: const Text("Save Changes"),
             ),
         ],

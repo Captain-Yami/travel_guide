@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/activities.dart';
@@ -62,6 +63,219 @@ class _MainPageState extends State<GuideHomepage> {
     );
   }
 
+  void _showChangePasswordDialog() {
+  final currentPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Change Password'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: currentPasswordController,
+                decoration: const InputDecoration(labelText: 'Current Password'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: newPasswordController,
+                decoration: const InputDecoration(labelText: 'New Password'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: confirmPasswordController,
+                decoration: const InputDecoration(labelText: 'Confirm New Password'),
+                obscureText: true,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final currentPassword = currentPasswordController.text;
+              final newPassword = newPasswordController.text;
+              final confirmPassword = confirmPasswordController.text;
+
+              if (newPassword != confirmPassword) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Passwords do not match!')),
+                );
+                return;
+              }
+
+              try {
+                final user = FirebaseAuth.instance.currentUser;
+
+                if (user != null && user.email != null) {
+                  // Reauthenticate the user
+                  final credential = EmailAuthProvider.credential(
+                    email: user.email!,
+                    password: currentPassword,
+                  );
+
+                  await user.reauthenticateWithCredential(credential);
+
+                   // Update the password in Firebase Authentication
+                  await user.updatePassword(newPassword);
+
+                  // Update the password in the Guide collection
+                   final guideId = user.uid;
+                  await FirebaseFirestore.instance
+                      .collection('Guide')
+                      .doc(guideId)
+                      .update({'password': newPassword});
+
+
+                  Navigator.of(context).pop(); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password changed successfully!')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No user is signed in.')),
+                  );
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: $e')),
+                );
+              }
+            },
+            child: const Text('Change Password'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _showPrivacySettingsDialog(BuildContext context, String guideId) {
+  bool shareContactInfo = true;
+  bool allowChat = true;
+
+  void _deleteAccount(BuildContext context, String guideId) async {
+    try {
+      // Delete the guide's document from Firestore
+      await FirebaseFirestore.instance.collection('Guide').doc(guideId).delete();
+
+      // Delete the guide's authentication account
+      await FirebaseAuth.instance.currentUser?.delete();
+
+      Navigator.of(context).pop(); // Close the dialog
+      Navigator.of(context).pop(); // Navigate back to login screen
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account deleted successfully')),
+      );
+
+      // Navigate to login page (replace with your login page widget)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting account: $e')),
+      );
+    }
+  }
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Privacy Settings'),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Data Sharing Preferences
+                  SwitchListTile(
+                    title: const Text('Share Contact Information'),
+                    value: shareContactInfo,
+                    onChanged: (value) {
+                      setState(() => shareContactInfo = value);
+                      FirebaseFirestore.instance
+                          .collection('Guide')
+                          .doc(guideId)
+                          .update({'shareContact': value});
+                    },
+                  ),
+                  // Communication Preferences
+                  SwitchListTile(
+                    title: const Text('Allow Chat Requests'),
+                    value: allowChat,
+                    onChanged: (value) {
+                      setState(() => allowChat = value);
+                      FirebaseFirestore.instance
+                          .collection('Guide')
+                          .doc(guideId)
+                          .update({'allowChat': value});
+                    },
+                  ),
+                  // Delete Account
+                  ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Delete Account'),
+                            content: const Text(
+                                'Are you sure you want to delete your account? This action cannot be undone.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => _deleteAccount(context, guideId),
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                      foregroundColor: Colors.black,
+                    ),
+                    child: const Text('Delete Account'),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Privacy Settings Updated')),
+                  );
+                },
+                child: const Text('Save Settings'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
   @override
   void dispose() {
     _pageController.dispose(); // Dispose of the PageController to avoid memory leaks
@@ -70,22 +284,20 @@ class _MainPageState extends State<GuideHomepage> {
 
    Future<void> handleMenuSelection(String option) async {
     switch (option) {
-      case 'Edit Profile':
       case 'Change Password':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Change Password feature coming soon!")),
-        );
-        break;
+        _showChangePasswordDialog();
+        
+        break;                                         
       case 'Privacy Settings':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Privacy Settings feature coming soon!")),
-        );
-        break;
-      case 'Notifications':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Notifications feature coming soon!")),
-        );
-        break;
+         final guideId = FirebaseAuth.instance.currentUser?.uid; // Replace with actual guide ID
+  if (guideId != null) {
+    _showPrivacySettingsDialog(context, guideId);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error: Guide ID not found')),
+    );
+  }
+      break;
       case 'Logout':
   try {
     // Log out the user from Firebase Authentication
@@ -113,27 +325,6 @@ class _MainPageState extends State<GuideHomepage> {
     }
   }
 
-   void _handleMenuSelection(String option) {
-    switch (option) {
-      case 'Filter Activities':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Filter activities feature coming soon!")),
-        );
-        break;
-      case 'Sort Activities':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Sort activities feature coming soon!")),
-        );
-        break;
-      case 'View Activity History':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Viewing activity history")),
-        );
-        break;
-      default:
-        break;
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -161,7 +352,7 @@ class _MainPageState extends State<GuideHomepage> {
           children: [
             _buildHomePage(),
             const Activities(),
-            const Chats(),
+            const ChatsPage(),
             const GuideProfile(isEditing: false),
           ],
         ),
@@ -221,52 +412,36 @@ AppBar _buildAppBar() {
         ),
       ];
       break;
-    case 1: // Activities
-      title = 'Activities';
-      logoTextSpacing = 150.0; // More space for Activities
+    case 1: // Profile
+      title = 'Activites';
+      logoTextSpacing = 165.0; // Smaller space for Profile
       appBarActions = [
         PopupMenuButton<String>(
-          onSelected: _handleMenuSelection,
-          icon: const Icon(Icons.more_vert, color: Colors.white),
+          onSelected: handleMenuSelection,
+          icon: const Icon(Icons.more, color: Colors.white),
           itemBuilder: (BuildContext context) {
             return [
               const PopupMenuItem(
-                value: 'Filter Activities',
-                child: Text('Filter Activities'),
-              ),
-              const PopupMenuItem(
-                value: 'Sort Activities',
-                child: Text('Sort Activities'),
-              ),
-              const PopupMenuItem(
-                value: 'View Activity History',
-                child: Text('View Activity History'),
+                value: 'Settings',
+                child: Text('Settings'),
               ),
             ];
           },
         ),
       ];
       break;
-    case 2: // Chats
+    case 2: // Profile
       title = 'Chats';
-      logoTextSpacing = 165.0; // Larger space for Chats
+      logoTextSpacing = 165.0; // Smaller space for Profile
       appBarActions = [
         PopupMenuButton<String>(
           onSelected: handleMenuSelection,
-          icon: const Icon(Icons.more_vert, color: Colors.white),
+          icon: const Icon(Icons.more, color: Colors.white),
           itemBuilder: (BuildContext context) {
             return [
               const PopupMenuItem(
-                value: 'Mark all as unread',
-                child: Text('Mark all as unread'),
-              ),
-              const PopupMenuItem(
-                value: 'Chat Settings',
-                child: Text('Chat Settings'),
-              ),
-              const PopupMenuItem(
-                value: 'Search Chats',
-                child: Text('Search Chats'),
+                value: 'Settings',
+                child: Text('Settings'),
               ),
             ];
           },
@@ -283,20 +458,12 @@ AppBar _buildAppBar() {
           itemBuilder: (BuildContext context) {
             return [
               const PopupMenuItem(
-                value: 'Edit Profile',
-                child: Text('Edit Profile'),
-              ),
-              const PopupMenuItem(
                 value: 'Change Password',
                 child: Text('Change Password'),
               ),
               const PopupMenuItem(
                 value: 'Privacy Settings',
                 child: Text('Privacy Settings'),
-              ),
-              const PopupMenuItem(
-                value: 'Notifications',
-                child: Text('Notifications'),
               ),
               const PopupMenuItem(
                 value: 'Logout',
@@ -323,13 +490,16 @@ AppBar _buildAppBar() {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between logo, title, and actions
         children: [
-          // Logo
-          ClipOval(
-            child: Image.asset(
-              'asset/logo3.jpg', // Replace with your logo path
-              fit: BoxFit.cover,
-              height: 40,
-              width: 40, // Make the width and height equal for a perfect circle
+          // Logo with left padding for space
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0), // Add space to the left of the logo
+            child: ClipOval(
+              child: Image.asset(
+                'asset/logo3.jpg', // Replace with your logo path
+                fit: BoxFit.cover,
+                height: 40,
+                width: 40, // Make the width and height equal for a perfect circle
+              ),
             ),
           ),
           // Title in the center
@@ -345,15 +515,19 @@ AppBar _buildAppBar() {
               ),
             ),
           ),
-          // Action button(s)
-          Row(
-            children: appBarActions,
+          // Action button(s) with right padding for space
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0), // Add space to the right of the action buttons
+            child: Row(
+              children: appBarActions,
+            ),
           ),
         ],
       ),
     ),
   );
 }
+
 
 
 

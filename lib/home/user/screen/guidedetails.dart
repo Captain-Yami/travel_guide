@@ -31,7 +31,8 @@ class Guide {
   });
 
   // Factory constructor to handle Firestore data
-  factory Guide.fromFirestore(Map<String, dynamic> data, String id, bool isAvailable) {
+  factory Guide.fromFirestore(
+      Map<String, dynamic> data, String id, bool isAvailable) {
     return Guide(
       name: data['name']?.toString() ?? '',
       phoneNumber: data['phone number']?.toString() ?? '',
@@ -41,7 +42,7 @@ class Guide {
       experience: data['experience']?.toString() ?? '',
       ratePerTrip: data['ratePerTrip']?.toString() ?? '',
       details: data['additionalDetails']?.toString() ?? '',
-      profileImage: data['licenseImageUrl']?.toString() ?? '',
+      profileImage: data['profile_picture']?.toString() ?? '',
       id: id,
       isAvailable: isAvailable, // Include availability status
     );
@@ -66,13 +67,15 @@ class _GuidedetailsState extends State<Guidedetails> {
 
   Future<void> _fetchGuides() async {
     try {
-      final querySnapshot = await FirebaseFirestore.instance.collection('Guide').get();
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('Guide').get();
 
       List<Guide> fetchedGuides = [];
+
       for (var doc in querySnapshot.docs) {
         var data = doc.data();
 
-        // Fetch availability details
+        // Fetch availability details for each guide
         var availabilitySnapshot = await FirebaseFirestore.instance
             .collection('Guide')
             .doc(doc.id)
@@ -84,12 +87,37 @@ class _GuidedetailsState extends State<Guidedetails> {
           var availabilityData = availabilitySnapshot.data()!;
           bool isSelected = availabilityData['isSelected'] ?? false;
 
+          // Debug: Log availability data
+          print('Guide ID: ${doc.id}');
+          print('Availability Data: $availabilityData');
+
           if (isSelected) {
             // Check if the guide is available today
             final dayOfWeek = DateTime.now().weekday - 1; // Monday = 0
-            final today = availabilityData['selectedDays'] as List<dynamic>? ?? [];
+            final today =
+                availabilityData['selectedDays'] as List<dynamic>? ?? [];
 
-            if (today.contains(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][dayOfWeek])) {
+            // Debug: Log day comparison
+            print('Today: ${[
+              'sunday',
+              'monday',
+              'tuesday',
+              'wednesday',
+              'thursday',
+              'friday',
+              'saturday'
+            ][dayOfWeek]}');
+            print('Selected Days: $today');
+
+            if (today.contains([
+              'sunday',
+              'monday',
+              'tuesday',
+              'wednesday',
+              'thursday',
+              'friday',
+              'saturday'
+            ][dayOfWeek])) {
               // Check time interval
               final now = TimeOfDay.now();
               final startTime = TimeOfDay(
@@ -101,17 +129,33 @@ class _GuidedetailsState extends State<Guidedetails> {
                 minute: availabilityData['endTime']['minute'],
               );
 
+              // Debug: Log time comparison
+              print('Now: $now');
+              print('Start Time: $startTime, End Time: $endTime');
+
               if (_isTimeWithinRange(now, startTime, endTime)) {
                 fetchedGuides.add(Guide.fromFirestore(data, doc.id, true));
+              } else {
+                print(
+                    'Guide ${doc.id} is not available within the time range.');
               }
+            } else {
+              print('Guide ${doc.id} is not available today.');
             }
+          } else {
+            print('Guide ${doc.id} is not selected for availability.');
           }
+        } else {
+          print('No availability data for Guide ${doc.id}.');
         }
       }
 
       setState(() {
         guides = fetchedGuides;
       });
+
+      // Debug: Log fetched guides
+      print('Fetched Guides: ${guides.length}');
     } catch (e) {
       print('Error fetching guides: $e');
     }
@@ -163,7 +207,8 @@ class _GuidedetailsState extends State<Guidedetails> {
               itemBuilder: (context, index) {
                 final guide = guides[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 16.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.all(16),
@@ -198,7 +243,8 @@ class _GuidedetailsState extends State<Guidedetails> {
                             ],
                           ),
                         ),
-                        const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                        const Icon(Icons.arrow_forward_ios,
+                            color: Colors.black),
                       ],
                     ),
                   ),
@@ -213,6 +259,51 @@ class GuideDetailPage extends StatelessWidget {
   final Guide guide;
 
   const GuideDetailPage({super.key, required this.guide});
+  // Add this method to fetch the current user's details
+  Future<Map<String, String?>> _fetchUserDetails() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not logged in.');
+    }
+
+    final userDoc =
+        await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+
+    final userName = userDoc.data()?['name'] ?? 'Unknown User';
+    final userProfilePic = userDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
+
+    return {'userId': userId, 'userName': userName, 'userProfilePic': userProfilePic};
+  }
+
+  void _startChat(BuildContext context, String userId, String guideId,
+      String userName, String guideName, String userProfilePic, String profileImage) {
+    if (userId.isEmpty || userName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load user data.')),
+      );
+      return;
+    }
+
+    // Create a unique chat ID based on the user ID and guide ID
+    final chatId =
+        userId.compareTo(guideId) < 0 ? '$userId-$guideId' : '$guideId-$userId';
+
+    // Navigate to the chat screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatScreen(
+          chatId: chatId,
+          guideId: guideId,
+          userId: userId,
+          userName: userName,
+          guideName: guideName,
+          userProfilePic: userProfilePic, 
+          guideProfilePic: profileImage,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -284,13 +375,35 @@ class GuideDetailPage extends StatelessWidget {
                     // "Chat with Guide" Button (aligned to the right)
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Handle the chat action here
-                          print('Chat with Guide button pressed');
+                        onPressed: () async {
+                          try {
+                            final userDetails = await _fetchUserDetails();
+                            final userId = userDetails['userId']!;
+                            final userName = userDetails['userName']!;
+                            final userProfilePic = userDetails['userProfilePic']!;
+
+                            // Start the chat with the guide using fetched details
+                            _startChat(
+                              context, // Pass the context
+                              userId, // Pass the user ID
+                              guide.id, // Pass the guide ID
+                              userName, // Pass the current user's name
+                              guide.name, // Pass the guide's name
+                              userProfilePic,
+                              guide.profileImage,
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to fetch user details.'),
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                          backgroundColor:
+                              const Color.fromARGB(255, 240, 240, 240),
                           foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -320,7 +433,9 @@ class GuideDetailPage extends StatelessWidget {
             child: Text(
               '$label:',
               style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black54),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.black54),
             ),
           ),
           Expanded(
@@ -335,91 +450,93 @@ class GuideDetailPage extends StatelessWidget {
     );
   }
 
-void _showRequestDialog(BuildContext context) {
-  final TextEditingController tripController = TextEditingController();
-  final TextEditingController categoriesController = TextEditingController();
-  final TextEditingController placesController = TextEditingController();
+  void _showRequestDialog(BuildContext context) {
+    final TextEditingController tripController = TextEditingController();
+    final TextEditingController categoriesController = TextEditingController();
+    final TextEditingController placesController = TextEditingController();
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Request Guide'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: tripController,
-                decoration: const InputDecoration(labelText: 'About Trip'),
-                maxLines: 3,
-              ),
-              TextField(
-                controller: categoriesController,
-                decoration: const InputDecoration(labelText: 'Interested Categories (Expertise)'),
-                maxLines: 2,
-              ),
-              TextField(
-                controller: placesController,
-                decoration: const InputDecoration(labelText: 'Places to Visit'),
-                maxLines: 3,
-              ),
-            ],
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Request Guide'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: tripController,
+                  decoration: const InputDecoration(labelText: 'About Trip'),
+                  maxLines: 3,
+                ),
+                TextField(
+                  controller: categoriesController,
+                  decoration: const InputDecoration(
+                      labelText: 'Interested Categories (Expertise)'),
+                  maxLines: 2,
+                ),
+                TextField(
+                  controller: placesController,
+                  decoration:
+                      const InputDecoration(labelText: 'Places to Visit'),
+                  maxLines: 3,
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              try {
-                // Fetch the current user's ID
-                final userId = FirebaseAuth.instance.currentUser?.uid;
-                if (userId == null) {
+          actions: [
+            TextButton(
+              onPressed: () async {
+                try {
+                  // Fetch the current user's ID
+                  final userId = FirebaseAuth.instance.currentUser?.uid;
+                  if (userId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('User not logged in.')),
+                    );
+                    return;
+                  }
+
+                  // Fetch the user's name from Firestore
+                  final userDoc = await FirebaseFirestore.instance
+                      .collection('Users')
+                      .doc(userId)
+                      .get();
+
+                  final userName = userDoc.data()?['name'] ?? 'Unknown User';
+
+                  // Send the request to Firestore with the user's name and guideId
+                  await FirebaseFirestore.instance.collection('requests').add({
+                    'guideId': guide.id, // Add guideId to the request
+                    'aboutTrip': tripController.text,
+                    'categories': categoriesController.text,
+                    'places': placesController.text,
+                    'user': userId,
+                    'userName': userName, // Add the user's name
+                    'requestDate': Timestamp.now(),
+                  });
+
+                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('User not logged in.')),
+                    const SnackBar(content: Text('Request sent successfully!')),
                   );
-                  return;
+                } catch (e) {
+                  print('Error sending request: $e');
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to send request.')),
+                  );
                 }
-
-                // Fetch the user's name from Firestore
-                final userDoc = await FirebaseFirestore.instance
-                    .collection('Users')
-                    .doc(userId)
-                    .get();
-
-                final userName = userDoc.data()?['name'] ?? 'Unknown User';
-
-                // Send the request to Firestore with the user's name and guideId
-                await FirebaseFirestore.instance.collection('requests').add({
-                  'guideId': guide.id, // Add guideId to the request
-                  'aboutTrip': tripController.text,
-                  'categories': categoriesController.text,
-                  'places': placesController.text,
-                  'user': userId,
-                  'userName': userName, // Add the user's name
-                  'requestDate': Timestamp.now(),
-                });
-
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Request sent successfully!')),
-                );
-              } catch (e) {
-                print('Error sending request: $e');
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to send request.')),
-                );
-              }
-            },
-            child: const Text('Send Request'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
-      );
-    },
-  );
-}
+              },
+              child: const Text('Send Request'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

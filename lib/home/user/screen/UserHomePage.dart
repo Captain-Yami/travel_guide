@@ -306,6 +306,7 @@ class _MainPageState extends State<MainPage> {
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart'; // Import the carousel_slider package
 import 'package:travel_guide/home/hotel.dart';
+import 'package:travel_guide/home/user/guidechat.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
 import 'package:travel_guide/home/user/screen/place/place.dart';
 import 'package:travel_guide/home/recommended.dart';
@@ -349,11 +350,11 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void _navigateToSeason() {
-    print('Navigating to Season page');
+  void _navigateToguidechats() {
+    print('Navigating to ChatsPageguide page');
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const Season()),
+      MaterialPageRoute(builder: (context) => const ChatsPageguide()),
     );
   }
 
@@ -603,8 +604,8 @@ class _MainPageState extends State<MainPage> {
                         Expanded(
                           child: _buildElevatedButton(
                             icon: Icons.calendar_today,
-                            label: 'Season',
-                            onPressed: _navigateToSeason,
+                            label: 'Chats',
+                            onPressed: _navigateToguidechats,
                           ),
                         ),
                       ],

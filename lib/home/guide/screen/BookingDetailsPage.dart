@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:travel_guide/home/guide/userchat.dart';
@@ -94,6 +95,67 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
       }
     }
   }
+   // Add this method to fetch the current user's details
+  Future<Map<String, String?>> _fetchGuideDetails() async {
+    final guideId = FirebaseAuth.instance.currentUser?.uid;
+    if (guideId == null) {
+      throw Exception('User not logged in.');
+    }
+
+    final guideDoc =
+        await FirebaseFirestore.instance.collection('Guide').doc(guideId).get();
+
+    final guideName = guideDoc.data()?['name'] ?? 'Unknown User';
+    final guideProfilePic = guideDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
+
+    return {'guideId': guideId, 'guideName': guideName , 'guideProfilePic': guideProfilePic};
+  }
+
+  Future<Map<String, String?>> _fetchUserDetails() async {
+          final requestDoc = await _firestore
+          .collection('confirmed_requests')
+          .doc(widget.requestId)
+          .get();
+          final userId = requestDoc.data()?['user'];
+
+    final userDoc =
+        await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+
+    final userName = userDoc.data()?['name'] ?? 'Unknown User';
+    final userProfilePic = userDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
+
+    return {'userId': userId, 'userName': userName, 'userProfilePic' : userProfilePic};
+  }
+
+  void _startChat(BuildContext context, String userId, String guideId,
+      String userName, String guideName, String userProfilePic, String guideProfilePic) {
+    if (userId.isEmpty || userName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load user data.')),
+      );
+      return;
+    }
+
+    // Create a unique chat ID based on the user ID and guide ID
+    final chatId =
+        userId.compareTo(guideId) < 0 ? '$userId-$guideId' : '$guideId-$userId';
+
+    // Navigate to the chat screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatScreen(
+          chatId: chatId,
+          guideId: guideId,
+          userId: userId,
+          userName: userName,
+          guideName: guideName,
+         userProfilePic: userProfilePic, 
+         guideProfilePic: guideProfilePic,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -178,27 +240,48 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                     ),
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => UserChat(
-                          name: userData!['name'] ?? 'Unknown',
-                          profilePic: userData!['profileImage'] ?? '',
-                          lastMessage: 'Looking forward to our trip!',
-                          messageTime: 'Yesterday',
+                ElevatedButton(
+                        onPressed: () async {
+                          try {
+                            final guideDetails = await _fetchGuideDetails();
+                            final userDetails = await _fetchUserDetails();
+                            final guideId = guideDetails['guideId']!;
+                            final guideName = guideDetails['guideName']!;
+                            final userId = userDetails['userId']!;
+                            final userName = userDetails['userName']!;
+                            final userProfilePic = userDetails['userProfilePic']!;
+                            final guideProfilePic = userDetails['guideProfilePic']!;
+
+                            // Start the chat with the guide using fetched details
+                            _startChat(
+                              context, // Pass the context
+                              guideId, // Pass the user ID
+                              userId, // Pass the guide ID
+                              guideName, // Pass the current user's name
+                              userName, // Pass the guide's name
+                              userProfilePic,
+                              guideProfilePic,
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to fetch user details.'),
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          backgroundColor:
+                              const Color.fromARGB(255, 240, 240, 240),
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          textStyle: const TextStyle(fontSize: 18),
                         ),
+                        child: const Text('Chat with Guide'),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.chat),
-                  label: const Text('Chat with User', style: TextStyle(color: Colors.black)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 240, 240, 240),
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 30),
-                  ),
-                ),
               ],
             ),
           ],
