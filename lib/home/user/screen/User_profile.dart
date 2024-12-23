@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
 
-
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
 
@@ -33,9 +32,11 @@ class _UserProfileState extends State<UserProfile> {
   File? _profileImage;
 
   // Cloudinary configuration
-  final Cloudinary cloudinary = Cloudinary.signedConfig ( cloudName: 'db2nki9dh',
-  apiKey: '894239764992456', 
-  apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',);
+  final Cloudinary cloudinary = Cloudinary.signedConfig(
+    cloudName: 'db2nki9dh',
+    apiKey: '894239764992456',
+    apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',
+  );
 
   // Function to save the profile data to Firestore
   Future<void> saveProfile() async {
@@ -46,7 +47,8 @@ class _UserProfileState extends State<UserProfile> {
 
       // If the user uploaded a new profile image, upload it to Cloudinary
       if (_profileImage != null) {
-        imageUrl = await uploadImageToCloudinary(_profileImage!); // Upload to Cloudinary
+        imageUrl = await uploadImageToCloudinary(
+            _profileImage!); // Upload to Cloudinary
       }
 
       // Update the Firestore document with the new data
@@ -60,7 +62,8 @@ class _UserProfileState extends State<UserProfile> {
         'state': stateController.text,
         'nation': nationController.text,
         'pincode': pincodeController.text,
-        if (imageUrl.isNotEmpty) 'profile_picture': imageUrl,  // Add profile image URL if available
+        if (imageUrl.isNotEmpty)
+          'profile_picture': imageUrl, // Add profile image URL if available
       });
 
       // Show a success message
@@ -116,21 +119,28 @@ class _UserProfileState extends State<UserProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 254, 254), // App bar with black color
+        backgroundColor: const Color.fromARGB(
+            255, 255, 254, 254), // App bar with black color
         title: const Text('Profile'),
         actions: [
           // Dropdown menu button
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Color.fromARGB(255, 0, 0, 0)),
-            onSelected: (String value) {
+            icon: const Icon(Icons.more_vert,
+                color: Color.fromARGB(255, 0, 0, 0)),
+            onSelected: (String value) async {
               if (value == 'Feedback') {
                 // Handle feedback action
+                TextEditingController feedbackController =
+                    TextEditingController();
+
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Feedback'),
                     content: TextField(
-                      decoration: const InputDecoration(hintText: 'Enter your feedback'),
+                      controller: feedbackController,
+                      decoration: const InputDecoration(
+                          hintText: 'Enter your feedback'),
                     ),
                     actions: [
                       TextButton(
@@ -140,8 +150,57 @@ class _UserProfileState extends State<UserProfile> {
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () {
-                          // Submit feedback logic here
+                        onPressed: () async {
+                          String feedback = feedbackController.text.trim();
+                          if (feedback.isNotEmpty) {
+                            try {
+                              String uid =
+                                  FirebaseAuth.instance.currentUser?.uid ?? '';
+
+                              if (uid.isEmpty) {
+                                throw Exception("User is not logged in");
+                              }
+
+                              // Fetch user's document from Firestore (Users collection)
+                              DocumentSnapshot<Map<String, dynamic>> userDoc =
+                                  await FirebaseFirestore.instance
+                                      .collection('Users')
+                                      .doc(uid)
+                                      .get();
+
+                              // Safely retrieve the user's name
+                              Map<String, dynamic>? userData = userDoc.data();
+                              String userName =
+                                  userData?['name'] ?? 'Anonymous';
+
+                              // Store feedback in Firestore (Feedback collection)
+                              await FirebaseFirestore.instance
+                                  .collection('Feedback')
+                                  .add({
+                                'feedback': feedback,
+                                'uid': uid,
+                                'userName': userName, // Add user's name
+                                'timestamp': FieldValue.serverTimestamp(),
+                              });
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Feedback submitted successfully!')),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Error submitting feedback: $e')),
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Feedback cannot be empty.')),
+                            );
+                          }
                           Navigator.of(context).pop();
                         },
                         child: const Text('Submit'),
@@ -153,7 +212,9 @@ class _UserProfileState extends State<UserProfile> {
                 // Handle logout action
                 FirebaseAuth.instance.signOut().then((value) {
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => LoginPage()), // Replace with your login page
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            LoginPage()), // Replace with your login page
                   );
                 });
               }
@@ -182,7 +243,7 @@ class _UserProfileState extends State<UserProfile> {
                 ),
               ];
             },
-          ),
+          )
         ],
       ),
       body: StreamBuilder<DocumentSnapshot>(
@@ -236,7 +297,8 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.camera_alt),
-                        onPressed: _pickProfileImage, // Allow user to pick an image
+                        onPressed:
+                            _pickProfileImage, // Allow user to pick an image
                         color: Colors.blue,
                       ),
                     ],
@@ -340,7 +402,7 @@ class _UserProfileState extends State<UserProfile> {
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.pin_drop),
                   ),
-                ), 
+                ),
                 const SizedBox(height: 20),
                 // Edit Profile Button
                 ElevatedButton(
@@ -354,7 +416,9 @@ class _UserProfileState extends State<UserProfile> {
                       });
                     }
                   },
-                  child: Text(isEditable ? 'Save Profile' : 'Edit Profile'), // Button text changes
+                  child: Text(isEditable
+                      ? 'Save Profile'
+                      : 'Edit Profile'), // Button text changes
                 ),
               ],
             ),

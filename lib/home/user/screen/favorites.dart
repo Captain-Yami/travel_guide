@@ -51,7 +51,7 @@ class _FavoritesState extends State<Favorites> {
           print(favoriteData);
 
           // If there are multiple items inside the document, you can retrieve them from a subcollection
-          List favoriteItems = favoriteData['beaches'] ?? [];
+          List favoriteItems = favoriteData['favourites'] ?? [];
 
           return ListView.builder(
             itemCount: favoriteItems.length,
@@ -62,16 +62,16 @@ class _FavoritesState extends State<Favorites> {
                 margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(10),
-                  leading: favoriteItem['item_image'] != null
+                  leading: favoriteItem['imageUrl'] != null
                       ? Image.network(
-                          favoriteItem['item_image'],
+                          favoriteItem['imageUrl'],
                           width: 50,
                           height: 50,
                           fit: BoxFit.cover,
                         )
                       : const Icon(Icons.image),
-                  title: Text(favoriteItem['location_name'] ?? 'No Name'),
-                  subtitle: Text(favoriteItem['location_description'] ?? 'No Description'),
+                  title: Text(favoriteItem['name'] ?? 'No Name'),
+                  subtitle: Text(favoriteItem['description'] ?? 'No Description'),
                 ),
               );
             },
