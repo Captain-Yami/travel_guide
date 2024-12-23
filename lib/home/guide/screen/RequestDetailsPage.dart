@@ -9,6 +9,7 @@ class RequestDetailsPage extends StatefulWidget {
   final List<String> interestedCategories;
   final String details;
   final String user;
+  final String guideId;
   final Function(String) onRemoveRequest;
 
   const RequestDetailsPage({
@@ -21,6 +22,7 @@ class RequestDetailsPage extends StatefulWidget {
     required this.details,
     required this.user,
     required this.onRemoveRequest,
+    required this.guideId,
   }) : super(key: key);
 
   @override
@@ -57,6 +59,7 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
       String expertiseStr = widget.interestedCategories.join(', ');
 
       final confirmedRequestDetails = {
+        'guideId' : widget.guideId,
         'userName': widget.name,
         'image': widget.image,
         'places': placesStr,

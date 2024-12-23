@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:travel_guide/home/guide/userchat.dart';
 
 class BookingDetailsPage extends StatefulWidget {
+  final String guideId;
   final String name;
   final String image;
   final String requestId;
@@ -16,7 +17,8 @@ class BookingDetailsPage extends StatefulWidget {
     required this.image,
     required this.requestId,
     required this.places,
-    required this.onRemoveBooking, // Ensure this is correctly passed
+    required this.onRemoveBooking,
+    required this.guideId,
   }) : super(key: key);
 
   @override
@@ -38,22 +40,39 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
 
   Future<void> _fetchUserData() async {
     try {
-      final requestDoc = await _firestore
+      final guideId = FirebaseAuth.instance.currentUser?.uid;
+      if (guideId == null) {
+        throw Exception("Guide not logged in.");
+      }
+
+      // Query the confirmed_requests collection for the specific guide and request
+      final requestQuery = await FirebaseFirestore.instance
           .collection('confirmed_requests')
-          .doc(widget.requestId)
+          .where('guideId', isEqualTo: guideId) // Filter by guideId
           .get();
 
-      if (requestDoc.exists) {
-        final userId = requestDoc.data()?['user'];
-        final status = requestDoc.data()?['status'];
+      if (requestQuery.docs.isNotEmpty) {
+        final requestDoc =
+            requestQuery.docs.first; // Assuming one result is expected
+        final requestData = requestDoc.data();
+        final userId = requestData['user'];
+        final status = requestData['status'];
+
         if (userId != null && status == 'Confirmed') {
-          final userDoc = await _firestore.collection('Users').doc(userId).get();
+          // Fetch user data from the Users collection
+          final userDoc = await FirebaseFirestore.instance
+              .collection('Users')
+              .doc(userId)
+              .get();
+
           if (userDoc.exists) {
             setState(() {
               userData = userDoc.data();
               isLoading = false;
               isConfirmed = true;
             });
+          } else {
+            throw Exception("User document not found.");
           }
         } else {
           setState(() {
@@ -61,6 +80,9 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
             isConfirmed = false;
           });
         }
+      } else {
+        throw Exception(
+            "Request document not found for the specified guide and request.");
       }
     } catch (e) {
       print('Error fetching user data: $e');
@@ -95,7 +117,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
       }
     }
   }
-   // Add this method to fetch the current user's details
+
+  // Add this method to fetch the current user's details
   Future<Map<String, String?>> _fetchGuideDetails() async {
     final guideId = FirebaseAuth.instance.currentUser?.uid;
     if (guideId == null) {
@@ -106,29 +129,45 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
         await FirebaseFirestore.instance.collection('Guide').doc(guideId).get();
 
     final guideName = guideDoc.data()?['name'] ?? 'Unknown User';
-    final guideProfilePic = guideDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
+    final guideProfilePic =
+        guideDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
 
-    return {'guideId': guideId, 'guideName': guideName , 'guideProfilePic': guideProfilePic};
+    return {
+      'guideId': guideId,
+      'guideName': guideName,
+      'guideProfilePic': guideProfilePic
+    };
   }
 
   Future<Map<String, String?>> _fetchUserDetails() async {
-          final requestDoc = await _firestore
-          .collection('confirmed_requests')
-          .doc(widget.requestId)
-          .get();
-          final userId = requestDoc.data()?['user'];
+    final requestDoc = await _firestore
+        .collection('confirmed_requests')
+        .doc(widget.requestId)
+        .get();
+    final userId = requestDoc.data()?['user'];
 
     final userDoc =
         await FirebaseFirestore.instance.collection('Users').doc(userId).get();
 
     final userName = userDoc.data()?['name'] ?? 'Unknown User';
-    final userProfilePic = userDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
+    final userProfilePic =
+        userDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
 
-    return {'userId': userId, 'userName': userName, 'userProfilePic' : userProfilePic};
+    return {
+      'userId': userId,
+      'userName': userName,
+      'userProfilePic': userProfilePic
+    };
   }
 
-  void _startChat(BuildContext context, String userId, String guideId,
-      String userName, String guideName, String userProfilePic, String guideProfilePic) {
+  void _startChat(
+      BuildContext context,
+      String userId,
+      String guideId,
+      String userName,
+      String guideName,
+      String userProfilePic,
+      String guideProfilePic) {
     if (userId.isEmpty || userName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to load user data.')),
@@ -150,8 +189,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
           userId: userId,
           userName: userName,
           guideName: guideName,
-         userProfilePic: userProfilePic, 
-         guideProfilePic: guideProfilePic,
+          userProfilePic: userProfilePic,
+          guideProfilePic: guideProfilePic,
         ),
       ),
     );
@@ -168,7 +207,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
     if (!isConfirmed) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Booking Details', style: TextStyle(color: Colors.white)),
+          title: const Text('Booking Details',
+              style: TextStyle(color: Colors.white)),
           backgroundColor: Colors.black87,
         ),
         body: const Center(
@@ -179,7 +219,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${userData!['name']}\'s Booking Details', style: const TextStyle(color: Colors.white)),
+        title: Text('${userData!['name']}\'s Booking Details',
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.black87,
       ),
       body: SingleChildScrollView(
@@ -192,7 +233,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: NetworkImage(userData!['profileImage'] ?? ''),
+                  backgroundImage:
+                      NetworkImage(userData!['profileImage'] ?? ''),
                 ),
                 const SizedBox(width: 16),
                 Column(
@@ -208,7 +250,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                     const SizedBox(height: 4),
                     const Text(
                       'Status: Confirmed',
-                      style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 11, 11, 11)),
+                      style: TextStyle(
+                          fontSize: 16, color: Color.fromARGB(255, 11, 11, 11)),
                     ),
                   ],
                 ),
@@ -231,7 +274,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
               children: [
                 ElevatedButton(
                   onPressed: () => _cancelBooking(widget.requestId),
-                  child: const Text('Cancel Booking', style: TextStyle(color: Colors.black)),
+                  child: const Text('Cancel Booking',
+                      style: TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 240, 240, 240),
                     padding: const EdgeInsets.symmetric(
@@ -241,47 +285,47 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                   ),
                 ),
                 ElevatedButton(
-                        onPressed: () async {
-                          try {
-                            final guideDetails = await _fetchGuideDetails();
-                            final userDetails = await _fetchUserDetails();
-                            final guideId = guideDetails['guideId']!;
-                            final guideName = guideDetails['guideName']!;
-                            final userId = userDetails['userId']!;
-                            final userName = userDetails['userName']!;
-                            final userProfilePic = userDetails['userProfilePic']!;
-                            final guideProfilePic = userDetails['guideProfilePic']!;
+                  onPressed: () async {
+                    try {
+                      final guideDetails = await _fetchGuideDetails();
+                      final userDetails = await _fetchUserDetails();
+                      final guideId = guideDetails['guideId']!;
+                      final guideName = guideDetails['guideName']!;
+                      final userId = userDetails['userId']!;
+                      final userName = userDetails['userName']!;
+                      final userProfilePic = userDetails['userProfilePic']!;
+                      final guideProfilePic = guideDetails['guideProfilePic']!;
 
-                            // Start the chat with the guide using fetched details
-                            _startChat(
-                              context, // Pass the context
-                              guideId, // Pass the user ID
-                              userId, // Pass the guide ID
-                              guideName, // Pass the current user's name
-                              userName, // Pass the guide's name
-                              userProfilePic,
-                              guideProfilePic,
-                            );
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Failed to fetch user details.'),
-                              ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          backgroundColor:
-                              const Color.fromARGB(255, 240, 240, 240),
-                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: const TextStyle(fontSize: 18),
+                      // Start the chat with the guide using fetched details
+                      _startChat(
+                        context, // Pass the context
+                        guideId, // Pass the user ID
+                        userId, // Pass the guide ID
+                        guideName, // Pass the current user's name
+                        userName, // Pass the guide's name
+                        userProfilePic,
+                        guideProfilePic,
+                      );
+                    } catch (e) {
+                      print('Error starting chat: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to fetch user details.'),
                         ),
-                        child: const Text('Chat with Guide'),
-                      ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                    foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                  child: const Text('Chat with Guide'),
+                ),
               ],
             ),
           ],
