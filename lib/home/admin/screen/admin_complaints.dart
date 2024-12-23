@@ -36,7 +36,7 @@ class _AdminComplaintsState extends State<AdminComplaints> {
             itemCount: feedbackDocs.length,
             itemBuilder: (context, index) {
               var feedbackData = feedbackDocs[index].data() as Map<String, dynamic>;
-              String userId = feedbackData['uid'] ?? 'Unknown UID';
+              
               String feedback = feedbackData['feedback'] ?? 'No feedback provided';
               String userName = feedbackData['userName'] ?? 'Unknown User'; // Optional: Add a name field
 
@@ -44,7 +44,7 @@ class _AdminComplaintsState extends State<AdminComplaints> {
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: ListTile(
                   title: Text(userName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('UID: $userId'),
+                 
                   trailing: const Icon(Icons.arrow_forward),
                   onTap: () {
                     // Navigate to detailed feedback view
