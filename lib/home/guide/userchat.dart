@@ -71,9 +71,9 @@ class _ChatScreenState extends State<ChatScreen> {
   String get appBarProfilePic {
     final currentUserId = FirebaseAuth.instance.currentUser!.uid;
     if (currentUserId == widget.guideId) {
-      return widget.userProfilePic; // Show user's profile pic if current user is the guide
+      return widget.guideProfilePic; // Show user's profile pic if current user is the guide
     } else {
-      return widget.guideProfilePic; // Show guide's profile pic if current user is the user
+      return widget.userProfilePic; // Show guide's profile pic if current user is the user
     }
   }
 

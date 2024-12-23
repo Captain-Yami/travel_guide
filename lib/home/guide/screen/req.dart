@@ -104,7 +104,7 @@ class _GuideDashboardState extends State<GuideDashboard>
       'categories': _parseList(data['categories']),
       'places': _parseList(data['places']),
       'status': data['status'] ?? 'Pending',
-      'image': 'asset/background3.jpg',
+      'image': data['userProfilePic'] ??'asset/background3.jpg',
       'user': data['user'] ?? '',
     };
   }
@@ -118,7 +118,7 @@ class _GuideDashboardState extends State<GuideDashboard>
       'name': data['userName'] ?? 'Unknown User',
       'details': data['aboutTrip'] ?? '',
       'places': _parseList(data['places']),
-      'image': 'asset/background3.jpg',
+      'image': data['userProfilePic'] ??'asset/background3.jpg',
     };
   }
 

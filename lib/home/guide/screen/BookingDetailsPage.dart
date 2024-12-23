@@ -234,7 +234,7 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
                 CircleAvatar(
                   radius: 40,
                   backgroundImage:
-                      NetworkImage(userData!['profileImage'] ?? ''),
+                      NetworkImage(userData!['profile_picture'] ?? 'asset/background3.jpg'),
                 ),
                 const SizedBox(width: 16),
                 Column(
