@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/screen/RequestDetailsPage.dart';
 import 'package:travel_guide/home/guide/screen/BookingDetailsPage.dart';
@@ -30,29 +31,57 @@ class _GuideDashboardState extends State<GuideDashboard>
     super.dispose();
   }
 
-  Future<void> _fetchRequests() async {
-    try {
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('requests').get();
-
-      setState(() {
-        requests = snapshot.docs.map((doc) => _parseRequestData(doc)).toList();
-      });
-    } catch (e) {
-      print('Error fetching requests: $e');
+ Future<void> _fetchRequests() async {
+  try {
+    // Fetch the current user's ID
+    final guideId = FirebaseAuth.instance.currentUser?.uid;
+    if (guideId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Guide not logged in.')),
+      );
+      return;
     }
+
+    // Query Firestore to get requests sent by the current user for the specific guide
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('requests')
+        .where('guideId', isEqualTo: guideId) // Filter by the guide ID
+        .get();
+
+    setState(() {
+      requests = snapshot.docs.map((doc) => _parseRequestData(doc)).toList();
+    });
+  } catch (e) {
+    print('Error fetching requests: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Failed to fetch requests.')),
+    );
   }
+}
+
 
   Future<void> _fetchBookings() async {
     try {
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('confirmed_requests').get();
+      final guideId = FirebaseAuth.instance.currentUser?.uid;
+    if (guideId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Guide not logged in.')),
+      );
+      return;
+    }
+       QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('confirmed_requests')
+        .where('guideId', isEqualTo: guideId) // Filter by the guide ID
+        .get();
 
       setState(() {
         bookings = snapshot.docs.map((doc) => _parseBookingData(doc)).toList();
       });
     } catch (e) {
       print('Error fetching bookings: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Failed to fetch boookings.')),
+    );
     }
   }
 
@@ -68,13 +97,14 @@ class _GuideDashboardState extends State<GuideDashboard>
     var data = doc.data() as Map<String, dynamic>;
 
     return {
+      'guideId': data['guideId'] ?? '',
       'id': doc.id,
       'name': data['userName'] ?? 'Unknown User',
       'details': data['aboutTrip'] ?? '',
       'categories': _parseList(data['categories']),
       'places': _parseList(data['places']),
       'status': data['status'] ?? 'Pending',
-      'image': 'assets/background3.jpg',
+      'image': data['userProfilePic'] ??'asset/background3.jpg',
       'user': data['user'] ?? '',
     };
   }
@@ -83,11 +113,12 @@ class _GuideDashboardState extends State<GuideDashboard>
     var data = doc.data() as Map<String, dynamic>;
 
     return {
+      'guideId': data['guideId'] ?? '',
       'id': doc.id,
       'name': data['userName'] ?? 'Unknown User',
       'details': data['aboutTrip'] ?? '',
       'places': _parseList(data['places']),
-      'image': 'assets/background3.jpg',
+      'image': data['userProfilePic'] ??'asset/background3.jpg',
     };
   }
 
@@ -148,6 +179,7 @@ class _GuideDashboardState extends State<GuideDashboard>
                   context,
                   MaterialPageRoute(
                     builder: (context) => RequestDetailsPage(
+                      guideId: request['guideId'],
                       requestId: request['id'],
                       name: request['name'],
                       image: request['image'],
@@ -191,6 +223,7 @@ class _GuideDashboardState extends State<GuideDashboard>
                 context,
                 MaterialPageRoute(
                   builder: (context) => BookingDetailsPage(
+                    guideId: booking['guideId'],
                     name: booking['name'],
                     image: booking['image'],
                     requestId: requestId,

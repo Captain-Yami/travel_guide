@@ -504,9 +504,11 @@ class GuideDetailPage extends StatelessWidget {
                       .get();
 
                   final userName = userDoc.data()?['name'] ?? 'Unknown User';
+                  final userProfilePic = userDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
 
                   // Send the request to Firestore with the user's name and guideId
                   await FirebaseFirestore.instance.collection('requests').add({
+                    'userProfilePic':userProfilePic,
                     'guideId': guide.id, // Add guideId to the request
                     'aboutTrip': tripController.text,
                     'categories': categoriesController.text,

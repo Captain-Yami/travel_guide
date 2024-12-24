@@ -16,7 +16,7 @@ class ChatScreen extends StatefulWidget {
     required this.chatId,
     required this.guideId,
     required this.userId,
-    required this.userName,
+    required this.userName,          
     required this.guideName,
     required this.userProfilePic,
     required this.guideProfilePic,
@@ -44,20 +44,20 @@ class _ChatScreenState extends State<ChatScreen> {
     };
 
     await FirebaseFirestore.instance.collection('Chats').doc(widget.chatId).set(confirmedRequestDetails);
-
-    await FirebaseFirestore.instance
-        .collection('Chats')
-        .doc(widget.chatId)
-        .collection('messages')
-        .add({
-      'senderId': senderId,
-      'message': message,
-      'timestamp': Timestamp.now(),
-    });
-
-    _messageController.clear();
-  }
-
+                                                        
+    await FirebaseFirestore.instance                   
+        .collection('Chats')                           
+        .doc(widget.chatId)                            
+        .collection('messages')                        
+        .add({                                         
+      'senderId': senderId,                             
+      'message': message,                              
+      'timestamp': Timestamp.now(),                    
+    });                                                
+                                                       
+    _messageController.clear();                        
+  }                                                    
+                                                       
   // Determine whether to show the user's name or guide's name in the app bar
   String get appBarTitle {
     final currentUserId = FirebaseAuth.instance.currentUser!.uid;
@@ -71,9 +71,9 @@ class _ChatScreenState extends State<ChatScreen> {
   String get appBarProfilePic {
     final currentUserId = FirebaseAuth.instance.currentUser!.uid;
     if (currentUserId == widget.guideId) {
-      return widget.userProfilePic; // Show user's profile pic if current user is the guide
+      return widget.guideProfilePic; // Show user's profile pic if current user is the guide
     } else {
-      return widget.guideProfilePic; // Show guide's profile pic if current user is the user
+      return widget.userProfilePic; // Show guide's profile pic if current user is the user
     }
   }
 
@@ -166,8 +166,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                 CircleAvatar(
                                   radius: 18,
                                   backgroundImage: NetworkImage(isSentByMe
-                                      ? widget.userProfilePic
-                                      : widget.guideProfilePic), // Show appropriate profile image
+                                      ? widget.guideProfilePic
+                                      : widget.userProfilePic), // Show appropriate profile image
                                 ),
                             ],
                           ),
@@ -201,7 +201,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 const SizedBox(width: 10),
                 IconButton(
-                  icon: const Icon(Icons.send),
+                  icon: const Icon(Icons.send),         
                   color: Colors.black,
                   onPressed: _sendMessage,
                 ),
