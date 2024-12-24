@@ -60,7 +60,7 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                backgroundColor:  const Color.fromARGB(255, 171, 167, 171),
               ),
               child: const Text(
                 'Homestay',
@@ -76,7 +76,7 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                backgroundColor:  const Color.fromARGB(255, 171, 167, 171),
               ),
               child: const Text(
                 'FIVE STAR',
@@ -92,7 +92,7 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                backgroundColor: const Color.fromARGB(255, 171, 167, 171),
               ),
               child: const Text(
                 'FOUR STAR',
@@ -108,7 +108,7 @@ class _hotelState extends State<hotel> {void _navigateToMonsoon() {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                backgroundColor:  const Color.fromARGB(255, 171, 167, 171),
               ),
               child: const Text(
                 'hotel',

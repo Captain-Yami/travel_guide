@@ -17,24 +17,28 @@ class _LoginPageState extends State<LoginPage> {
 
   // Method to handle login action
   bool loading = false;
+  bool _obscurePassword = true; // To toggle password visibility
 
   void LoginHandler() async {
-    setState(() {
-      loading = true;
-    });
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        loading = true;
+      });
 
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
 
-    // Call the login function
-    await LoginServiceFire().LoginService(
-      email: email,
-      password: password,
-      context: context,
-    );
-    setState(() {
-      loading = false;
-    });
+      // Call the login function
+      await LoginServiceFire().LoginService(
+        email: email,
+        password: password,
+        context: context,
+      );
+
+      setState(() {
+        loading = false;
+      });
+    }
   }
 
   // Method to handle navigation to Signup page
@@ -53,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
         foregroundColor: Colors.white, // White color for text in AppBar
       ),
       backgroundColor: Colors.white, // Set background color to white
-      body: SingleChildScrollView(  // Make the entire form scrollable
+      body: SingleChildScrollView( // Make the entire form scrollable
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -85,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email address';
-                    } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                    } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\$')
                         .hasMatch(value)) {
                       return 'Please enter a valid email address';
                     }
@@ -94,14 +98,24 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 20),
 
-                // Password field with validation and oval shape
+                // Password field with validation, oval shape, and show password toggle
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30), // Oval shape
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword; // Toggle password visibility
+                        });
+                      },
                     ),
                   ),
                   validator: (value) {

@@ -48,14 +48,16 @@ class _PlaceState extends State<Place> {
         backgroundColor: const Color.fromARGB(255, 42, 41, 41),
         title: Row(
           children: [
-             const SizedBox(width: 150),
-        const Text('Place',
+            const SizedBox(width: 150),
+            const Text(
+              'Place',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 253, 253, 253),
-              ),),
-          ],     
+              ),
+            ),
+          ],
         ),
       ),
       body: Padding(
@@ -66,7 +68,7 @@ class _PlaceState extends State<Place> {
           mainAxisSpacing: 20, // Space between rows
           childAspectRatio: 2, // Adjust the aspect ratio to control the button size
           children: [
-            // Button 1: Monsoon
+            // Button 1: Beaches
             ElevatedButton(
               onPressed: _navigateToBeaches,
               style: ElevatedButton.styleFrom(
@@ -74,15 +76,22 @@ class _PlaceState extends State<Place> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                backgroundColor: const Color.fromARGB(255, 171, 167, 171),
               ),
-              child: const Text(
-                'Beaches',
-                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.beach_access_rounded, size: 30, color: Colors.black),
+                  SizedBox(height: 8),
+                  Text(
+                    'Beaches',
+                    style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
+                  ),
+                ],
               ),
             ),
 
-            // Button 2: Theyyam
+            // Button 2: Temples
             ElevatedButton(
               onPressed: _navigateToTemples,
               style: ElevatedButton.styleFrom(
@@ -90,15 +99,22 @@ class _PlaceState extends State<Place> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                backgroundColor:const Color.fromARGB(255, 171, 167, 171),
               ),
-              child: const Text(
-                'Temples',
-                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.temple_hindu, size: 30, color: Colors.black), // You can use a temple icon here if available
+                  SizedBox(height: 8),
+                  Text(
+                    'Temples',
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                ],
               ),
             ),
 
-            // Button 3: Winter
+            // Button 3: Trekking Spots
             ElevatedButton(
               onPressed: _navigateToTrekkingSpots,
               style: ElevatedButton.styleFrom(
@@ -106,15 +122,22 @@ class _PlaceState extends State<Place> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                backgroundColor: const Color.fromARGB(255, 171, 167, 171),
               ),
-              child: const Text(
-                'Trekking Spots',
-                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.directions_walk, size: 30, color: Colors.black), // Trekking icon
+                  SizedBox(height: 8),
+                  Text(
+                    'Trekking Spots',
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                ],
               ),
             ),
 
-            // Button 4: Summer
+            // Button 4: Museums & Forts
             ElevatedButton(
               onPressed: _navigateToMuseumsAndForts,
               style: ElevatedButton.styleFrom(
@@ -122,11 +145,18 @@ class _PlaceState extends State<Place> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                backgroundColor:const Color.fromARGB(255, 171, 167, 171),
               ),
-              child: const Text(
-                'Museums & Forts',
-                style: TextStyle(fontSize: 16, color: Colors.black), // Medium font size
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.castle, size: 30, color: Colors.black), // Forts & Museums icon
+                  SizedBox(height: 8),
+                  Text(
+                    'Museums & Forts',
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                ],
               ),
             ),
           ],
