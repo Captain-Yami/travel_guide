@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
+import 'package:travel_guide/distance_calculator.dart';
+import 'package:travel_guide/timecomparison.dart';
 
 class Start extends StatefulWidget {
   const Start({super.key});
@@ -49,7 +51,8 @@ class _StartState extends State<Start> {
   };
 
   // Function to show the popup dialog with checkbox options
-  void _showFilterDialog(BuildContext context, String title, Map<String, bool> options) {
+  void _showFilterDialog(
+      BuildContext context, String title, Map<String, bool> options) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -124,7 +127,7 @@ class _StartState extends State<Start> {
               ),
               onPressed: () async {
                 // Handle apply action
-               /* final selectedFilters = {
+                /* final selectedFilters = {
                   'Budget': budgetOptions.entries
                       .where((entry) => entry.value)
                       .map((entry) => entry.key)
@@ -143,9 +146,7 @@ class _StartState extends State<Start> {
                       .toList(),
                 };*/
 
-
-
-               /* showDialog(
+                /* showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Selected Filters'),
@@ -160,31 +161,53 @@ class _StartState extends State<Start> {
                     ],
                   ),
                 );*/
-                List scheduledDatalist= [];
-                var aidata = await getRecommendedPlaces(currentLocation:[11.97040711534504, 75.66143691162308],
+                List scheduledDatalist = [];
+                try {
+                  // Fetch AI-recommended places
+                  var aidata = await getRecommendedPlaces(
+                    currentLocation: [11.97040711534504, 75.66143691162308],
+                    budget: 100,
+                    availableTime: 2,
+                    maxDistance: 50,
+                    type: 'Beach',
+                  );
 
-                budget: 100,
-                availableTime: 2,
-                maxDistance: 50,
-                type: 'Beach');
-                
-               scheduledDatalist = aidata['recommended_places'].map((e){
-                String place= e['Place Name'];
-                var data =kannurTripPlan.firstWhere((element) {
-                  return element["place name"]==place;
-                },);
-                return data;
-               }).toList();
+                  List tripschedulelist= [];
+                  //calculate distance
 
-                print(scheduledDatalist);
-                var data =kannurTripPlan.firstWhere((element) {
-                  return element["place name"]=="payyambalam Beach";
-                },);
-                
-                var schedule= data["Trip plan"].firstWhere((element){
-                  return element['time']=="6:00 AM";
-                });
-                
+                  var distance= await getRouteDistanceMapMyIndia('11.7636,75.4514','11.983,75.5046','8cf0bcc4bff66a72a7871b09b2da2192');
+                  print(distance);
+                  // Process the recommended places
+                  for (var e in aidata['recommended_places']) {
+                    String place = e['Place Name'];
+
+                    // Find and add matching places from kannurTripPlan
+                    for (var element in kannurTripPlan) {
+                      var data = element;
+                      if (place ==element["place name"]) {
+                        scheduledDatalist.add(element);
+                        break; // Exit loop if match is found
+                      }
+                      if (data != null) {
+                        // Find a specific schedule for "6:00 AM"
+                        var schedule = data["Trip plan"].firstWhere(
+                          (element) =>
+                              isTimeInRange(element['time'], '7:15 AM'),
+                        );
+
+                        if (schedule != null) {
+                          print("Schedule found: $schedule");
+                        } else {
+                          print("No schedule found for 6:00 AM.");
+                        }
+                      } else {
+                        print("No data found for Payyambalam Beach.");
+                      }
+                    }
+                  }
+                } catch (e) {
+                  print('An error occurred: $e');
+                }
               },
               child: const Text(
                 'Apply Filters',
