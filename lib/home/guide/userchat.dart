@@ -71,9 +71,9 @@ class _ChatScreenState extends State<ChatScreen> {
   String get appBarProfilePic {
     final currentUserId = FirebaseAuth.instance.currentUser!.uid;
     if (currentUserId == widget.guideId) {
-      return widget.guideProfilePic; // Show user's profile pic if current user is the guide
+      return widget.userProfilePic; // Show user's profile pic if current user is the guide
     } else {
-      return widget.userProfilePic; // Show guide's profile pic if current user is the user
+      return widget.guideProfilePic; // Show guide's profile pic if current user is the user
     }
   }
 
@@ -145,13 +145,6 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (!isSentByMe)
-                                CircleAvatar(
-                                  radius: 18,
-                                  backgroundImage: NetworkImage(isSentByMe
-                                      ? widget.guideProfilePic
-                                      : widget.userProfilePic), // Show appropriate profile image
-                                ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -162,13 +155,6 @@ class _ChatScreenState extends State<ChatScreen> {
                                   ),
                                 ),
                               ),
-                              if (isSentByMe)
-                                CircleAvatar(
-                                  radius: 18,
-                                  backgroundImage: NetworkImage(isSentByMe
-                                      ? widget.guideProfilePic
-                                      : widget.userProfilePic), // Show appropriate profile image
-                                ),
                             ],
                           ),
                         ),

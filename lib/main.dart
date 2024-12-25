@@ -26,9 +26,11 @@ import 'package:travel_guide/home/admin/screen/admin_users.dart';
 import 'package:travel_guide/home/admin/screen/add_places.dart';
 import 'package:travel_guide/home/user/screen/UserHomePage.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
+import 'package:travel_guide/home/user/screen/start.dart';
 import 'package:travel_guide/intro.dart';
 //import 'package:travel_guide/home/user/place/place.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:travel_guide/schedule.dart';
 import 'firebase_options.dart';
 
 
@@ -37,6 +39,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:MainPage()));}
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:Start()));}
   
  

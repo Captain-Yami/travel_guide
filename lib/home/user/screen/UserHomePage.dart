@@ -5,7 +5,7 @@ import 'package:travel_guide/home/user/guidechat.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
 import 'package:travel_guide/home/user/screen/place/place.dart';
 import 'package:travel_guide/home/recommended.dart';
-import 'package:travel_guide/home/start.dart';
+import 'package:travel_guide/home/user/screen/start.dart';
 import 'package:travel_guide/home/user/screen/Recent.dart';
 import 'package:travel_guide/home/user/screen/User_profile.dart';
 import 'package:travel_guide/home/user/screen/favorites.dart';
@@ -57,7 +57,7 @@ class _MainPageState extends State<MainPage> {
   void _navigateToStart() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const start()),
+      MaterialPageRoute(builder: (context) => const Start()),
     );
   }
 
