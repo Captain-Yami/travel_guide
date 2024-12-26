@@ -1,11 +1,16 @@
 import 'package:intl/intl.dart';
 
+
+
+
+
 bool isTimeInRange(String timeRange, String exactTime) {
   final parts = timeRange.split(" - ");
   if (parts.length != 2) return false;
 
   String startTimeStr = parts[0];
   String endTimeStr = parts[1];
+  print(endTimeStr);
 
   final timeFormat = DateFormat("h:mm a");
   DateTime startTime = timeFormat.parse(startTimeStr);

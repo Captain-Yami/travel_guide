@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
 import 'package:travel_guide/distance_calculator.dart';
+import 'package:travel_guide/experiment.dart';
 import 'package:travel_guide/timecomparison.dart';
 
 class Start extends StatefulWidget {
@@ -172,19 +173,48 @@ class _StartState extends State<Start> {
                     type: 'Beach',
                   );
 
-                  List tripschedulelist= [];
+                  List tripschedulelist = [];
                   //calculate distance
+                  final apiKey =
+                      '5b3ce3597851110001cf6248ff2a3f3c5bdd4ab2bcfbcc4e272c9223';
+                  final origin = [
+                    11.7753,
+                    75.4513
+                  ]; // Example: Muzhappilangad Beach
+                  final destination = [11.2588, 75.7804]; // Example: Kozhikode
 
-                  var distance= await getRouteDistanceMapMyIndia('11.7636,75.4514','11.983,75.5046','8cf0bcc4bff66a72a7871b09b2da2192');
-                  print(distance);
+                  List<dynamic> recommendedPlaces =
+                      aidata['recommended_places'];
+                  List<dynamic> selectedPlaces = [];
+
+// Fetch up to 4 places
+                  for (int i = 0; i < recommendedPlaces.length && i < 4; i++) {
+                    selectedPlaces.add(recommendedPlaces[i]);
+                  }
+
+                  print(selectedPlaces);
+
+                  var startlatitudefirst = 11.97040711534504;
+                  var startlongitudefirst = 75.66143691162308;
+                  userinputtime = '7:00 AM';
+
                   // Process the recommended places
-                  for (var e in aidata['recommended_places']) {
+                  for (var e in selectedPlaces) {
+                    var distance = calculateDistance(
+                        startlatitudefirst,
+                        startlongitudefirst,
+                        e['Location']['Latitude'],
+                        e['Location']['Longitude']);
+                       
+
+              var   userinputtime =   getTimeFromDist(distance, userinputtime);
+                    
                     String place = e['Place Name'];
 
                     // Find and add matching places from kannurTripPlan
                     for (var element in kannurTripPlan) {
                       var data = element;
-                      if (place ==element["place name"]) {
+                      if (place == element["place name"]) {
                         scheduledDatalist.add(element);
                         break; // Exit loop if match is found
                       }
@@ -192,7 +222,7 @@ class _StartState extends State<Start> {
                         // Find a specific schedule for "6:00 AM"
                         var schedule = data["Trip plan"].firstWhere(
                           (element) =>
-                              isTimeInRange(element['time'], '7:15 AM'),
+                              isTimeInRange(element['time'], userinputtime!),
                         );
 
                         if (schedule != null) {
@@ -204,6 +234,9 @@ class _StartState extends State<Start> {
                         print("No data found for Payyambalam Beach.");
                       }
                     }
+
+                    startlatitudefirst = e['Location']['Latitude'];
+                    startlongitudefirst = e['Location']['Longitude'];
                   }
                 } catch (e) {
                   print('An error occurred: $e');
