@@ -3,6 +3,7 @@ import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
 import 'package:travel_guide/distance_calculator.dart';
 import 'package:travel_guide/experiment.dart';
+import 'package:travel_guide/schedule.dart';
 import 'package:travel_guide/timecomparison.dart';
 
 class Start extends StatefulWidget {
@@ -169,7 +170,7 @@ class _StartState extends State<Start> {
                     currentLocation: [11.97040711534504, 75.66143691162308],
                     budget: 100,
                     availableTime: 2,
-                    maxDistance: 50,
+                    maxDistance: 100,
                     type: 'Beach',
                   );
 
@@ -187,7 +188,7 @@ class _StartState extends State<Start> {
                       aidata['recommended_places'];
                   List<dynamic> selectedPlaces = [];
 
-// Fetch up to 4 places
+                  // Fetch up to 4 places
                   for (int i = 0; i < recommendedPlaces.length && i < 4; i++) {
                     selectedPlaces.add(recommendedPlaces[i]);
                   }
@@ -196,7 +197,7 @@ class _StartState extends State<Start> {
 
                   var startlatitudefirst = 11.97040711534504;
                   var startlongitudefirst = 75.66143691162308;
-                  userinputtime = '7:00 AM';
+                  var startTime = '7:00 AM';
 
                   // Process the recommended places
                   for (var e in selectedPlaces) {
@@ -205,38 +206,44 @@ class _StartState extends State<Start> {
                         startlongitudefirst,
                         e['Location']['Latitude'],
                         e['Location']['Longitude']);
-                       
 
-              var   userinputtime =   getTimeFromDist(distance, userinputtime);
-                    
+                    var userinputtime = getTimeFromDist(distance, startTime);
+
                     String place = e['Place Name'];
 
                     // Find and add matching places from kannurTripPlan
+                    var schedule;
                     for (var element in kannurTripPlan) {
                       var data = element;
+                      print('$place === ${element['place name']}');
                       if (place == element["place name"]) {
-                        scheduledDatalist.add(element);
-                        break; // Exit loop if match is found
-                      }
-                      if (data != null) {
-                        // Find a specific schedule for "6:00 AM"
-                        var schedule = data["Trip plan"].firstWhere(
-                          (element) =>
-                              isTimeInRange(element['time'], userinputtime!),
-                        );
+                        if (data != null) {
+                          // Find a specific schedule
+                          schedule = data["Trip plan"].firstWhere(
+                            (element) =>
+                                isTimeInRange(element['time'], userinputtime),
+                            orElse: () =>
+                                <String, dynamic>{}, // Return an empty map
+                          );
 
-                        if (schedule != null) {
-                          print("Schedule found: $schedule");
+                          if (schedule.isNotEmpty) {
+                            print("Schedule found: $schedule");
+                          } else {
+                            print(
+                                "No matching schedule found for $userinputtime.");
+                          }
                         } else {
-                          print("No schedule found for 6:00 AM.");
+                          print("No data found for $place.");
                         }
-                      } else {
-                        print("No data found for Payyambalam Beach.");
                       }
                     }
 
-                    startlatitudefirst = e['Location']['Latitude'];
-                    startlongitudefirst = e['Location']['Longitude'];
+                    if (schedule != null && schedule.isNotEmpty) {
+                      startTime = extractEndTime(schedule['time']);
+                    } else {
+                      print("No valid schedule found for the selected place.");
+                      // Handle cases where there's no valid schedule (e.g., skip the place or set a default time)
+                    }
                   }
                 } catch (e) {
                   print('An error occurred: $e');

@@ -10,7 +10,6 @@ bool isTimeInRange(String timeRange, String exactTime) {
 
   String startTimeStr = parts[0];
   String endTimeStr = parts[1];
-  print(endTimeStr);
 
   final timeFormat = DateFormat("h:mm a");
   DateTime startTime = timeFormat.parse(startTimeStr);
@@ -20,4 +19,16 @@ bool isTimeInRange(String timeRange, String exactTime) {
   return exactTimeDt.isAfter(startTime) && exactTimeDt.isBefore(endTime) ||
       exactTimeDt.isAtSameMomentAs(startTime) ||
       exactTimeDt.isAtSameMomentAs(endTime);
+}
+
+
+// extracting end time
+
+
+String extractEndTime(String timeRange) {
+  // Split the time range using the delimiter " - "
+  List<String> times = timeRange.split(" - ");
+  
+  // Return the second part, which is the end time
+  return times.length > 1 ? times[1].trim() : '';
 }
