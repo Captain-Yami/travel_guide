@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart'; // Import the carousel_slider package
+import 'package:geolocator/geolocator.dart';
 import 'package:travel_guide/home/hotel.dart';
 import 'package:travel_guide/home/user/guidechat.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
@@ -54,12 +55,60 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void _navigateToStart() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Start()),
-    );
+ 
+  Future<void> _navigateToStart() async {
+    try {
+      // Check location permission
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Location services are disabled. Please enable them.');
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Location permissions are denied.');
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception('Location permissions are permanently denied.');
+      }
+
+      // Get current location
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      // Navigate to the "Start" screen and pass the location
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Start(
+            userLocation: {'latitude': position.latitude, 'longitude': position.longitude},
+          ),
+        ),
+      );
+    } catch (e) {
+      // Show an error dialog if location retrieval fails
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
+ 
 
   int _selectedIndex = 0;
 

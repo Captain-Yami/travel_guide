@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
 import 'package:travel_guide/distance_calculator.dart';
-import 'package:travel_guide/experiment.dart';
-import 'package:travel_guide/schedule.dart';
 import 'package:travel_guide/timecomparison.dart';
 
 class Start extends StatefulWidget {
-  const Start({super.key});
+  const Start({super.key, required Map<String, double> userLocation});
 
   @override
   State<Start> createState() => _StartState();
@@ -15,42 +13,42 @@ class Start extends StatefulWidget {
 
 class _StartState extends State<Start> {
   // Filter options with selection states
-  final Map<String, bool> budgetOptions = {
-    '1000-1500': false,
-    '1500-2000': false,
-    '2000-2500': false,
-    '2500-3000': false,
-    '3000-3500': false,
-    '3500-4000': false,
-    '4000-4500': false,
-    '4500-5000': false,
-  };
+  final List<String> budgetOptions = [
+  '1000-1500',
+  '1500-2000',
+  '2000-2500',
+  '2500-3000',
+  '3000-3500',
+  '3500-4000',
+  '4000-4500',
+  '4500-5000',
+];
 
-  final Map<String, bool> timeOptions = {
-    '1 Hour': false,
-    '1.30 Hour': false,
-    '2 Hour': false,
-    '2.30 Hour': false,
-    '3 Hour': false,
-    '3.30 Hour': false,
-    '4 Hour': false,
-  };
+final List<String> timeOptions = [
+  '1 Hour',
+  '1.30 Hour',
+  '2 Hour',
+  '2.30 Hour',
+  '3 Hour',
+  '3.30 Hour',
+  '4 Hour',
+];
 
-  final Map<String, bool> placeOptions = {
-    'Temple': false,
-    'Museum': false,
-    'Beach': false,
-    'Park': false,
-    'Trekking': false,
-  };
+final List<String> placeOptions = [
+  'Temple',
+  'Museum',
+  'Beach',
+  'Park',
+  'Trekking',
+];
 
-  final Map<String, bool> kmOptions = {
-    '0-5 Km': false,
-    '5-10 Km': false,
-    '10-15 Km': false,
-    '15-20 Km': false,
-    '20-25 Km': false,
-  };
+final List<String> kmOptions = [
+  '0-5 Km',
+  '5-10 Km',
+  '10-15 Km',
+  '15-20 Km',
+  '20-25 Km',
+];
 
   // Function to show the popup dialog with checkbox options
   void _showFilterDialog(
@@ -87,6 +85,30 @@ class _StartState extends State<Start> {
     );
   }
 
+  List<Widget> buildFilterChips(List<String> options, Set<String> selectedOptions) {
+  return options.map((option) {
+    return FilterChip(
+      label: Text(option),
+      selected: selectedOptions.contains(option),
+      onSelected: (isSelected) {
+        setState(() {
+          if (isSelected) {
+            selectedOptions.add(option);
+          } else {
+            selectedOptions.remove(option);
+          }
+        });
+      },
+    );
+  }).toList();
+}
+
+ final Set<String> selectedBudgetOptions = {};
+  final Set<String> selectedTimeOptions = {};
+  final Set<String> selectedPlaceOptions = {};
+  final Set<String> selectedKmOptions = {};
+
+  List<Map<String, String>> scheduledTrips = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,22 +119,71 @@ class _StartState extends State<Start> {
       body: Column(
         children: [
           // Filters section
-          Expanded(
+           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // Filter button for Budget
-                buildFilterButton('Budget', budgetOptions),
+                // Budget Filter
+                buildFilterSection('Budget', budgetOptions, selectedBudgetOptions),
                 const SizedBox(height: 10),
-                // Filter button for Time
-                buildFilterButton('Time', timeOptions),
+                // Time Filter
+                buildFilterSection('Time', timeOptions, selectedTimeOptions),
                 const SizedBox(height: 10),
-                // Filter button for Place
-                buildFilterButton('Place', placeOptions),
+                // Place Filter
+                buildFilterSection('Place', placeOptions, selectedPlaceOptions),
                 const SizedBox(height: 10),
-                // Filter button for Distance
-                buildFilterButton('Distance', kmOptions),
+                // Distance Filter
+                buildFilterSection('Distance', kmOptions, selectedKmOptions),
               ],
+            ),
+          ),
+         Expanded(
+            child: ListView.builder(
+              itemCount: scheduledTrips.length,
+              itemBuilder: (context, index) {
+                final schedule = scheduledTrips[index];
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                   onPressed: null,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          schedule['place name'] ?? 'No Place',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          'Time: ${schedule['time'] ?? 'No Time'}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          'activity: ${schedule['activity'] ?? 'No activity'}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 
@@ -128,42 +199,7 @@ class _StartState extends State<Start> {
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
               ),
               onPressed: () async {
-                // Handle apply action
-                /* final selectedFilters = {
-                  'Budget': budgetOptions.entries
-                      .where((entry) => entry.value)
-                      .map((entry) => entry.key)
-                      .toList(),
-                  'Time': timeOptions.entries
-                      .where((entry) => entry.value)
-                      .map((entry) => entry.key)
-                      .toList(),
-                  'Place': placeOptions.entries
-                      .where((entry) => entry.value)
-                      .map((entry) => entry.key)
-                      .toList(),
-                  'Distance': kmOptions.entries
-                      .where((entry) => entry.value)
-                      .map((entry) => entry.key)
-                      .toList(),
-                };*/
 
-                /* showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Selected Filters'),
-                    content: Text(selectedFilters.entries
-                        .map((entry) => '${entry.key}: ${entry.value.join(', ')}')
-                        .join('\n')),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Close'),
-                      ),
-                    ],
-                  ),
-                );*/
-                List scheduledDatalist = [];
                 try {
                   // Fetch AI-recommended places
                   var aidata = await getRecommendedPlaces(
@@ -173,16 +209,6 @@ class _StartState extends State<Start> {
                     maxDistance: 100,
                     type: 'Beach',
                   );
-
-                  List tripschedulelist = [];
-                  //calculate distance
-                  final apiKey =
-                      '5b3ce3597851110001cf6248ff2a3f3c5bdd4ab2bcfbcc4e272c9223';
-                  final origin = [
-                    11.7753,
-                    75.4513
-                  ]; // Example: Muzhappilangad Beach
-                  final destination = [11.2588, 75.7804]; // Example: Kozhikode
 
                   List<dynamic> recommendedPlaces =
                       aidata['recommended_places'];
@@ -240,6 +266,10 @@ class _StartState extends State<Start> {
 
                     if (schedule != null && schedule.isNotEmpty) {
                       startTime = extractEndTime(schedule['time']!);
+                      setState(() {
+                        scheduledTrips
+                            .add(schedule!); // Add the schedule to the list
+                      });
                     } else {
                       print("No valid schedule found for the selected place.");
                       // Handle cases where there's no valid schedule (e.g., skip the place or set a default time)
@@ -261,20 +291,21 @@ class _StartState extends State<Start> {
   }
 
   // Build filter buttons to open the popup dialog
-  Widget buildFilterButton(String title, Map<String, bool> options) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 151, 152, 153),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+  Widget buildFilterSection(String title, List<String> options, Set<String> selectedOptions) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-      ),
-      onPressed: () => _showFilterDialog(context, title, options),
-      child: Text(
-        '$title Filters',
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8.0,
+          runSpacing: 4.0,
+          children: buildFilterChips(options, selectedOptions),
+        ),
+      ],
     );
   }
 }

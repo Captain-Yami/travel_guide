@@ -30,6 +30,7 @@ import 'package:travel_guide/home/user/screen/start.dart';
 import 'package:travel_guide/intro.dart';
 //import 'package:travel_guide/home/user/place/place.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:travel_guide/multiplelocation.dart';
 import 'package:travel_guide/schedule.dart';
 import 'firebase_options.dart';
 
@@ -39,6 +40,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:Start()));}
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:LoginPage()));}
   
+ 
  
