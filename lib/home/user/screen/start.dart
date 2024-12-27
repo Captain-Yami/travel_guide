@@ -121,7 +121,7 @@ class _StartState extends State<Start> {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade900,
+                backgroundColor: const Color.fromARGB(255, 151, 152, 153),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -212,21 +212,21 @@ class _StartState extends State<Start> {
                     String place = e['Place Name'];
 
                     // Find and add matching places from kannurTripPlan
-                    var schedule;
+                    Map<String, String>?
+                        schedule; // Adjusted type to match expectations
                     for (var element in kannurTripPlan) {
                       var data = element;
-                      print('$place === ${element['place name']}');
                       if (place == element["place name"]) {
                         if (data != null) {
                           // Find a specific schedule
                           schedule = data["Trip plan"].firstWhere(
                             (element) =>
                                 isTimeInRange(element['time'], userinputtime),
-                            orElse: () =>
-                                <String, dynamic>{}, // Return an empty map
+                            orElse: () => <String,
+                                String>{}, // Return an empty map of the correct type
                           );
 
-                          if (schedule.isNotEmpty) {
+                          if (schedule!.isNotEmpty) {
                             print("Schedule found: $schedule");
                           } else {
                             print(
@@ -239,7 +239,7 @@ class _StartState extends State<Start> {
                     }
 
                     if (schedule != null && schedule.isNotEmpty) {
-                      startTime = extractEndTime(schedule['time']);
+                      startTime = extractEndTime(schedule['time']!);
                     } else {
                       print("No valid schedule found for the selected place.");
                       // Handle cases where there's no valid schedule (e.g., skip the place or set a default time)
@@ -264,7 +264,7 @@ class _StartState extends State<Start> {
   Widget buildFilterButton(String title, Map<String, bool> options) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue.shade900,
+        backgroundColor: const Color.fromARGB(255, 151, 152, 153),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),

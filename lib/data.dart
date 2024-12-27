@@ -1,6 +1,6 @@
 List<Map<String, dynamic>> kannurTripPlan = [
   {
-    "place name": "Muzhappilangad Drive-in Beach",
+    "place name": "Payyambalam Beach",
     "Trip plan": [
       {
         "time": "6:00 AM - 6:30 AM",
@@ -184,4 +184,96 @@ List<Map<String, dynamic>> kannurTripPlan = [
       }
     ]
   },
+  {
+    "place name": "Muzhappilangad Drive-in Beach",
+    "Trip plan": [
+        {
+            "time": "6:00 AM - 6:30 AM",
+            "activity": "Drive along the pristine sands of the beach and enjoy the cool morning breeze."
+        },
+        {
+            "time": "6:30 AM - 7:00 AM",
+            "activity": "Park your vehicle and walk along the shoreline to experience the gentle waves and peaceful ambiance."
+        },
+        {
+            "time": "7:00 AM - 7:30 AM",
+            "activity": "Set up a picnic spot near the water and enjoy a light breakfast while watching the early morning activities of local fishermen."
+        },
+        {
+            "time": "7:30 AM - 8:00 AM",
+            "activity": "Take some time for photography or explore the unique drive-in beach experience further by driving along the full stretch."
+        },
+        {
+            "time": "8:00 AM - 5:00 PM",
+            "activity": "Relax under the shade of palm trees or explore nearby attractions like Dharmadam Island (accessible during low tide) or try local seafood at beachside shacks."
+        },
+        {
+            "time": "5:00 PM - 5:30 PM",
+            "activity": "Return to the beach for a leisurely drive as the sun begins to set, enjoying the golden glow over the Arabian Sea."
+        },
+        {
+            "time": "5:30 PM - 6:00 PM",
+            "activity": "Witness the stunning sunset while parked along the beach. Capture photos of the colorful horizon."
+        },
+        {
+            "time": "6:00 PM - 6:30 PM",
+            "activity": "Take a walk to feel the cool sand under your feet and listen to the rhythmic waves crashing ashore."
+        },
+        {
+            "time": "6:30 PM - 7:00 PM",
+            "activity": "Enjoy freshly prepared snacks like pazham pori or fried fish from nearby stalls while soaking in the twilight views."
+        },
+        {
+            "time": "7:00 PM - 7:30 PM",
+            "activity": "Unwind in your vehicle or sit on the beach, enjoying the serene night atmosphere under the stars."
+        }
+    ]
+},
+{
+    "place name": "Madayipara",
+    "Trip plan": [
+        {
+            "time": "6:00 AM - 6:30 AM",
+            "activity": "Arrive at Madayipara and start your day with a short hike to enjoy the breathtaking sunrise over the hillock."
+        },
+        {
+            "time": "6:30 AM - 7:00 AM",
+            "activity": "Explore the grasslands and observe the rich flora and fauna. Look out for rare butterflies and endemic plant species."
+        },
+        {
+            "time": "7:00 AM - 7:30 AM",
+            "activity": "Visit the ancient Madayi Kavu Temple and the nearby Vadukunda Shiva Temple, known for their historical and spiritual significance."
+        },
+        {
+            "time": "7:30 AM - 8:00 AM",
+            "activity": "Enjoy a traditional Kerala-style breakfast brought along or purchased from a nearby eatery."
+        },
+        {
+            "time": "8:00 AM - 5:00 PM",
+            "activity": "Spend the day exploring Madayipara's historical landmarks like the remnants of the Pazhassi Raja fort, the historic well, and the watchtower. You can also enjoy a picnic amidst the serene surroundings."
+        },
+        {
+            "time": "5:00 PM - 5:30 PM",
+            "activity": "Stroll around the plateau and enjoy the golden hour, perfect for photography as the setting sun bathes the landscape in a warm glow."
+        },
+        {
+            "time": "5:30 PM - 6:00 PM",
+            "activity": "Sit and relax by the edge of the plateau, soaking in the views of the surrounding valleys and the Arabian Sea in the distance."
+        },
+        {
+            "time": "6:00 PM - 6:30 PM",
+            "activity": "Take a peaceful walk through the grasslands as the day winds down, enjoying the calm atmosphere and cool breeze."
+        },
+        {
+            "time": "6:30 PM - 7:00 PM",
+            "activity": "Wrap up your visit with light snacks and reflect on the beauty of this lesser-known gem in Kerala."
+        },
+        {
+            "time": "7:00 PM - 7:30 PM",
+            "activity": "Depart from Madayipara, leaving with beautiful memories and stunning photographs of this unique hillock."
+        }
+    ]
+},
+
+
 ];
