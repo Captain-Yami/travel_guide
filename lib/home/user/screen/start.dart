@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
 import 'package:travel_guide/distance_calculator.dart';
 import 'package:travel_guide/timecomparison.dart';
+import 'package:geocoding/geocoding.dart';
 
 class Start extends StatefulWidget {
-  const Start({super.key, required Map<String, double> userLocation});
+  Start({super.key, required this.userLocation});
+
+  Map<String, double> userLocation;
 
   @override
   State<Start> createState() => _StartState();
@@ -13,42 +18,44 @@ class Start extends StatefulWidget {
 
 class _StartState extends State<Start> {
   // Filter options with selection states
+  TextEditingController _addressController = TextEditingController();
+
   final List<String> budgetOptions = [
-  '1000-1500',
-  '1500-2000',
-  '2000-2500',
-  '2500-3000',
-  '3000-3500',
-  '3500-4000',
-  '4000-4500',
-  '4500-5000',
-];
+    '1000-1500',
+    '1500-2000',
+    '2000-2500',
+    '2500-3000',
+    '3000-3500',
+    '3500-4000',
+    '4000-4500',
+    '4500-5000',
+  ];
 
-final List<String> timeOptions = [
-  '1 Hour',
-  '1.30 Hour',
-  '2 Hour',
-  '2.30 Hour',
-  '3 Hour',
-  '3.30 Hour',
-  '4 Hour',
-];
+  final List<String> timeOptions = [
+    '1 Hour',
+    '1.30 Hour',
+    '2 Hour',
+    '2.30 Hour',
+    '3 Hour',
+    '3.30 Hour',
+    '4 Hour',
+  ];
 
-final List<String> placeOptions = [
-  'Temple',
-  'Museum',
-  'Beach',
-  'Park',
-  'Trekking',
-];
+  final List<String> placeOptions = [
+    'Temple',
+    'Museum',
+    'Beach',
+    'Park',
+    'Trekking',
+  ];
 
-final List<String> kmOptions = [
-  '0-5 Km',
-  '5-10 Km',
-  '10-15 Km',
-  '15-20 Km',
-  '20-25 Km',
-];
+  final List<String> kmOptions = [
+    '0-5 Km',
+    '5-10 Km',
+    '10-15 Km',
+    '15-20 Km',
+    '20-25 Km',
+  ];
 
   // Function to show the popup dialog with checkbox options
   void _showFilterDialog(
@@ -85,25 +92,45 @@ final List<String> kmOptions = [
     );
   }
 
-  List<Widget> buildFilterChips(List<String> options, Set<String> selectedOptions) {
-  return options.map((option) {
-    return FilterChip(
-      label: Text(option),
-      selected: selectedOptions.contains(option),
-      onSelected: (isSelected) {
+  Future<void> _convertAddressToCoordinates() async {
+    String address = _addressController.text;
+    try {
+      List<Location> locations = await locationFromAddress(address);
+      if (locations != null && locations.isNotEmpty) {
         setState(() {
-          if (isSelected) {
-            selectedOptions.add(option);
-          } else {
-            selectedOptions.remove(option);
-          }
+          double latitude = locations.first.latitude;
+          double longitude = locations.first.longitude;
+          print('Coordinates: Latitude: $latitude, Longitude: $longitude');
         });
-      },
-    );
-  }).toList();
-}
+        // You can now use these coordinates as needed
+      } else {
+        print('No locations found for the provided address.');
+      }
+    } catch (e) {
+      print('Error occurred while converting address to coordinates: $e');
+    }
+  }
 
- final Set<String> selectedBudgetOptions = {};
+  List<Widget> buildFilterChips(
+      List<String> options, Set<String> selectedOptions) {
+    return options.map((option) {
+      return FilterChip(
+        label: Text(option),
+        selected: selectedOptions.contains(option),
+        onSelected: (isSelected) {
+          setState(() {
+            if (isSelected) {
+              selectedOptions.add(option);
+            } else {
+              selectedOptions.remove(option);
+            }
+          });
+        },
+      );
+    }).toList();
+  }
+
+  final Set<String> selectedBudgetOptions = {};
   final Set<String> selectedTimeOptions = {};
   final Set<String> selectedPlaceOptions = {};
   final Set<String> selectedKmOptions = {};
@@ -119,12 +146,24 @@ final List<String> kmOptions = [
       body: Column(
         children: [
           // Filters section
-           Expanded(
+          Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
+                TextField(
+                  controller: _addressController,
+                  decoration: InputDecoration(
+                    labelText: 'Enter the satarting location',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _convertAddressToCoordinates,
+                  child: Text('OK'),
+                ),
                 // Budget Filter
-                buildFilterSection('Budget', budgetOptions, selectedBudgetOptions),
+                buildFilterSection(
+                    'Budget', budgetOptions, selectedBudgetOptions),
                 const SizedBox(height: 10),
                 // Time Filter
                 buildFilterSection('Time', timeOptions, selectedTimeOptions),
@@ -137,7 +176,7 @@ final List<String> kmOptions = [
               ],
             ),
           ),
-         Expanded(
+          Expanded(
             child: ListView.builder(
               itemCount: scheduledTrips.length,
               itemBuilder: (context, index) {
@@ -152,7 +191,7 @@ final List<String> kmOptions = [
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                   onPressed: null,
+                    onPressed: null,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -199,11 +238,16 @@ final List<String> kmOptions = [
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
               ),
               onPressed: () async {
-
                 try {
+                  print(selectedBudgetOptions);
+                  print(selectedTimeOptions);
+
                   // Fetch AI-recommended places
                   var aidata = await getRecommendedPlaces(
-                    currentLocation: [11.97040711534504, 75.66143691162308],
+                    currentLocation: [
+                      widget.userLocation['latitude']!,
+                      widget.userLocation['longitude']!
+                    ],
                     budget: 100,
                     availableTime: 2,
                     maxDistance: 100,
@@ -291,7 +335,8 @@ final List<String> kmOptions = [
   }
 
   // Build filter buttons to open the popup dialog
-  Widget buildFilterSection(String title, List<String> options, Set<String> selectedOptions) {
+  Widget buildFilterSection(
+      String title, List<String> options, Set<String> selectedOptions) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
