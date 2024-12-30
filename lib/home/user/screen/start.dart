@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
@@ -19,6 +18,42 @@ class Start extends StatefulWidget {
 class _StartState extends State<Start> {
   // Filter options with selection states
   TextEditingController _addressController = TextEditingController();
+   Future<void> getCoordinatesFromAddress() async {
+    try {
+  String address = _addressController.text;
+  if (address.isEmpty) {
+    print('Address is empty');
+    return;
+  }
+  print('===============================');
+  List<Location> locations = await locationFromAddress(address);
+  print(locations);
+  setState(() {
+    if (locations.isNotEmpty) {
+    double latitude = locations[0].latitude;
+    double longitude = locations[0].longitude;
+    print('Latitude: $latitude, Longitude: $longitude');
+    setState(() {
+      widget.userLocation['latitude'] = latitude;
+      widget.userLocation['longitude'] = longitude;
+    });
+  } else {
+    print('No locations found for this address.');
+  }
+    
+  });
+  
+} catch (e) {
+  print('Error occurred while fetching coordinates: $e');
+}
+
+  }
+
+
+  String? selectedBudget;
+  String? selectedTime;
+  String? selectedPlace;
+  String? selectedDistance;
 
   final List<String> budgetOptions = [
     '1000-1500',
@@ -57,59 +92,23 @@ class _StartState extends State<Start> {
     '20-25 Km',
   ];
 
-  // Function to show the popup dialog with checkbox options
-  void _showFilterDialog(
-      BuildContext context, String title, Map<String, bool> options) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: options.entries.map((entry) {
-                return CheckboxListTile(
-                  title: Text(entry.key),
-                  value: entry.value,
-                  onChanged: (bool? newValue) {
-                    setState(() {
-                      options[entry.key] = newValue!;
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
+  int _extractMinBudget(String? range) {
+    if (range == null) return 0;
+    return int.parse(range.split('-').first);
   }
 
-  Future<void> _convertAddressToCoordinates() async {
-    String address = _addressController.text;
-    try {
-      List<Location> locations = await locationFromAddress(address);
-      if (locations != null && locations.isNotEmpty) {
-        setState(() {
-          double latitude = locations.first.latitude;
-          double longitude = locations.first.longitude;
-          print('Coordinates: Latitude: $latitude, Longitude: $longitude');
-        });
-        // You can now use these coordinates as needed
-      } else {
-        print('No locations found for the provided address.');
-      }
-    } catch (e) {
-      print('Error occurred while converting address to coordinates: $e');
-    }
+  double _convertTimeToHours(String? time) {
+    if (time == null) return 0.0;
+    return time.contains('Hour')
+        ? double.parse(time.replaceAll(' Hour', '').replaceAll(':', '.'))
+        : 0.0;
   }
+
+  double _extractMaxDistance(String? range) {
+    if (range == null) return 0.0;
+    return double.parse(range.split('-').last.replaceAll(' Km', ''));
+  }
+
 
   List<Widget> buildFilterChips(
       List<String> options, Set<String> selectedOptions) {
@@ -135,6 +134,38 @@ class _StartState extends State<Start> {
   final Set<String> selectedPlaceOptions = {};
   final Set<String> selectedKmOptions = {};
 
+  Widget buildChoiceChipSection(
+      String title, List<String> options, Function(String?) onSelected) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8.0,
+          runSpacing: 4.0,
+          children: options.map((option) {
+            return ChoiceChip(
+              label: Text(option),
+              selected: option == selectedBudget ||
+                  option == selectedTime ||
+                  option == selectedPlace ||
+                  option == selectedDistance,
+              onSelected: (isSelected) {
+                setState(() {
+                  if (isSelected) onSelected(option);
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   List<Map<String, String>> scheduledTrips = [];
   @override
   Widget build(BuildContext context) {
@@ -157,25 +188,27 @@ class _StartState extends State<Start> {
                     border: OutlineInputBorder(),
                   ),
                 ),
+                 // Add a button to trigger the geocoding
                 ElevatedButton(
-                  onPressed: _convertAddressToCoordinates,
-                  child: Text('OK'),
+                  onPressed: getCoordinatesFromAddress,
+                  child: Text('Get Coordinates'),
                 ),
                 // Budget Filter
-                buildFilterSection(
-                    'Budget', budgetOptions, selectedBudgetOptions),
+                buildChoiceChipSection(
+                    'Budget', budgetOptions, (value) => selectedBudget = value),
                 const SizedBox(height: 10),
-                // Time Filter
-                buildFilterSection('Time', timeOptions, selectedTimeOptions),
+                buildChoiceChipSection(
+                    'Time', timeOptions, (value) => selectedTime = value),
                 const SizedBox(height: 10),
-                // Place Filter
-                buildFilterSection('Place', placeOptions, selectedPlaceOptions),
+                buildChoiceChipSection(
+                    'Place', placeOptions, (value) => selectedPlace = value),
                 const SizedBox(height: 10),
-                // Distance Filter
-                buildFilterSection('Distance', kmOptions, selectedKmOptions),
+                buildChoiceChipSection(
+                    'Distance', kmOptions, (value) => selectedDistance = value),
               ],
             ),
           ),
+
           Expanded(
             child: ListView.builder(
               itemCount: scheduledTrips.length,
@@ -239,85 +272,103 @@ class _StartState extends State<Start> {
               ),
               onPressed: () async {
                 try {
-                  print(selectedBudgetOptions);
-                  print(selectedTimeOptions);
+                  if (selectedBudget != null &&
+                      selectedTime != null &&
+                      selectedPlace != null &&
+                      selectedDistance != null) {
+                    int budget = _extractMinBudget(selectedBudget);
+                    double time = _convertTimeToHours(selectedTime);
+                    double distance = _extractMaxDistance(selectedDistance);
+                    String type = selectedPlace!;
 
-                  // Fetch AI-recommended places
-                  var aidata = await getRecommendedPlaces(
-                    currentLocation: [
-                      widget.userLocation['latitude']!,
-                      widget.userLocation['longitude']!
-                    ],
-                    budget: 100,
-                    availableTime: 2,
-                    maxDistance: 100,
-                    type: 'Beach',
-                  );
+                    print('Budget: $budget');
+                    print('Time: $time');
+                    print('Distance: $distance');
+                    print('Type: $type');
+                    
 
-                  List<dynamic> recommendedPlaces =
-                      aidata['recommended_places'];
-                  List<dynamic> selectedPlaces = [];
+                    // Fetch AI-recommended places
+                    var aidata = await getRecommendedPlaces(
+                      currentLocation: [
+                        widget.userLocation['latitude']!,
+                        widget.userLocation['longitude']!
+                      ],
+                      budget: 100,
+                      availableTime: 4,
+                      maxDistance: 100,
+                      type: type,
+                    );
 
-                  // Fetch up to 4 places
-                  for (int i = 0; i < recommendedPlaces.length && i < 4; i++) {
-                    selectedPlaces.add(recommendedPlaces[i]);
-                  }
+                    List<dynamic> recommendedPlaces =
+                        aidata['recommended_places'];
+                    List<dynamic> selectedPlaces = [];
 
-                  print(selectedPlaces);
+                    // Fetch up to 4 places
+                    for (int i = 0;
+                        i < recommendedPlaces.length && i < 4;
+                        i++) {
+                      selectedPlaces.add(recommendedPlaces[i]);
+                    }
 
-                  var startlatitudefirst = 11.97040711534504;
-                  var startlongitudefirst = 75.66143691162308;
-                  var startTime = '7:00 AM';
+                    print(selectedPlaces);
 
-                  // Process the recommended places
-                  for (var e in selectedPlaces) {
-                    var distance = calculateDistance(
-                        startlatitudefirst,
-                        startlongitudefirst,
-                        e['Location']['Latitude'],
-                        e['Location']['Longitude']);
+                    var startlatitudefirst = 11.97040711534504;
+                    var startlongitudefirst = 75.66143691162308;
+                    var startTime = '7:00 AM';
 
-                    var userinputtime = getTimeFromDist(distance, startTime);
+                    // Process the recommended places
+                    for (var e in selectedPlaces) {
+                      var distance = calculateDistance(
+                          startlatitudefirst,
+                          startlongitudefirst,
+                          e['Location']['Latitude'],
+                          e['Location']['Longitude']);
 
-                    String place = e['Place Name'];
+                      var userinputtime = getTimeFromDist(distance, startTime);
 
-                    // Find and add matching places from kannurTripPlan
-                    Map<String, String>?
-                        schedule; // Adjusted type to match expectations
-                    for (var element in kannurTripPlan) {
-                      var data = element;
-                      if (place == element["place name"]) {
-                        if (data != null) {
-                          // Find a specific schedule
-                          schedule = data["Trip plan"].firstWhere(
-                            (element) =>
-                                isTimeInRange(element['time'], userinputtime),
-                            orElse: () => <String,
-                                String>{}, // Return an empty map of the correct type
-                          );
+                      String place = e['Place Name'];
 
-                          if (schedule!.isNotEmpty) {
-                            print("Schedule found: $schedule");
+                      // Find and add matching places from kannurTripPlan
+                      Map<String, String>?
+                          schedule; // Adjusted type to match expectations
+                      for (var element in kannurTripPlan) {
+                        var data = element;
+                        if (place == element["place name"]) {
+                          if (data != null) {
+                            // Find a specific schedule
+                            schedule = data["Trip plan"].firstWhere(
+                              (element) =>
+                                  isTimeInRange(element['time'], userinputtime),
+                              orElse: () => <String,
+                                  String>{}, // Return an empty map of the correct type
+                            );
+
+                            if (schedule!.isNotEmpty) {
+                              print("Schedule found: $schedule");
+                            } else {
+                              print(
+                                  "No matching schedule found for $userinputtime.");
+                            }
                           } else {
-                            print(
-                                "No matching schedule found for $userinputtime.");
+                            print("No data found for $place.");
                           }
-                        } else {
-                          print("No data found for $place.");
                         }
                       }
-                    }
 
-                    if (schedule != null && schedule.isNotEmpty) {
-                      startTime = extractEndTime(schedule['time']!);
-                      setState(() {
-                        scheduledTrips
-                            .add(schedule!); // Add the schedule to the list
-                      });
-                    } else {
-                      print("No valid schedule found for the selected place.");
-                      // Handle cases where there's no valid schedule (e.g., skip the place or set a default time)
+                      if (schedule != null && schedule.isNotEmpty) {
+                        startTime = extractEndTime(schedule['time']!);
+                        setState(() {
+                          scheduledTrips
+                              .add(schedule!); // Add the schedule to the list
+                        });
+                      } else {
+                        print(
+                            "No valid schedule found for the selected place.");
+                        // Handle cases where there's no valid schedule (e.g., skip the place or set a default time)
+                      }
                     }
+                  } else {
+                    print('Please select all filters.');
                   }
                 } catch (e) {
                   print('An error occurred: $e');

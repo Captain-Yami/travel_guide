@@ -5,9 +5,8 @@ import 'package:travel_guide/home/hotel.dart';
 import 'package:travel_guide/home/user/guidechat.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
 import 'package:travel_guide/home/user/screen/place/place.dart';
-import 'package:travel_guide/home/recommended.dart';
+import 'package:travel_guide/home/user/screen/requests.dart';
 import 'package:travel_guide/home/user/screen/start.dart';
-import 'package:travel_guide/home/user/screen/Recent.dart';
 import 'package:travel_guide/home/user/screen/User_profile.dart';
 import 'package:travel_guide/home/user/screen/favorites.dart';
 import 'package:google_fonts/google_fonts.dart';  // Import google_fonts package
@@ -41,21 +40,14 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void _navigateToguidechats() {
-    Navigator.push(
+  void _navigateToRequests() {
+     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ChatsPageguide()),
+      MaterialPageRoute(builder: (context) => const Requests()),
     );
+    // Implement navigation to the requests page.
   }
 
-  void _navigateToRecommended() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Recommended()),
-    );
-  }
-
- 
   Future<void> _navigateToStart() async {
     try {
       // Check location permission
@@ -108,7 +100,6 @@ class _MainPageState extends State<MainPage> {
       );
     }
   }
- 
 
   int _selectedIndex = 0;
 
@@ -126,13 +117,13 @@ class _MainPageState extends State<MainPage> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const Recent()),
+          MaterialPageRoute(builder: (context) => const Favorites()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const Favorites()),
+          MaterialPageRoute(builder: (context) => const ChatsPageguide()),
         );
         break;
       case 3:
@@ -258,10 +249,10 @@ class _MainPageState extends State<MainPage> {
                       children: [
                         Expanded(
                           child: _buildElevatedButton(
-                            icon: Icons.location_on_outlined,
-                            label: 'Place',
+                            icon: Icons.location_city_outlined,
+                            label: 'Hotel',
                             color: const Color.fromARGB(255, 171, 167, 171),
-                            onPressed: _navigateToPlace,
+                            onPressed: _navigateToHotel,
                           ),
                         ),
                         const SizedBox(width: 20),
@@ -273,6 +264,15 @@ class _MainPageState extends State<MainPage> {
                             onPressed: _navigateToGuideDetails,
                           ),
                         ),
+                        const SizedBox(width: 20),
+                         Expanded(
+                          child: _buildElevatedButton(
+                            icon: Icons.request_page_outlined,
+                            label: 'Requests',
+                            color: const Color.fromARGB(255, 171, 167, 171),
+                            onPressed: _navigateToRequests,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -281,19 +281,10 @@ class _MainPageState extends State<MainPage> {
                       children: [
                         Expanded(
                           child: _buildElevatedButton(
-                            icon: Icons.location_city_outlined,
-                            label: 'Hotel',
+                            icon: Icons.location_on_outlined,
+                            label: 'Place',
                             color: const Color.fromARGB(255, 171, 167, 171),
-                            onPressed: _navigateToHotel,
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: _buildElevatedButton(
-                            icon: Icons.chat,
-                            label: 'Chats',
-                            color: const Color.fromARGB(255, 171, 167, 171),
-                            onPressed: _navigateToguidechats,
+                            onPressed: _navigateToPlace,
                           ),
                         ),
                       ],
@@ -302,24 +293,23 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
               ElevatedButton(
-  onPressed: _navigateToStart,
-  style: ElevatedButton.styleFrom(
-    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15), // Increase padding
-    minimumSize: Size(200, 60), // Increase height and make it stretch across the screen
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  ),
-  child: Text(
-    'Start your journey',
-    style: GoogleFonts.roboto(
-      fontSize: 18,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
-    ),
-  ),
-),
-
+                onPressed: _navigateToStart,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15), // Increase padding
+                  minimumSize: Size(200, 60), // Increase height and make it stretch across the screen
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Start your journey',
+                  style: GoogleFonts.roboto(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -332,13 +322,14 @@ class _MainPageState extends State<MainPage> {
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.access_time),
-            label: 'Clock',
-          ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Favorites',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: 'Chats',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
@@ -347,7 +338,7 @@ class _MainPageState extends State<MainPage> {
         ],
         selectedItemColor: const Color.fromARGB(255, 6, 6, 6),
         unselectedItemColor: const Color.fromARGB(255, 6, 6, 6),
-          backgroundColor: Colors.black
+        backgroundColor: Colors.black,
       ),
     );
   }
