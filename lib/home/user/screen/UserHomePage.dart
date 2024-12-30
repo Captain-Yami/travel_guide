@@ -140,30 +140,34 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 42, 41, 41),
-        title: Row(
-          children: [
-            ClipOval(
-              child: Image.asset(
-                'asset/logo3.jpg',
-                fit: BoxFit.cover,
-                height: 40,
-                width: 40,
-              ),
-            ),
-            const SizedBox(width: 120),
-            Text(
-              'Travel Chronicles',
-              style: GoogleFonts.roboto(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: const Color.fromARGB(255, 251, 250, 250),
-              ),
-            ),
-          ],
+     appBar: AppBar(
+  backgroundColor: const Color.fromARGB(255, 42, 41, 41),
+  title: Row(
+    children: [
+      ClipOval(
+        child: Image.asset(
+          'asset/logo3.jpg',
+          fit: BoxFit.cover,
+          height: 40,
+          width: 40,
         ),
       ),
+      const SizedBox(width: 10), // Adjust spacing
+      Expanded(
+        child: Text(
+          'Travel Chronicles',
+          style: GoogleFonts.roboto(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: const Color.fromARGB(255, 251, 250, 250),
+          ),
+          overflow: TextOverflow.ellipsis, // This will prevent overflow when the text is too long
+        ),
+      ),
+    ],
+  ),
+),
+
       body: Container(
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
@@ -251,7 +255,7 @@ class _MainPageState extends State<MainPage> {
                           child: _buildElevatedButton(
                             icon: Icons.location_city_outlined,
                             label: 'Hotel',
-                            color: const Color.fromARGB(255, 171, 167, 171),
+                            color: const Color.fromARGB(255, 240, 240, 240),
                             onPressed: _navigateToHotel,
                           ),
                         ),
@@ -260,7 +264,7 @@ class _MainPageState extends State<MainPage> {
                           child: _buildElevatedButton(
                             icon: Icons.group_outlined,
                             label: 'Guide',
-                            color: const Color.fromARGB(255, 171, 167, 171),
+                            color: const Color.fromARGB(255, 240, 240, 240),
                             onPressed: _navigateToGuideDetails,
                           ),
                         ),
@@ -269,7 +273,7 @@ class _MainPageState extends State<MainPage> {
                           child: _buildElevatedButton(
                             icon: Icons.request_page_outlined,
                             label: 'Requests',
-                            color: const Color.fromARGB(255, 171, 167, 171),
+                            color: const Color.fromARGB(255, 240, 240, 240),
                             onPressed: _navigateToRequests,
                           ),
                         ),
@@ -283,7 +287,7 @@ class _MainPageState extends State<MainPage> {
                           child: _buildElevatedButton(
                             icon: Icons.location_on_outlined,
                             label: 'Place',
-                            color: const Color.fromARGB(255, 171, 167, 171),
+                            color: const Color.fromARGB(255, 240, 240, 240),
                             onPressed: _navigateToPlace,
                           ),
                         ),

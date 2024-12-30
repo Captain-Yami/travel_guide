@@ -132,8 +132,19 @@ class _RequestsState extends State<Requests> with SingleTickerProviderStateMixin
                       guideName,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text(request['description'] ?? 'No description'),
                     trailing: Text(request['status'] ?? 'No status'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RequestDetailsPage(
+                            aboutTrip: request['aboutTrip'] ?? 'No details',
+                            expertise: request['expertise'] ?? 'No expertise',
+                            places: request['places'] ?? 'No places',
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
@@ -167,3 +178,49 @@ class _RequestsState extends State<Requests> with SingleTickerProviderStateMixin
   }
 }
 
+class RequestDetailsPage extends StatelessWidget {
+  final String aboutTrip;
+  final String expertise;
+  final String places;
+
+  const RequestDetailsPage({
+    Key? key,
+    required this.aboutTrip,
+    required this.expertise,
+    required this.places,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Request Details'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'About Trip:',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text(aboutTrip),
+            const SizedBox(height: 20),
+            Text(
+              'Expertise:',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text(expertise),
+            const SizedBox(height: 20),
+            Text(
+              'Places:',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text(places),
+          ],
+        ),
+      ),
+    );
+  }
+}

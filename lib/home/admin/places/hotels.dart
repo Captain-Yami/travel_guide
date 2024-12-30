@@ -90,9 +90,9 @@ class _HotelsState extends State<Hotels> {
           );
         },
       ),
-       floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to the AddBeachScreen
+          // Navigate to the HotelsDetails screen for adding new hotels
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -100,12 +100,10 @@ class _HotelsState extends State<Hotels> {
             ),
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         backgroundColor: Colors.blueGrey[800],
       ),
     );
-  }
-    
   }
 
   // Function to show the confirmation dialog before deleting a hotel
@@ -128,9 +126,9 @@ class _HotelsState extends State<Hotels> {
               onPressed: () async {
                 // Delete the hotel document from Firestore
                 await FirebaseFirestore.instance
-                .collection('Hotels')
-                .doc(hotelId)
-                .delete();
+                    .collection('Hotels')
+                    .doc(hotelId)
+                    .delete();
 
                 // Show a confirmation message
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -147,6 +145,7 @@ class _HotelsState extends State<Hotels> {
       },
     );
   }
+}
 
 class HotelDetails extends StatefulWidget {
   final String hotelId;

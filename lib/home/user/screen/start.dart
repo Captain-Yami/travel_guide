@@ -26,7 +26,7 @@ class _StartState extends State<Start> {
     return;
   }
   print('===============================');
-  List<Location> locations = await locationFromAddress(address);
+  List<Location> locations = await locationFromAddress(_addressController.text);
   print(locations);
   setState(() {
     if (locations.isNotEmpty) {
@@ -190,7 +190,7 @@ class _StartState extends State<Start> {
                 ),
                  // Add a button to trigger the geocoding
                 ElevatedButton(
-                  onPressed: getCoordinatesFromAddress,
+                  onPressed: getCoordinatesFromAddress, 
                   child: Text('Get Coordinates'),
                 ),
                 // Budget Filter
@@ -293,9 +293,9 @@ class _StartState extends State<Start> {
                         widget.userLocation['latitude']!,
                         widget.userLocation['longitude']!
                       ],
-                      budget: 100,
-                      availableTime: 4,
-                      maxDistance: 100,
+                      budget: budget,
+                      availableTime: time,
+                      maxDistance: distance,
                       type: type,
                     );
 
