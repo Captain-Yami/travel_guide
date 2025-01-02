@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
 import 'package:travel_guide/distance_calculator.dart';
 import 'package:travel_guide/timecomparison.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:travel_guide/serach_location.dart';
+import 'package:http/http.dart' as http;
 
 class Start extends StatefulWidget {
   Start({super.key, required this.userLocation});
@@ -18,37 +21,9 @@ class Start extends StatefulWidget {
 class _StartState extends State<Start> {
   // Filter options with selection states
   TextEditingController _addressController = TextEditingController();
-   Future<void> getCoordinatesFromAddress() async {
-    try {
-  String address = _addressController.text;
-  if (address.isEmpty) {
-    print('Address is empty');
-    return;
-  }
-  print('===============================');
-  List<Location> locations = await locationFromAddress(_addressController.text);
-  print(locations);
-  setState(() {
-    if (locations.isNotEmpty) {
-    double latitude = locations[0].latitude;
-    double longitude = locations[0].longitude;
-    print('Latitude: $latitude, Longitude: $longitude');
-    setState(() {
-      widget.userLocation['latitude'] = latitude;
-      widget.userLocation['longitude'] = longitude;
-    });
-  } else {
-    print('No locations found for this address.');
-  }
-    
-  });
-  
-} catch (e) {
-  print('Error occurred while fetching coordinates: $e');
-}
-
-  }
-
+  String _latitude = "";
+  String _longitude = "";
+  String _errorMessage = "";
 
   String? selectedBudget;
   String? selectedTime;
@@ -56,14 +31,11 @@ class _StartState extends State<Start> {
   String? selectedDistance;
 
   final List<String> budgetOptions = [
-    '1000-1500',
-    '1500-2000',
-    '2000-2500',
-    '2500-3000',
-    '3000-3500',
-    '3500-4000',
-    '4000-4500',
-    '4500-5000',
+    '0-100',
+    '100-200',
+    '200-300',
+    '300-400',
+    '400-500',
   ];
 
   final List<String> timeOptions = [
@@ -85,11 +57,11 @@ class _StartState extends State<Start> {
   ];
 
   final List<String> kmOptions = [
-    '0-5 Km',
-    '5-10 Km',
-    '10-15 Km',
-    '15-20 Km',
-    '20-25 Km',
+    '30-40 Km',
+    '40-50 Km',
+    '50-60 Km',
+    '60-70 Km',
+    '70-80 Km',
   ];
 
   int _extractMinBudget(String? range) {
@@ -108,7 +80,6 @@ class _StartState extends State<Start> {
     if (range == null) return 0.0;
     return double.parse(range.split('-').last.replaceAll(' Km', ''));
   }
-
 
   List<Widget> buildFilterChips(
       List<String> options, Set<String> selectedOptions) {
@@ -166,6 +137,31 @@ class _StartState extends State<Start> {
     );
   }
 
+  Future<Map<String, double>> getCoordinates(String location) async {
+    final String apiKey =
+        'ccc08d8bd6a4487fa52aa6fd4dc0794a'; // Replace with your OpenCage API key
+    final String url =
+        'https://api.opencagedata.com/geocode/v1/json?q=${Uri.encodeComponent(location)}&key=$apiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['results'].isNotEmpty) {
+          final double lat = data['results'][0]['geometry']['lat'];
+          final double lng = data['results'][0]['geometry']['lng'];
+          return {'latitude': lat, 'longitude': lng};
+        } else {
+          throw Exception("Location not found!");
+        }
+      } else {
+        throw Exception("Error: ${response.reasonPhrase}");
+      }
+    } catch (e) {
+      throw Exception("An error occurred: $e");
+    }
+  }
+
   List<Map<String, String>> scheduledTrips = [];
   @override
   Widget build(BuildContext context) {
@@ -184,15 +180,68 @@ class _StartState extends State<Start> {
                 TextField(
                   controller: _addressController,
                   decoration: InputDecoration(
-                    labelText: 'Enter the satarting location',
                     border: OutlineInputBorder(),
+                    labelText: "Enter Location",
+                    hintText: "e.g., New York, Eiffel Tower",
                   ),
                 ),
-                 // Add a button to trigger the geocoding
+                SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: getCoordinatesFromAddress, 
-                  child: Text('Get Coordinates'),
+                  onPressed: () async {
+                    String address = _addressController.text;
+
+                    if (address.isEmpty) {
+                      print('Please enter an address.');
+                      return;
+                    }
+
+                    try {
+                      // Fetch the latitude and longitude using getCoordinates
+                      Map<String, double> coordinates =
+                          await getCoordinates(address);
+
+                      // Use the coordinates
+                      print(
+                          'Latitude: ${coordinates['latitude']}, Longitude: ${coordinates['longitude']}');
+
+                      setState(() {
+                        widget.userLocation =
+                            coordinates; // Update userLocation in the widget
+                      });
+
+                      // Optionally, use these coordinates for further processing
+                      var latitude = coordinates['latitude'];
+                      var longitude = coordinates['longitude'];
+
+                      // Example: Print or pass these values into another function
+                      print(
+                          'Coordinates received: Latitude - $latitude, Longitude - $longitude');
+
+                      // Use the coordinates with any other logic
+                      // e.g., Pass them to other functions or make API calls
+                    } catch (e) {
+                      print('Error fetching coordinates: $e');
+                    }
+                  },
+                  child: const Text('Get Coordinates'),
                 ),
+
+                SizedBox(height: 16),
+                if (_latitude.isNotEmpty && _longitude.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Latitude: $_latitude",
+                          style: TextStyle(fontSize: 16)),
+                      Text("Longitude: $_longitude",
+                          style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                if (_errorMessage.isNotEmpty)
+                  Text(
+                    _errorMessage,
+                    style: TextStyle(color: Colors.red, fontSize: 16),
+                  ),
                 // Budget Filter
                 buildChoiceChipSection(
                     'Budget', budgetOptions, (value) => selectedBudget = value),
@@ -285,87 +334,94 @@ class _StartState extends State<Start> {
                     print('Time: $time');
                     print('Distance: $distance');
                     print('Type: $type');
-                    
 
-                    // Fetch AI-recommended places
-                    var aidata = await getRecommendedPlaces(
-                      currentLocation: [
-                        widget.userLocation['latitude']!,
-                        widget.userLocation['longitude']!
-                      ],
-                      budget: budget,
-                      availableTime: time,
-                      maxDistance: distance,
-                      type: type,
-                    );
+                    // Ensure coordinates are available
+                    if (widget.userLocation['latitude'] != null &&
+                        widget.userLocation['longitude'] != null) {
+                      double latitude = widget.userLocation['latitude']!;
+                      double longitude = widget.userLocation['longitude']!;
 
-                    List<dynamic> recommendedPlaces =
-                        aidata['recommended_places'];
-                    List<dynamic> selectedPlaces = [];
+                      print('Using Latitude: $latitude, Longitude: $longitude');
 
-                    // Fetch up to 4 places
-                    for (int i = 0;
-                        i < recommendedPlaces.length && i < 4;
-                        i++) {
-                      selectedPlaces.add(recommendedPlaces[i]);
-                    }
+                      // Fetch AI-recommended places
+                      var aidata = await getRecommendedPlaces(
+                        currentLocation: [latitude, longitude],
+                        budget: budget,
+                        availableTime: time,
+                        maxDistance: distance,
+                        type: type,
+                      );
 
-                    print(selectedPlaces);
+                      List<dynamic> recommendedPlaces =
+                          aidata['recommended_places'];
+                      List<dynamic> selectedPlaces = [];
 
-                    var startlatitudefirst = 11.97040711534504;
-                    var startlongitudefirst = 75.66143691162308;
-                    var startTime = '7:00 AM';
+                      // Fetch up to 4 places
+                      for (int i = 0;
+                          i < recommendedPlaces.length && i < 4;
+                          i++) {
+                        selectedPlaces.add(recommendedPlaces[i]);
+                      }
 
-                    // Process the recommended places
-                    for (var e in selectedPlaces) {
-                      var distance = calculateDistance(
-                          startlatitudefirst,
-                          startlongitudefirst,
-                          e['Location']['Latitude'],
-                          e['Location']['Longitude']);
+                      print(selectedPlaces);
 
-                      var userinputtime = getTimeFromDist(distance, startTime);
+                      var startlatitudefirst = latitude;
+                      var startlongitudefirst = longitude;
+                      var startTime = '7:00 AM';
 
-                      String place = e['Place Name'];
+                      // Process the recommended places
+                      for (var e in selectedPlaces) {
+                        var distance = calculateDistance(
+                            startlatitudefirst,
+                            startlongitudefirst,
+                            e['Location']['Latitude'],
+                            e['Location']['Longitude']);
 
-                      // Find and add matching places from kannurTripPlan
-                      Map<String, String>?
-                          schedule; // Adjusted type to match expectations
-                      for (var element in kannurTripPlan) {
-                        var data = element;
-                        if (place == element["place name"]) {
-                          if (data != null) {
-                            // Find a specific schedule
-                            schedule = data["Trip plan"].firstWhere(
-                              (element) =>
-                                  isTimeInRange(element['time'], userinputtime),
-                              orElse: () => <String,
-                                  String>{}, // Return an empty map of the correct type
-                            );
+                        var userinputtime =
+                            getTimeFromDist(distance, startTime);
 
-                            if (schedule!.isNotEmpty) {
-                              print("Schedule found: $schedule");
+                        String place = e['Place Name'];
+
+                        // Find and add matching places from kannurTripPlan
+                        Map<String, String>?
+                            schedule; // Adjusted type to match expectations
+                        for (var element in kannurTripPlan) {
+                          var data = element;
+                          if (place == element["place name"]) {
+                            if (data != null) {
+                              // Find a specific schedule
+                              schedule = data["Trip plan"].firstWhere(
+                                (element) => isTimeInRange(
+                                    element['time'], userinputtime),
+                                orElse: () => <String,
+                                    String>{}, // Return an empty map of the correct type
+                              );
+
+                              if (schedule!.isNotEmpty) {
+                                print("Schedule found: $schedule");
+                              } else {
+                                print(
+                                    "No matching schedule found for $userinputtime.");
+                              }
                             } else {
-                              print(
-                                  "No matching schedule found for $userinputtime.");
+                              print("No data found for $place.");
                             }
-                          } else {
-                            print("No data found for $place.");
                           }
                         }
-                      }
 
-                      if (schedule != null && schedule.isNotEmpty) {
-                        startTime = extractEndTime(schedule['time']!);
-                        setState(() {
-                          scheduledTrips
-                              .add(schedule!); // Add the schedule to the list
-                        });
-                      } else {
-                        print(
-                            "No valid schedule found for the selected place.");
-                        // Handle cases where there's no valid schedule (e.g., skip the place or set a default time)
+                        if (schedule != null && schedule.isNotEmpty) {
+                          startTime = extractEndTime(schedule['time']!);
+                          setState(() {
+                            scheduledTrips
+                                .add(schedule!); // Add the schedule to the list
+                          });
+                        } else {
+                          print(
+                              "No valid schedule found for the selected place.");
+                        }
                       }
+                    } else {
+                      print('User location not set. Please enter an address.');
                     }
                   } else {
                     print('Please select all filters.');

@@ -32,6 +32,7 @@ import 'package:travel_guide/intro.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:travel_guide/multiplelocation.dart';
 import 'package:travel_guide/schedule.dart';
+import 'package:travel_guide/serach_location.dart';
 import 'firebase_options.dart';
 
 
