@@ -29,6 +29,17 @@ class _StartState extends State<Start> {
   String? selectedTime;
   String? selectedPlace;
   String? selectedDistance;
+  String? selectedStartTime;
+
+  final List<String> startTimeOptions = [
+    '6:00 AM',
+    '7:00 AM',
+    '8:00 AM',
+    '9:00 AM',
+    '10:00 AM',
+    '11:00 AM',
+    '12:00 PM',
+  ];
 
   final List<String> budgetOptions = [
     '0-100',
@@ -121,7 +132,8 @@ class _StartState extends State<Start> {
           children: options.map((option) {
             return ChoiceChip(
               label: Text(option),
-              selected: option == selectedBudget ||
+              selected: option == selectedStartTime ||
+                  option == selectedBudget ||
                   option == selectedTime ||
                   option == selectedPlace ||
                   option == selectedDistance,
@@ -243,6 +255,8 @@ class _StartState extends State<Start> {
                     style: TextStyle(color: Colors.red, fontSize: 16),
                   ),
                 // Budget Filter
+                buildChoiceChipSection('Start Time', startTimeOptions,
+                    (value) => selectedStartTime = value),
                 buildChoiceChipSection(
                     'Budget', budgetOptions, (value) => selectedBudget = value),
                 const SizedBox(height: 10),
@@ -324,7 +338,8 @@ class _StartState extends State<Start> {
                   if (selectedBudget != null &&
                       selectedTime != null &&
                       selectedPlace != null &&
-                      selectedDistance != null) {
+                      selectedDistance != null &&
+                      selectedStartTime != null) {
                     int budget = _extractMinBudget(selectedBudget);
                     double time = _convertTimeToHours(selectedTime);
                     double distance = _extractMaxDistance(selectedDistance);
@@ -367,7 +382,7 @@ class _StartState extends State<Start> {
 
                       var startlatitudefirst = latitude;
                       var startlongitudefirst = longitude;
-                      var startTime = '7:00 AM';
+                      var startTime = selectedStartTime;
 
                       // Process the recommended places
                       for (var e in selectedPlaces) {
@@ -378,7 +393,7 @@ class _StartState extends State<Start> {
                             e['Location']['Longitude']);
 
                         var userinputtime =
-                            getTimeFromDist(distance, startTime);
+                            getTimeFromDist(distance, startTime!);
 
                         String place = e['Place Name'];
 
@@ -461,3 +476,4 @@ class _StartState extends State<Start> {
     );
   }
 }
+

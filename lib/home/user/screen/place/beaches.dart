@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../service/userfirebaseFavourites.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class Beaches extends StatefulWidget {
   const Beaches({super.key});
@@ -149,6 +150,7 @@ class _BeachesState extends State<Beaches> {
   }
 }
 
+
 class BeachDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> beach;
 
@@ -208,27 +210,38 @@ class BeachDetailsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16.0), // Space between description and image
 
-              // Image of the beach (if available)
-              beach['imageUrl'] != null
-                  ? ClipRRect(
+              // Image carousel
+              if (beach['imageUrl'] != null && beach['imageUrl'] is List<dynamic>)
+                CarouselSlider(
+                  items: (beach['imageUrl'] as List<dynamic>).map((imageUrl) {
+                    return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
-                        beach['imageUrl'],
+                        imageUrl,
                         width: double.infinity,
-                        height: 300,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                       ),
-                    )
-                  : Container(
-                      width: double.infinity,
-                      height: 300,
-                      color: Colors.blueGrey[100],
-                      child: const Icon(
-                        Icons.beach_access,
-                        size: 50,
-                        color: Colors.blueGrey,
-                      ),
-                    ),
+                    );
+                  }).toList(),
+                  options: CarouselOptions(
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    autoPlayInterval: const Duration(seconds: 2),
+                    height: 300,
+                    viewportFraction: 1.0,
+                  ),
+                )
+              else
+                Container(
+                  width: double.infinity,
+                  height: 400,
+                  color: Colors.blueGrey[100],
+                  child: const Icon(
+                    Icons.beach_access,
+                    size: 50,
+                    color: Colors.blueGrey,
+                  ),
+                ),
             ],
           ),
         ),

@@ -21,21 +21,22 @@ class _AddLocationDetailsPageState extends State<BeachesDetails> {
   TextEditingController openingTimeController = TextEditingController();
   TextEditingController closingTimeController = TextEditingController();
 
-  File? _image;
+  List<File> _images = [];
   bool isUploading = false;
-final Cloudinary cloudinary = Cloudinary.signedConfig(
-    cloudName: 'db2nki9dh',  // Replace with your Cloudinary cloud name
-    apiKey: '894239764992456',  // Replace with your API key
-    apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',  // Replace with your API secret
+
+  final Cloudinary cloudinary = Cloudinary.signedConfig(
+    cloudName: 'db2nki9dh', // Replace with your Cloudinary cloud name
+    apiKey: '894239764992456', // Replace with your API key
+    apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0', // Replace with your API secret
   );
-  // Function to pick an image from the gallery or camera
+
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final List<XFile>? pickedFiles = await picker.pickMultiImage();
 
-    if (pickedFile != null) {
+    if (pickedFiles != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _images.addAll(pickedFiles.map((file) => File(file.path)));
       });
     }
   }
@@ -50,65 +51,76 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
     super.dispose();
   }
 
-  // Function to upload image to Cloudinary and return the image URL
-  Future<String?> _uploadImageToCloudinary() async {
-    if (_image == null) return null;
-
+  Future<List<String>> _uploadImagesToCloudinary() async {
+    List<String> imageUrls = [];
     setState(() {
       isUploading = true;
     });
 
-    // Uploading the image to Cloudinary
-    final response = await cloudinary.upload(
-      file: _image!.path,
-      resourceType: CloudinaryResourceType.image,
-      folder: 'beaches',  // Specify folder as 'beaches'
-      fileName: 'beach_${DateTime.now().millisecondsSinceEpoch}',
-    );
+    for (var image in _images) {
+      final response = await cloudinary.upload(
+        file: image.path,
+        resourceType: CloudinaryResourceType.image,
+        folder: 'beaches',
+        fileName: 'beach_${DateTime.now().millisecondsSinceEpoch}',
+      );
+
+      if (response.isSuccessful) {
+        imageUrls.add(response.secureUrl!);
+      } else {
+        setState(() {
+          isUploading = false;
+        });
+        return [];
+      }
+    }
 
     setState(() {
       isUploading = false;
     });
-
-    if (response.isSuccessful) {
-      return response.secureUrl;  // Return the secure URL of the uploaded image
-    } else {
-      // Handle error in uploading image
-      return null;
-    }
+    return imageUrls;
   }
 
-  // Function to submit the form and add the data to Firestore
   void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Upload the image first and get the URL
-      final imageUrl = await _uploadImageToCloudinary();
+      if (_images.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select at least one image.')),
+        );
+        return;
+      }
 
-      if (imageUrl != null) {
-        // Now store the data in Firestore
-        FirebaseFirestore.instance.collection('Places').doc('Locations').collection('Beaches').add({
+      final imageUrls = await _uploadImagesToCloudinary();
+
+      if (imageUrls.isNotEmpty) {
+        FirebaseFirestore.instance
+            .collection('Places')
+            .doc('Locations')
+            .collection('Beaches')
+            .add({
           'name': nameController.text,
           'description': descriptionController.text,
           'seasonalTime': seasonalTimeController.text,
           'openingTime': openingTimeController.text,
           'closingTime': closingTimeController.text,
-          'imageUrl': imageUrl,  // Save the image URL
+          'imageUrl': imageUrls, // Save the list of image URLs
           'createdAt': Timestamp.now(),
         }).then((value) {
-          // Show success message and reset the form
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Beach details added successfully!')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Beach details added successfully!')));
           _clearForm();
         }).catchError((error) {
-          // Handle error while adding data to Firestore
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add data: $error')));
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to add data: $error')));
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Image upload failed!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Image upload failed!')),
+        );
       }
     }
   }
 
-  // Clear the form fields
   void _clearForm() {
     nameController.clear();
     descriptionController.clear();
@@ -116,7 +128,7 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
     openingTimeController.clear();
     closingTimeController.clear();
     setState(() {
-      _image = null;
+      _images = [];
     });
   }
 
@@ -134,7 +146,6 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image upload section
               GestureDetector(
                 onTap: _pickImage,
                 child: Container(
@@ -143,14 +154,8 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
-                    image: _image != null
-                        ? DecorationImage(
-                            image: FileImage(_image!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
                   ),
-                  child: _image == null
+                  child: _images.isEmpty
                       ? Center(
                           child: Icon(
                             Icons.camera_alt,
@@ -158,18 +163,45 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
                             size: 50,
                           ),
                         )
-                      : null,
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _images.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Stack(
+                                children: [
+                                  Image.file(
+                                    _images[index],
+                                    width: 150,
+                                    height: 150,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: IconButton(
+                                      icon: Icon(Icons.remove_circle, color: Colors.red),
+                                      onPressed: () {
+                                        setState(() {
+                                          _images.removeAt(index);
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                 ),
               ),
               SizedBox(height: 20),
-              
               Text(
                 'Enter details for ${widget.locationType}:',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
-              
-              // Name text field
               TextFormField(
                 controller: nameController,
                 decoration: InputDecoration(
@@ -184,8 +216,6 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
                 },
               ),
               SizedBox(height: 20),
-
-              // Description text field
               TextFormField(
                 controller: descriptionController,
                 maxLines: 4,
@@ -201,8 +231,6 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
                 },
               ),
               SizedBox(height: 20),
-
-              // Seasonal Time text field
               TextFormField(
                 controller: seasonalTimeController,
                 decoration: InputDecoration(
@@ -217,8 +245,6 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
                 },
               ),
               SizedBox(height: 20),
-
-              // Opening Time text field
               TextFormField(
                 controller: openingTimeController,
                 decoration: InputDecoration(
@@ -233,8 +259,6 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
                 },
               ),
               SizedBox(height: 20),
-
-              // Closing Time text field
               TextFormField(
                 controller: closingTimeController,
                 decoration: InputDecoration(
@@ -249,10 +273,8 @@ final Cloudinary cloudinary = Cloudinary.signedConfig(
                 },
               ),
               SizedBox(height: 20),
-
-              // Submit button
               ElevatedButton(
-                onPressed: isUploading ? null : _submitForm,  // Disable when uploading
+                onPressed: isUploading ? null : _submitForm,
                 child: isUploading
                     ? CircularProgressIndicator(color: Colors.white)
                     : Text('Submit'),
