@@ -11,6 +11,7 @@ import 'package:travel_guide/home/guide/screen/availability.dart';
 import 'package:travel_guide/home/guide/screen/availability.dart';
 import 'package:travel_guide/home/guide/screen/guide_profile.dart';
 import 'package:travel_guide/home/guide/screen/req.dart';
+import 'package:travel_guide/home/guide/screen/user_feedback.dart';
 import 'package:travel_guide/home/user/screen/start.dart';
 import 'package:travel_guide/home/user/screen/Recent.dart';
 import 'package:travel_guide/home/user/screen/User_profile.dart';
@@ -40,7 +41,7 @@ class _MainPageState extends State<GuideHomepage> {
   void _navigateToreq() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const GuideDashboard()), // Replace with actual destination widget
+      MaterialPageRoute(builder: (context) => const UserFeedback()), // Replace with actual destination widget
     );
   }
 
@@ -632,7 +633,7 @@ AppBar _buildAppBar() {
                         // Button 2: Guide
                         _buildGridButton(
                           icon: Icons.star,
-                          label: 'Ratings',
+                          label: 'Feedback',
                           onPressed: _navigateToreq,
                         ),
                       ],
