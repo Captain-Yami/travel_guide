@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:travel_guide/select_user.dart';
-import 'package:travel_guide/services/login_services.dart'; 
+import 'package:travel_guide/services/login_services.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -8,14 +8,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Controllers to manage the input text
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  // GlobalKey for form validation
   final _formKey = GlobalKey<FormState>();
 
-  // Method to handle login action
   bool loading = false;
   bool _obscurePassword = true;
 
@@ -27,18 +23,17 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Call the login function
     await LoginServiceFire().LoginService(
       email: email,
       password: password,
       context: context,
     );
+
     setState(() {
       loading = false;
     });
   }
 
-  // Method to handle navigation to Signup page
   void _navigateToSignup() {
     Navigator.push(
       context,
@@ -50,109 +45,196 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black, // Black color for AppBar
-        foregroundColor: Colors.white, // White color for text in AppBar
+        backgroundColor: Color(0xFF0C1615), // Black app bar
+        foregroundColor: Colors.white,
       ),
-      backgroundColor: Colors.white, // Set background color to white
-      body: SingleChildScrollView(  // Make the entire form scrollable
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey, // Attach the form key to the Form widget
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                // Add the text at the top center
-                Text(
-                  'LOGIN',
-                  style: TextStyle(
-                    fontSize: 30, // Set font size
-                    color: Colors.black, // Set text color
-                    fontWeight: FontWeight.bold, // Bold text style
-                  ),
-                  textAlign: TextAlign.center, // Center align the text
-                ),
-                SizedBox(height: 100), // Add some spacing
-
-                // Email field with validation and oval shape
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email Address',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30), // Oval shape
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email address';
-                    } else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                        .hasMatch(value)) {
-                      return 'Please enter a valid email address';
-                    }
-                    return null; // Return null if the input is valid
-                  },
-                ),
-                SizedBox(height: 20),
-
-                // Password field with validation and oval shape
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30), // Oval shape
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+      body: Stack(
+        children: [
+          // Custom Painted Background
+          CustomPaint(
+            size: Size(double.infinity, double.infinity),
+            painter: BackgroundPainter(),
+          ),
+          // Login Form
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(height: 100),
+                    Text(
+                      'LOGIN',
+                      style: TextStyle(
+                        fontSize: 30,
+                        color: Colors.greenAccent,
+                        fontWeight: FontWeight.bold,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword; // Toggle password visibility
-                        });
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 50),
+
+                    // Email field
+                    TextFormField(
+                      controller: _emailController,
+                      style: TextStyle(color: Colors.green),
+                      decoration: InputDecoration(
+                        labelText: 'Email Address',
+                        labelStyle: TextStyle(color: Colors.greenAccent),
+                        filled: true,
+                        fillColor: Colors.black.withOpacity(0.7),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: Colors.green),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email address';
+                        } else if (!RegExp(
+                                r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                            .hasMatch(value)) {
+                          return 'Please enter a valid email address';
+                        }
+                        return null;
                       },
                     ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    } else if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
-                      // Password should contain at least one lowercase, one uppercase, and one digit
-                      return 'Password must include at least one uppercase letter, one lowercase letter, and one number';
-                    }
-                    return null; // Return null if the input is valid
-                  },
-                ),
-                SizedBox(height: 20),
+                    SizedBox(height: 20),
 
-                // Login button
-                ElevatedButton(
-                  onPressed: LoginHandler, // Trigger login logic
-                  child: Text('Login'),
-                ),
-                SizedBox(height: 10),
-
-                // Redirect to Signup page
-                TextButton(
-                  onPressed: _navigateToSignup, // Navigate to Signup page
-                  child: Text(
-                    'Create account',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14, // Increased font size for better readability
-                      color: const Color(0xFF123E03),
+                    // Password field
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      style: TextStyle(color: Colors.green),
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        labelStyle: TextStyle(color: Colors.greenAccent),
+                        filled: true,
+                        fillColor: Colors.black.withOpacity(0.7),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: Colors.green),
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.greenAccent,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        } else if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)')
+                            .hasMatch(value)) {
+                          return 'Password must include at least one uppercase letter, one lowercase letter, and one number';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
+                    SizedBox(height: 20),
+
+                    // Login button
+                    ElevatedButton(
+                      onPressed: LoginHandler,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                      ),
+                      child: Text(
+                        'Login',
+                        style: TextStyle(color: Colors.greenAccent),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+
+                    // Redirect to Signup page
+                    TextButton(
+                      onPressed: _navigateToSignup,
+                      child: Text(
+                        'Create account',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.greenAccent,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
+  }
+}
+
+// Custom Painter for Background
+class BackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()..style = PaintingStyle.fill;
+
+    // Background color (Dark Green)
+    paint.color = Color(0xFF0C1615);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+
+    // Light Green Strips
+    paint.color = Color(0xFF3CA55C);
+    var path1 = Path();
+    path1.moveTo(0, size.height * 0.75);
+    path1.lineTo(size.width, size.height * 0.65);
+    path1.lineTo(size.width, size.height);
+    path1.lineTo(0, size.height);
+    path1.close();
+    canvas.drawPath(path1, paint);
+
+    // Medium Green Strip
+    paint.color = Color(0xFF2E8B57);
+    var path2 = Path();
+    path2.moveTo(0, size.height * 0.85);
+    path2.lineTo(size.width, size.height * 0.75);
+    path2.lineTo(size.width, size.height);
+    path2.lineTo(0, size.height);
+    path2.close();
+    canvas.drawPath(path2, paint);
+
+    // Darker Green Strip
+    paint.color = Color(0xFF1B5E20);
+    var path3 = Path();
+    path3.moveTo(0, size.height * 0.95);
+    path3.lineTo(size.width, size.height * 0.85);
+    path3.lineTo(size.width, size.height);
+    path3.lineTo(0, size.height);
+    path3.close();
+    canvas.drawPath(path3, paint);
+
+    // Draw a wave-like structure at the top
+    paint.color = Color.fromARGB(255, 18, 34, 32); // Light Green for the wave
+    var wavePath = Path();
+    wavePath.moveTo(0, 100); // Start position
+    wavePath.quadraticBezierTo(size.width * 0.25, 50, size.width * 0.5, 100); // Wave curve
+    wavePath.quadraticBezierTo(size.width * 0.75, 150, size.width, 100); // Wave curve
+    wavePath.lineTo(size.width, 0);
+    wavePath.lineTo(0, 0);
+    wavePath.close();
+    canvas.drawPath(wavePath, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
   }
 }

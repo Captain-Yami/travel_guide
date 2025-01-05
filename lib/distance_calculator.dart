@@ -49,17 +49,23 @@ print(response.body);
 
 String getTimeFromDist(double distance, String startTime) {
   int timeToAddInMinutes = 0;
+ print('distance');
+ print(distance);
+ print('========================================');
 
   // Check the distance and determine the time to add
-  if (distance < 10) {
+  if (distance < 5) {
     timeToAddInMinutes = 20; // Add 20 minutes for distances less than 10 km
-  } else if (distance >= 10 && distance < 20) {
+  } else if (distance >= 5 && distance < 10) {
     timeToAddInMinutes = 30; // Add 30 minutes for distances between 10 and 20 km
-  } else if (distance >= 20 && distance < 30) {
+  } else if (distance >= 10 && distance < 15) {
     timeToAddInMinutes = 40; // Add 40 minutes for distances between 20 and 30 km
-  } else if (distance >= 30) {
+  } else if (distance >= 20) {
     timeToAddInMinutes = 60; // Add 60 minutes for distances greater than or equal to 30 km
   }
+  print('time');
+  print(timeToAddInMinutes);
+  print('============================================');
 
   // Parse the start time in 7:00 AM format
   DateTime startDateTime = DateTime.now();

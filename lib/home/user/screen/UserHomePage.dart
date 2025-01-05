@@ -9,7 +9,7 @@ import 'package:travel_guide/home/user/screen/requests.dart';
 import 'package:travel_guide/home/user/screen/start.dart';
 import 'package:travel_guide/home/user/screen/User_profile.dart';
 import 'package:travel_guide/home/user/screen/favorites.dart';
-import 'package:google_fonts/google_fonts.dart';  // Import google_fonts package
+import 'package:google_fonts/google_fonts.dart'; // Import google_fonts package
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -41,11 +41,10 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _navigateToRequests() {
-     Navigator.push(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const Requests()),
     );
-    // Implement navigation to the requests page.
   }
 
   Future<void> _navigateToStart() async {
@@ -77,7 +76,10 @@ class _MainPageState extends State<MainPage> {
         context,
         MaterialPageRoute(
           builder: (context) => Start(
-            userLocation: {'latitude': position.latitude, 'longitude': position.longitude},
+            userLocation: {
+              'latitude': position.latitude,
+              'longitude': position.longitude
+            },
           ),
         ),
       );
@@ -140,39 +142,43 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
-  backgroundColor: const Color.fromARGB(255, 42, 41, 41),
-  title: Row(
-    children: [
-      ClipOval(
-        child: Image.asset(
-          'asset/logo3.jpg',
-          fit: BoxFit.cover,
-          height: 40,
-          width: 40,
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 42, 41, 41),
+        title: Row(
+          children: [
+            ClipOval(
+              child: Image.asset(
+                'asset/logo3.jpg',
+                fit: BoxFit.cover,
+                height: 40,
+                width: 40,
+              ),
+            ),
+            const SizedBox(width: 10), // Adjust spacing
+            Expanded(
+              child: Text(
+                'Travel Chronicles',
+                style: GoogleFonts.roboto(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: const Color.fromARGB(255, 251, 250, 250),
+                ),
+                overflow: TextOverflow
+                    .ellipsis, // This will prevent overflow when the text is too long
+              ),
+            ),
+          ],
         ),
       ),
-      const SizedBox(width: 10), // Adjust spacing
-      Expanded(
-        child: Text(
-          'Travel Chronicles',
-          style: GoogleFonts.roboto(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: const Color.fromARGB(255, 251, 250, 250),
-          ),
-          overflow: TextOverflow.ellipsis, // This will prevent overflow when the text is too long
-        ),
-      ),
-    ],
-  ),
-),
-
       body: Container(
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [const Color.fromARGB(255, 242, 240, 240), const Color.fromARGB(255, 242, 238, 238)],
+            colors: [
+              Color(0xFF0C1615), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25), // Even lighter black
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -252,29 +258,98 @@ class _MainPageState extends State<MainPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: _buildElevatedButton(
-                            icon: Icons.location_city_outlined,
-                            label: 'Hotel',
-                            color: const Color.fromARGB(255, 240, 240, 240),
-                            onPressed: _navigateToHotel,
+                          child: InkWell(
+                            onTap: _navigateToHotel,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 40, horizontal: 10),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'asset/hotel_icon.png', // Adjust path if needed
+                                      height: 50, // Adjust the size as needed
+                                      width: 50, // Adjust the size as needed
+                                      fit: BoxFit
+                                          .contain, // Ensures the image fits properly
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Hotel',
+                                      style: GoogleFonts.roboto(
+                                        fontSize: 16,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 20),
                         Expanded(
-                          child: _buildElevatedButton(
-                            icon: Icons.group_outlined,
-                            label: 'Guide',
-                            color: const Color.fromARGB(255, 240, 240, 240),
-                            onPressed: _navigateToGuideDetails,
+                          child: InkWell(
+                            onTap: _navigateToGuideDetails,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  children: [
+                                    Image.asset('asset/guide_icon.png',
+                                        height: 50),
+                                    const SizedBox(height: 8),
+                                    Text('Guide',
+                                        style: GoogleFonts.roboto(
+                                            fontSize: 16, color: Colors.green)),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 20),
-                         Expanded(
-                          child: _buildElevatedButton(
-                            icon: Icons.request_page_outlined,
-                            label: 'Requests',
-                            color: const Color.fromARGB(255, 240, 240, 240),
-                            onPressed: _navigateToRequests,
+                             Expanded(
+                          child: InkWell(
+                            onTap: _navigateToGuideDetails,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  children: [
+                                    Image.asset('asset/guide_icon.png',
+                                        height: 50),
+                                    const SizedBox(height: 8),
+                                    Text('Requests',
+                                        style: GoogleFonts.roboto(
+                                            fontSize: 16, color: Colors.green)),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -287,7 +362,7 @@ class _MainPageState extends State<MainPage> {
                           child: _buildElevatedButton(
                             icon: Icons.location_on_outlined,
                             label: 'Place',
-                            color: const Color.fromARGB(255, 240, 240, 240),
+                            color: Colors.green,
                             onPressed: _navigateToPlace,
                           ),
                         ),
@@ -299,11 +374,13 @@ class _MainPageState extends State<MainPage> {
               ElevatedButton(
                 onPressed: _navigateToStart,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15), // Increase padding
-                  minimumSize: Size(200, 60), // Increase height and make it stretch across the screen
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  minimumSize: Size(200, 60),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  backgroundColor: Colors.green,
                 ),
                 child: Text(
                   'Start your journey',
@@ -326,7 +403,6 @@ class _MainPageState extends State<MainPage> {
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Favorites',
@@ -341,7 +417,7 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
         selectedItemColor: const Color.fromARGB(255, 6, 6, 6),
-        unselectedItemColor: const Color.fromARGB(255, 6, 6, 6),
+        unselectedItemColor: const Color.fromARGB(255, 52, 51, 51),
         backgroundColor: Colors.black,
       ),
     );
