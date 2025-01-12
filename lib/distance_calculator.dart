@@ -1,9 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
-import 'package:travel_guide/home/user/screen/start.dart';
-import 'package:intl/intl.dart';
 
 double calculateDistance(
     double startLatitude,
@@ -55,13 +52,13 @@ String getTimeFromDist(double distance, String startTime) {
 
   // Check the distance and determine the time to add
   if (distance < 5) {
-    timeToAddInMinutes = 20; // Add 20 minutes for distances less than 10 km
+    timeToAddInMinutes = 31; // Add 20 minutes for distances less than 10 km
   } else if (distance >= 5 && distance < 10) {
-    timeToAddInMinutes = 30; // Add 30 minutes for distances between 10 and 20 km
+    timeToAddInMinutes = 41; // Add 30 minutes for distances between 10 and 20 km
   } else if (distance >= 10 && distance < 15) {
-    timeToAddInMinutes = 40; // Add 40 minutes for distances between 20 and 30 km
+    timeToAddInMinutes = 61; // Add 40 minutes for distances between 20 and 30 km
   } else if (distance >= 20) {
-    timeToAddInMinutes = 60; // Add 60 minutes for distances greater than or equal to 30 km
+    timeToAddInMinutes = 91; // Add 60 minutes for distances greater than or equal to 30 km
   }
   print('time');
   print(timeToAddInMinutes);

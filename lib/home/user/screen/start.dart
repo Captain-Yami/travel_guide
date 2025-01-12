@@ -64,7 +64,8 @@ class _StartState extends State<Start> {
     'Museum',
     'Beach',
     'Park',
-    'Trekking',
+    'Hill_Station',
+    'Waterfalls'
   ];
 
   final List<String> kmOptions = [
@@ -335,6 +336,13 @@ class _StartState extends State<Start> {
               ),
               onPressed: () async {
                 try {
+                  // Clear previous schedules before applying new filters
+                  setState(() {
+                    scheduledTrips
+                        .clear(); // 🔥 Ensures old schedules are removed
+                  });
+
+                  // Ensure all filters are selected
                   if (selectedBudget != null &&
                       selectedTime != null &&
                       selectedPlace != null &&
@@ -350,7 +358,6 @@ class _StartState extends State<Start> {
                     print('Distance: $distance');
                     print('Type: $type');
 
-                    // Ensure coordinates are available
                     if (widget.userLocation['latitude'] != null &&
                         widget.userLocation['longitude'] != null) {
                       double latitude = widget.userLocation['latitude']!;
@@ -371,7 +378,7 @@ class _StartState extends State<Start> {
                           aidata['recommended_places'];
                       List<dynamic> selectedPlaces = [];
 
-                      // Fetch up to 4 places
+                      // Select up to 4 places
                       for (int i = 0;
                           i < recommendedPlaces.length && i < 4;
                           i++) {
@@ -384,7 +391,9 @@ class _StartState extends State<Start> {
                       var startlongitudefirst = longitude;
                       var startTime = selectedStartTime;
 
-                      // Process the recommended places
+                      List<Map<String, String>> newSchedules =
+                          []; // Temporary storage
+
                       for (var e in selectedPlaces) {
                         var distance = calculateDistance(
                             startlatitudefirst,
@@ -394,22 +403,17 @@ class _StartState extends State<Start> {
 
                         var userinputtime =
                             getTimeFromDist(distance, startTime!);
-
                         String place = e['Place Name'];
 
-                        // Find and add matching places from kannurTripPlan
-                        Map<String, String>?
-                            schedule; // Adjusted type to match expectations
+                        Map<String, String>? schedule;
                         for (var element in kannurTripPlan) {
                           var data = element;
                           if (place == element["place name"]) {
                             if (data != null) {
-                              // Find a specific schedule
                               schedule = data["Trip plan"].firstWhere(
                                 (element) => isTimeInRange(
                                     element['time'], userinputtime),
-                                orElse: () => <String,
-                                    String>{}, // Return an empty map of the correct type
+                                orElse: () => <String, String>{},
                               );
 
                               if (schedule!.isNotEmpty) {
@@ -418,23 +422,21 @@ class _StartState extends State<Start> {
                                 print(
                                     "No matching schedule found for $userinputtime.");
                               }
-                            } else {
-                              print("No data found for $place.");
                             }
                           }
                         }
 
                         if (schedule != null && schedule.isNotEmpty) {
                           startTime = extractEndTime(schedule['time']!);
-                          setState(() {
-                            scheduledTrips
-                                .add(schedule!); // Add the schedule to the list
-                          });
-                        } else {
-                          print(
-                              "No valid schedule found for the selected place.");
+                          newSchedules
+                              .add(schedule!); // Add to temporary storage
                         }
                       }
+
+                      // Update UI with new schedules
+                      setState(() {
+                        scheduledTrips.addAll(newSchedules);
+                      });
                     } else {
                       print('User location not set. Please enter an address.');
                     }
@@ -446,7 +448,7 @@ class _StartState extends State<Start> {
                 }
               },
               child: const Text(
-                'Apply Filters',
+                'Schedule',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
@@ -476,4 +478,3 @@ class _StartState extends State<Start> {
     );
   }
 }
-

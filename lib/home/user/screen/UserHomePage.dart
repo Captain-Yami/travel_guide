@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart'; // Import the carousel_slider package
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:travel_guide/home/hotel.dart';
+import 'package:travel_guide/home/hotel.dart'; 
 import 'package:travel_guide/home/user/guidechat.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
 import 'package:travel_guide/home/user/screen/place/place.dart';
@@ -9,7 +9,7 @@ import 'package:travel_guide/home/user/screen/requests.dart';
 import 'package:travel_guide/home/user/screen/start.dart';
 import 'package:travel_guide/home/user/screen/User_profile.dart';
 import 'package:travel_guide/home/user/screen/favorites.dart';
-import 'package:google_fonts/google_fonts.dart'; // Import google_fonts package
+import 'package:google_fonts/google_fonts.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
