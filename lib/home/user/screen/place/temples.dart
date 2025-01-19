@@ -11,11 +11,7 @@ class Temples extends StatefulWidget {
 
 class _TemplesState extends State<Temples> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  // A Map to store favorite status for each temple
   final Map<String, bool> favoriteStatus = {};
-  
-  // Create an instance of FavoriteService
   final FavoriteService _favoriteService = FavoriteService();
 
   @override
@@ -23,113 +19,129 @@ class _TemplesState extends State<Temples> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Temples List'),
-        backgroundColor: Colors.blueGrey[800], // Darker AppBar color
+        backgroundColor: Colors.blueGrey[800],
+        elevation: 0,
       ),
-      backgroundColor: Colors.grey[100], // Light grey background for the screen
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('Places')
-            .doc('Locations')
-            .collection('Temples') // Changed to 'Temples' instead of 'Beaches'
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+           colors: [
+              Color(0xFF0C1615), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25), // Even lighter black
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('Places')
+              .doc('Locations')
+              .collection('Temples')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
+            if (snapshot.hasError) {
+              return const Center(child: Text('Something went wrong'));
+            }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No Temples found')); // Changed text
-          }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No Temples found'));
+            }
 
-          var temples = snapshot.data!.docs;
+            var temples = snapshot.data!.docs;
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: temples.length,
-            itemBuilder: (context, index) {
-              var temple = temples[index].data() as Map<String, dynamic>;
-              String templeId = temples[index].id; // Unique ID for each temple
+            return ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: temples.length,
+              itemBuilder: (context, index) {
+                var temple = temples[index].data() as Map<String, dynamic>;
+                String templeId = temples[index].id;
 
-              // Initialize the favorite status if not already done
-              if (!favoriteStatus.containsKey(templeId)) {
-                favoriteStatus[templeId] = false;
-              }
+                if (!favoriteStatus.containsKey(templeId)) {
+                  favoriteStatus[templeId] = false;
+                }
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                    backgroundColor: Colors.white,
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Card(
                     elevation: 6,
-                    minimumSize: Size(double.infinity, 80),
-                  ),
-                  onPressed: () {
-                    // Navigate to the TempleDetailsScreen with temple data
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TempleDetailsScreen(
-                          temple: temple,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Temple name with overflow handling
-                      Flexible(
-                        child: Text(
-                          temple['name'] ?? 'No name',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueGrey[900],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    color: Colors.green,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TempleDetailsScreen(
+                              temple: temple,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis, // Handle overflow if text is too long
-                        ),
-                      ),
-                      // Favourite Icon
-                      GestureDetector(
-                        onTap: () async {
-                          setState(() {
-                            // Toggle favorite status in the UI
-                            favoriteStatus[templeId] = !favoriteStatus[templeId]!;
-                          });
-
-                          try {
-                            // Call the backend service to update the favorite status
-                            await _favoriteService.updateFavoriteStatus(
-                              templeId,
-                              temple,
-                              favoriteStatus[templeId]!,
-                            );
-                          } catch (e) {
-                            // Handle any errors
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Failed to update favorite: $e'),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                temple['name'] ?? 'No name',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black, // Black text
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            );
-                          }
-                        },
-                        child: Icon(
-                          favoriteStatus[templeId]! ? Icons.favorite : Icons.favorite_border,
-                          color: favoriteStatus[templeId]! ? Colors.red : Colors.grey,
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                setState(() {
+                                  favoriteStatus[templeId] =
+                                      !favoriteStatus[templeId]!;
+                                });
+
+                                try {
+                                  await _favoriteService.updateFavoriteStatus(
+                                    templeId,
+                                    temple,
+                                    favoriteStatus[templeId]!,
+                                  );
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content:
+                                          Text('Failed to update favorite: $e'),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Icon(
+                                favoriteStatus[templeId]!
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: favoriteStatus[templeId]!
+                                    ? Colors.red
+                                    : Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -147,55 +159,84 @@ class TempleDetailsScreen extends StatelessWidget {
         title: Text(temple['name'] ?? 'Temple Details'),
         backgroundColor: Colors.blueGrey[800],
       ),
-      backgroundColor: Colors.grey[100],
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Name of the temple
-            Text(
-              temple['name'] ?? 'No name',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey[900],
-              ),
-            ),
-            const SizedBox(height: 8.0), // Add some space between name and description
-
-            // Description of the temple
-            Text(
-              temple['description'] ?? 'No description',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.blueGrey[700],
-              ),
-            ),
-            const SizedBox(height: 16.0), // Space between description and image
-
-            // Image of the temple (if available)
-            temple['imageUrl'] != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      temple['imageUrl'],
-                      width: double.infinity,
-                      height: 300,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Container(
-                    width: double.infinity,
-                    height: 300,
-                    color: Colors.blueGrey[100],
-                    child: const Icon(
-                      Icons.temple_buddhist, // Icon for temple
-                      size: 50,
-                      color: Colors.blueGrey,
-                    ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0C1615), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25), // Even lighter black
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  temple['name'] ?? 'No name',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green, // Black text for title
                   ),
-          ],
+                ),
+                const SizedBox(height: 16),
+
+                // Description of the temple
+                Text(
+                  temple['description'] ?? 'No description',
+                  style: TextStyle(fontSize: 18, color: Colors.green),
+                ),
+                const SizedBox(height: 16),
+
+                // Seasonal Time Section
+                Text(
+                  'Seasonal Time: ${temple['seasonalTime'] ?? 'Not available'}',
+                  style: TextStyle(fontSize: 18, color: Colors.green),
+                ),
+                const SizedBox(height: 8),
+
+                // Opening and Closing Time Section
+                Text(
+                  'Opening Time: ${temple['openingTime'] ?? 'Not available'}',
+                  style: TextStyle(fontSize: 18, color: Colors.green),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Closing Time: ${temple['closingTime'] ?? 'Not available'}',
+                  style: TextStyle(fontSize: 18, color: Colors.green),
+                ),
+                const SizedBox(height: 16),
+
+                // Image of the temple (if available)
+                temple['imageUrl'] != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          temple['imageUrl'],
+                          width: double.infinity,
+                          height: 300,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Container(
+                        width: double.infinity,
+                        height: 300,
+                        color: Colors.blueGrey[100],
+                        child: const Icon(
+                          Icons.temple_buddhist,
+                          size: 50,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+              ],
+            ),
+          ),
         ),
       ),
     );

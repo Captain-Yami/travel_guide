@@ -180,9 +180,9 @@ class BeachDetailsScreen extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.black,
-              Colors.grey[800]!,
-              Colors.green[800]!,
+              Color(0xFF0C1615), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25), // Even lighter black
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
