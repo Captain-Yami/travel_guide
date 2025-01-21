@@ -9,63 +9,78 @@ class hotel extends StatefulWidget {
 }
 
 class _hotelState extends State<hotel> {
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hotels'),
+        backgroundColor: Colors.blueGrey[800], // Darker AppBar color
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('Hotels').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0C1615), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25), // Even lighter black
+            ], // Three colors for gradient
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance.collection('Hotels').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching data'));
-          }
+            if (snapshot.hasError) {
+              return const Center(child: Text('Error fetching data'));
+            }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No hotels available'));
-          }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No hotels available'));
+            }
 
-          final hotels = snapshot.data!.docs;
+            final hotels = snapshot.data!.docs;
 
-          return ListView.builder(
-            itemCount: hotels.length,
-            itemBuilder: (context, index) {
-              final hotel = hotels[index];
-              final hotelName = hotel['name'];
+            return ListView.builder(
+              itemCount: hotels.length,
+              itemBuilder: (context, index) {
+                final hotel = hotels[index];
+                final hotelName = hotel['name'];
 
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                elevation: 4,
-                child: ListTile(
-                  title: Text(
-                    hotelName,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => hotelDetails(
-                          name: hotel['name'],
-                          description: hotel['description'],
-                          location: hotel['location'],
-                          openingTime: hotel['openingTime'],
-                          closingTime: hotel['closingTime'],
-                          imageUrl: hotel['imageUrl'],
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 4,
+                  color: Colors.green, // Set card color to green
+                  child: ListTile(
+                    title: Text(
+                      hotelName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => hotelDetails(
+                            name: hotel['name'],
+                            description: hotel['description'],
+                            location: hotel['location'],
+                            openingTime: hotel['openingTime'],
+                            closingTime: hotel['closingTime'],
+                            imageUrl: hotel['imageUrl'],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
-        },
+                      );
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -94,49 +109,63 @@ class hotelDetails extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(name),
+        backgroundColor: Colors.blueGrey[800], // Darker AppBar color
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (imageUrl.isNotEmpty)
-                Image.network(
-                  imageUrl,
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0C1615), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25), // Even lighter black
+            ], // Three colors for gradient
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (imageUrl.isNotEmpty)
+                  Image.network(
+                    imageUrl,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                const SizedBox(height: 16),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              const SizedBox(height: 16),
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 8),
+                Text(
+                  'Description: $description',
+                  style: const TextStyle(fontSize: 16),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Description: $description',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Location: $location',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Opening Time: $openingTime',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Closing Time: $closingTime',
-                style: const TextStyle(fontSize: 16),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  'Location: $location',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Opening Time: $openingTime',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Closing Time: $closingTime',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
           ),
         ),
       ),

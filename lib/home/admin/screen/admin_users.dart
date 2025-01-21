@@ -14,7 +14,8 @@ class _AdminUsersState extends State<AdminUsers> {
   // Stream to get users data from Firestore without gender filter
   Stream<QuerySnapshot> getUserStream() {
     var userCollection = _firestore.collection('Users');
-    return userCollection.snapshots(); // Get all users without filtering by gender
+    return userCollection
+        .snapshots(); // Get all users without filtering by gender
   }
 
   // Navigate to the user details page
@@ -31,9 +32,11 @@ class _AdminUsersState extends State<AdminUsers> {
   Future<void> deleteUser(String userId) async {
     try {
       await _firestore.collection('Users').doc(userId).delete();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User deleted successfully')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User deleted successfully')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to delete user')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Failed to delete user')));
     }
   }
 
@@ -73,87 +76,107 @@ class _AdminUsersState extends State<AdminUsers> {
         backgroundColor: Colors.blueGrey[800],
       ),
       backgroundColor: Colors.grey[100],
-      body: StreamBuilder<QuerySnapshot>(
-        stream: getUserStream(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        // Adding a linear gradient background
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromRGBO(12, 22, 21, 1), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: getUserStream(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
+            if (snapshot.hasError) {
+              return const Center(child: Text('Something went wrong'));
+            }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No Users found'));
-          }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No Users found'));
+            }
 
-          var users = snapshot.data!.docs;
+            var users = snapshot.data!.docs;
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              var user = users[index].data() as Map<String, dynamic>;
-              String userId = users[index].id; // Get the user ID
+            return ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: users.length,
+              itemBuilder: (context, index) {
+                var user = users[index].data() as Map<String, dynamic>;
+                String userId = users[index].id; // Get the user ID
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: GestureDetector(
-                  onTap: () => navigateToUserDetails(user),
-                  child: Card(
-                    elevation: 5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          // Profile Image
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundImage: NetworkImage(
-                                user['image'] ?? 'https://example.com/default-avatar.png'),
-                          ),
-                          const SizedBox(width: 16),
-                          // Display user name
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user['name'] ?? 'No name',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blueGrey[900],
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: GestureDetector(
+                    onTap: () => navigateToUserDetails(user),
+                    child: Card(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      color: Colors.green, // Green card background
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            // If the image is null or empty, show account icon
+                            user['image'] != null && user['image'].isNotEmpty
+                                ? CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage:
+                                        NetworkImage(user['image']),
+                                  )
+                                : Icon(
+                                    Icons
+                                        .account_circle, // Account icon as fallback
+                                    size: 60, // Icon size
+                                    color: Colors.black, // Icon color
+                                  ),
+                            const SizedBox(width: 16),
+                            // Display user name
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user['name'] ?? 'No name',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black, // Font color black
+                                  ),
                                 ),
-                              ),
-                              // Gender removed
-                              // Text(user['gender'] ?? 'No gender'),
-                            ],
-                          ),
-                          const Spacer(),
-                          // Delete Icon
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => showDeleteConfirmationDialog(userId),
-                          ),
-                        ],
+                              ],
+                            ),
+                            const Spacer(),
+                            // Delete Icon
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () =>
+                                  showDeleteConfirmationDialog(userId),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-// User details page
 class UserDetailsPage extends StatelessWidget {
   final Map<String, dynamic> user;
 
@@ -166,83 +189,89 @@ class UserDetailsPage extends StatelessWidget {
         title: Text('${user['name']} Details'),
         backgroundColor: Colors.blueGrey[800],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Display the user's name
-            Text(
-              'Name: ${user['name']}',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Display more user details
-            // Gender removed
-            // Text(
-            //   'Gender: ${user['gender']}',
-            //   style: const TextStyle(fontSize: 18),
-            // ),
-            const SizedBox(height: 10),
-            Text(
-              'Date of Birth: ${user['DOB'] ?? 'Not Available'}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Email: ${user['useremail']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Address: ${user['address']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'City: ${user['city']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'State: ${user['state']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Pincode: ${user['pincode']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Nation: ${user['nation']}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 10),
-            user['image'] != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      user['image'],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.fromRGBO(12, 22, 21, 1), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25),
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            children: [
+              // Display the user's name in a tile
+              _buildTile('Name', user['name'] ?? 'Not Available'),
+              const SizedBox(height: 10),
+              // Display Date of Birth in a tile
+              _buildTile('Date of Birth', user['DOB'] ?? 'Not Available'),
+              const SizedBox(height: 10),
+              // Display Email in a tile
+              _buildTile('Email', user['useremail'] ?? 'Not Available'),
+              const SizedBox(height: 10),
+              // Display Address in a tile
+              _buildTile('Address', user['address'] ?? 'Not Available'),
+              const SizedBox(height: 10),
+              // Display City in a tile
+              _buildTile('City', user['city'] ?? 'Not Available'),
+              const SizedBox(height: 10),
+              // Display State in a tile
+              _buildTile('State', user['state'] ?? 'Not Available'),
+              const SizedBox(height: 10),
+              // Display Pincode in a tile
+              _buildTile('Pincode', user['pincode'] ?? 'Not Available'),
+              const SizedBox(height: 10),
+              // Display Nation in a tile
+              _buildTile('Nation', user['nation'] ?? 'Not Available'),
+              const SizedBox(height: 20),
+              // Display the user's profile image or placeholder icon
+              user['image'] != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        user['image'],
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
                       width: double.infinity,
                       height: 200,
-                      fit: BoxFit.cover,
+                      color: Colors.blueGrey[100],
+                      child: const Icon(
+                        Icons.account_circle,
+                        size: 50,
+                        color: Colors.blueGrey,
+                      ),
                     ),
-                  )
-                : Container(
-                    width: double.infinity,
-                    height: 200,
-                    color: Colors.blueGrey[100],
-                    child: const Icon(
-                      Icons.account_circle,
-                      size: 50,
-                      color: Colors.blueGrey,
-                    ),
-                  ),
-          ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to create a tile for user details
+  Widget _buildTile(String title, String value) {
+    return Card(
+      color: const Color.fromARGB(255, 39, 39, 40),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: ListTile(
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          value,
+          style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
     );

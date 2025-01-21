@@ -42,8 +42,7 @@ class _TrekkingSpotsState extends State<TrekkingSpots> {
           stream: _firestore
               .collection('Places')
               .doc('Locations')
-              .collection(
-                  'Trekking') // Changed to 'Trekking' instead of 'Temples'
+              .collection('Trekking') // Changed to 'Trekking' instead of 'Temples'
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -176,7 +175,7 @@ class TrekkingSpotDetailsScreen extends StatelessWidget {
       backgroundColor:
           Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
 
-      body: Padding(
+      body: SingleChildScrollView( // Added SingleChildScrollView
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

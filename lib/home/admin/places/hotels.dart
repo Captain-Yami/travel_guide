@@ -19,76 +19,99 @@ class _HotelsState extends State<Hotels> {
         title: const Text('Hotels List'),
         backgroundColor: Colors.blueGrey[800], // Darker AppBar color
       ),
-      backgroundColor: Colors.grey[100], // Light grey background for the screen
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('Hotels').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Stack(
+        children: [
+          // Apply a Linear Gradient as the background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromRGBO(12, 22, 21, 1), // Dark black
+                  Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+                  Color.fromARGB(255, 14, 26, 25), // Even lighter Green
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          StreamBuilder<QuerySnapshot>(
+            stream: _firestore.collection('Hotels').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
+              if (snapshot.hasError) {
+                return const Center(child: Text('Something went wrong'));
+              }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No Hotels found'));
-          }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text('No Hotels found'));
+              }
 
-          var hotels = snapshot.data!.docs;
+              var hotels = snapshot.data!.docs;
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: hotels.length,
-            itemBuilder: (context, index) {
-              var hotel = hotels[index].data() as Map<String, dynamic>;
-              String hotelId = hotels[index].id;  // Get the document ID
+              return ListView.builder(
+                padding: const EdgeInsets.all(8.0),
+                itemCount: hotels.length,
+                itemBuilder: (context, index) {
+                  var hotel = hotels[index].data() as Map<String, dynamic>;
+                  String hotelId = hotels[index].id; // Get the document ID
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: InkWell(
-                  onTap: () {
-                    // Navigate to HotelDetails screen and pass the hotelId
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HotelDetails(hotelId: hotelId),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    elevation: 6,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Hotel name
-                          Text(
-                            hotel['name'] ?? 'No name',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey[900],
-                            ),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    child: InkWell(
+                      onTap: () {
+                        // Navigate to HotelDetails screen and pass the hotelId
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                HotelDetails(hotelId: hotelId),
                           ),
-                          // Delete button
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              // Show confirmation dialog before deleting
-                              _showDeleteConfirmationDialog(context, hotelId);
-                            },
+                        );
+                      },
+                      child: Card(
+                        color: Colors.green, // Set the card background to green
+                        elevation: 6,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Hotel name
+                              Text(
+                                hotel['name'] ?? 'No name',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black, // Black font color
+                                ),
+                                overflow:
+                                    TextOverflow.ellipsis, // Handle overflow
+                              ),
+                              // Delete button
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  // Show confirmation dialog before deleting
+                                  _showDeleteConfirmationDialog(
+                                      context, hotelId);
+                                },
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -107,7 +130,8 @@ class _HotelsState extends State<Hotels> {
   }
 
   // Function to show the confirmation dialog before deleting a hotel
-  Future<void> _showDeleteConfirmationDialog(BuildContext context, String hotelId) {
+  Future<void> _showDeleteConfirmationDialog(
+      BuildContext context, String hotelId) {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -183,10 +207,8 @@ class _HotelDetailsState extends State<HotelDetails> {
 
   // Function to fetch hotel details from Firestore
   Future<void> _fetchHotelDetails() async {
-    DocumentSnapshot snapshot = await _firestore
-        .collection('Hotels')
-        .doc(widget.hotelId)
-        .get();
+    DocumentSnapshot snapshot =
+        await _firestore.collection('Hotels').doc(widget.hotelId).get();
 
     if (snapshot.exists) {
       var hotel = snapshot.data() as Map<String, dynamic>;
@@ -200,10 +222,7 @@ class _HotelDetailsState extends State<HotelDetails> {
 
   // Function to save the edited hotel details to Firestore
   Future<void> _saveHotelDetails() async {
-    await _firestore
-        .collection('Hotels')
-        .doc(widget.hotelId)
-        .update({
+    await _firestore.collection('Hotels').doc(widget.hotelId).update({
       'name': _nameController.text,
       'description': _descriptionController.text,
       'openingTime': _openingTimeController.text,
@@ -235,96 +254,127 @@ class _HotelDetailsState extends State<HotelDetails> {
         title: const Text('Hotel Details'),
         backgroundColor: Colors.blueGrey[800],
       ),
-      backgroundColor: Colors.grey[100],
-      body: FutureBuilder<DocumentSnapshot>(
-        future: _firestore
-            .collection('Hotels')
-            .doc(widget.hotelId)
-            .get(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
-
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text('Hotel not found'));
-          }
-
-          var hotel = snapshot.data!.data() as Map<String, dynamic>;
-
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name
-                  _isEditing
-                      ? TextField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(labelText: 'Hotel Name'),
-                        )
-                      : Text(
-                          'Hotel Name: ${hotel['name'] ?? 'No name'}',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                  SizedBox(height: 16),
-
-                  // Description
-                  _isEditing
-                      ? TextField(
-                          controller: _descriptionController,
-                          decoration: const InputDecoration(labelText: 'Description'),
-                          maxLines: 4,
-                        )
-                      : Text(
-                          'Description: ${hotel['description'] ?? 'No description available'}',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                  SizedBox(height: 16),
-
-                  // Opening Time
-                  _isEditing
-                      ? TextField(
-                          controller: _openingTimeController,
-                          decoration: const InputDecoration(labelText: 'Opening Time'),
-                        )
-                      : Text(
-                          'Opening Time: ${hotel['openingTime'] ?? 'No opening time'}',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                  SizedBox(height: 16),
-
-                  // Closing Time
-                  _isEditing
-                      ? TextField(
-                          controller: _closingTimeController,
-                          decoration: const InputDecoration(labelText: 'Closing Time'),
-                        )
-                      : Text(
-                          'Closing Time: ${hotel['closingTime'] ?? 'No closing time'}',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                  SizedBox(height: 16),
-
-                  // Image URL
-                  _isEditing
-                      ? TextField(
-                          controller: _imageUrlController,
-                          decoration: const InputDecoration(labelText: 'Image URL'),
-                        )
-                      : (hotel['imageUrl'] != null
-                          ? Image.network(hotel['imageUrl'])
-                          : const Text('No image available')),
+      body: Stack(
+        children: [
+          // Apply Linear Gradient as the background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0C1615), // Dark Green
+                  Color(0xFF0E3923), // Slightly lighter Green
+                  Color(0xFF1C5A46), // Even lighter Green
                 ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-          );
-        },
+          ),
+          FutureBuilder<DocumentSnapshot>(
+            future: _firestore.collection('Hotels').doc(widget.hotelId).get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return const Center(child: Text('Something went wrong'));
+              }
+
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return const Center(child: Text('Hotel not found'));
+              }
+
+              var hotel = snapshot.data!.data() as Map<String, dynamic>;
+
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Name
+                      _isEditing
+                          ? TextField(
+                              controller: _nameController,
+                              decoration: const InputDecoration(
+                                  labelText: 'Hotel Name'),
+                            )
+                          : Text(
+                              'Hotel Name: ${hotel['name'] ?? 'No name'}',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.green, // Green font color
+                              ),
+                            ),
+                      SizedBox(height: 16),
+
+                      // Description
+                      _isEditing
+                          ? TextField(
+                              controller: _descriptionController,
+                              decoration: const InputDecoration(
+                                  labelText: 'Description'),
+                              maxLines: 4,
+                            )
+                          : Text(
+                              'Description: ${hotel['description'] ?? 'No description available'}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.green, // Green font color
+                              ),
+                            ),
+                      SizedBox(height: 16),
+
+                      // Opening Time
+                      _isEditing
+                          ? TextField(
+                              controller: _openingTimeController,
+                              decoration: const InputDecoration(
+                                  labelText: 'Opening Time'),
+                            )
+                          : Text(
+                              'Opening Time: ${hotel['openingTime'] ?? 'No opening time'}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.green, // Green font color
+                              ),
+                            ),
+                      SizedBox(height: 16),
+
+                      // Closing Time
+                      _isEditing
+                          ? TextField(
+                              controller: _closingTimeController,
+                              decoration: const InputDecoration(
+                                  labelText: 'Closing Time'),
+                            )
+                          : Text(
+                              'Closing Time: ${hotel['closingTime'] ?? 'No closing time'}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.green, // Green font color
+                              ),
+                            ),
+                      SizedBox(height: 16),
+
+                      // Image URL
+                      _isEditing
+                          ? TextField(
+                              controller: _imageUrlController,
+                              decoration:
+                                  const InputDecoration(labelText: 'Image URL'),
+                            )
+                          : (hotel['imageUrl'] != null
+                              ? Image.network(hotel['imageUrl'])
+                              : const Text('No image available')),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

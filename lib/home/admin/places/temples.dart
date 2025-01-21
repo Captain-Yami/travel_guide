@@ -19,88 +19,101 @@ class _BeachesState extends State<adminTemples> {
         title: const Text('Temples List'),
         backgroundColor: Colors.blueGrey[800], // Darker AppBar color
       ),
-      backgroundColor: Colors.grey[100], // Light grey background for the screen
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('Places')
-            .doc('Locations')
-            .collection('Temples')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0C1615), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25), // Even lighter black
+            ], // Three colors for gradient
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('Places')
+              .doc('Locations')
+              .collection('Temples')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
+            if (snapshot.hasError) {
+              return const Center(child: Text('Something went wrong'));
+            }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No Temples found'));
-          }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No Temples found'));
+            }
 
-          var temples = snapshot.data!.docs;
+            var temples = snapshot.data!.docs;
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(8.0),
-            itemCount: temples.length,
-            itemBuilder: (context, index) {
-              var temple = temples[index].data() as Map<String, dynamic>;
-              String templeId = temples[index].id;  // Get the document ID
+            return ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: temples.length,
+              itemBuilder: (context, index) {
+                var temple = temples[index].data() as Map<String, dynamic>;
+                String templeId = temples[index].id;  // Get the document ID
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: GestureDetector(
-                  onTap: () {
-                    // Navigate to the TempleDetails screen and pass the data
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TempleDetails(
-                          templeId: templeId,
-                          name: temple['name'],
-                          description: temple['description'],
-                          seasonalTime: temple['seasonalTime'],
-                          openingTime: temple['openingTime'],
-                          closingTime: temple['closingTime'],
-                          imageUrl: temple['imageUrl'],
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      // Navigate to the TempleDetails screen and pass the data
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TempleDetails(
+                            templeId: templeId,
+                            name: temple['name'],
+                            description: temple['description'],
+                            seasonalTime: temple['seasonalTime'],
+                            openingTime: temple['openingTime'],
+                            closingTime: temple['closingTime'],
+                            imageUrl: temple['imageUrl'],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    elevation: 6,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Temple name
-                          Text(
-                            temple['name'] ?? 'No name',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey[900],
+                      );
+                    },
+                    child: Card(
+                      color: Colors.green, // Set the card color to green
+                      elevation: 6,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Temple name
+                            Text(
+                              temple['name'] ?? 'No name',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black, // White font color for visibility
+                              ),
                             ),
-                          ),
-                          // Delete button
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              // Show confirmation dialog before deleting
-                              _showDeleteConfirmationDialog(context, templeId);
-                            },
-                          ),
-                        ],
+                            // Delete button
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                // Show confirmation dialog before deleting
+                                _showDeleteConfirmationDialog(context, templeId);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -264,8 +277,22 @@ class _TempleDetailsState extends State<TempleDetails> {
         title: Text(_isEditing ? 'Edit Temple' : widget.name),
         backgroundColor: Colors.blueGrey[800],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: Colors.transparent,  // Set transparent to allow gradient
+      body: Container(
+        width: double.infinity,  // Ensure full width
+        height: double.infinity,  // Ensure full height
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0C1615), // Dark green shade
+              Color(0xFF0E3923), // Slightly lighter green
+              Color(0xFF1C5A46), // Even lighter green
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        padding: EdgeInsets.zero,  // Remove any extra padding from container
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +311,6 @@ class _TempleDetailsState extends State<TempleDetails> {
                         _buildTextField(_seasonalTimeController, 'Seasonal Time'),
                         _buildTextField(_openingTimeController, 'Opening Time'),
                         _buildTextField(_closingTimeController, 'Closing Time'),
-                        
                       ],
                     )
                   : Column(
@@ -294,7 +320,6 @@ class _TempleDetailsState extends State<TempleDetails> {
                         _buildDetailText('Seasonal Time: ${_seasonalTimeController.text}'),
                         _buildDetailText('Opening Time: ${_openingTimeController.text}'),
                         _buildDetailText('Closing Time: ${_closingTimeController.text}'),
-                       
                       ],
                     ),
             ],
@@ -327,6 +352,7 @@ class _TempleDetailsState extends State<TempleDetails> {
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: TextStyle(color: Colors.green), // Green text color for labels
           border: OutlineInputBorder(),
         ),
         maxLines: label == 'Description' ? null : 1, // Multiline for Description
@@ -340,7 +366,7 @@ class _TempleDetailsState extends State<TempleDetails> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 16),
+        style: TextStyle(fontSize: 16, color: Colors.green), // Green text color
       ),
     );
   }

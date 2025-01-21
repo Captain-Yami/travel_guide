@@ -101,8 +101,7 @@ class _FortsAndMuseumsState extends State<FortsAndMuseums> {
                         // Name with overflow handling
                         Flexible(
                           child: Text(
-                            place['name'] ??
-                                'No name', // Display name of fort or museum
+                            place['name'] ?? 'No name', // Display name of fort or museum
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -172,8 +171,8 @@ class FortOrMuseumDetailsScreen extends StatelessWidget {
         title: Text(place['name'] ?? 'Fort or Museum Details'),
         backgroundColor: Color.fromARGB(255, 22, 40, 37),
       ),
-      backgroundColor:  Color.fromARGB(255, 16, 31, 29),
-      body: Padding(
+      backgroundColor: Color.fromARGB(255, 16, 31, 29),
+      body: SingleChildScrollView( // Added SingleChildScrollView here
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,33 +198,33 @@ class FortOrMuseumDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16.0), // Space between description and image
-            // Description of the place
+            // Opening time section
             Text(
-              place['openingTime'] ?? 'No opening available',
+              place['openingTime'] ?? 'No opening time available',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.green, // Green background for card
               ),
             ),
-            const SizedBox(height: 16.0), // Space between description and image
-            // Description of the place
+            const SizedBox(height: 16.0), // Space between opening time and closing time
+            // Closing time section
             Text(
-              place['closingTime'] ?? 'No closingtime available',
+              place['closingTime'] ?? 'No closing time available',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.green, // Green background for card
               ),
             ),
-            const SizedBox(height: 16.0), // Space between description and image
-            // Description of the place
+            const SizedBox(height: 16.0), // Space between closing time and seasonal time
+            // Seasonal time section
             Text(
-              place['seasonalTime'] ?? 'No Season time available',
+              place['seasonalTime'] ?? 'No seasonal time available',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.green, // Green background for card
               ),
             ),
-            const SizedBox(height: 16.0), // Space between description and image
+            const SizedBox(height: 16.0), // Space between seasonal time and image
 
             // Image of the place (if available)
             place['imageUrl'] != null
@@ -241,11 +240,11 @@ class FortOrMuseumDetailsScreen extends StatelessWidget {
                 : Container(
                     width: double.infinity,
                     height: 300,
-                color: Colors.green, // Green background for card
+                    color: Colors.green, // Green background for card
                     child: Icon(
                       Icons.location_city, // Generic icon for fort or museum
                       size: 50,
-                color: Colors.green, // Green background for card
+                      color: Colors.green, // Green background for card
                     ),
                   ),
           ],
