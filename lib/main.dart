@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:travel_guide/home/Hotels/screen/hotel_login.dart';
+import 'package:travel_guide/home/Hotels/screen/hotel_registration.dart';
+import 'package:travel_guide/home/admin/screen/hotel_managment.dart';
 import 'package:travel_guide/home/user/screen/UserHomePage.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,4 +12,4 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:MainPage()));} 
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:HotelLoginPage()));} 
