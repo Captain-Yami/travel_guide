@@ -12,4 +12,4 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:HotelLoginPage()));} 
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:MainPage()));} 

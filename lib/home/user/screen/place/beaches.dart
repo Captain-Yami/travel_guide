@@ -200,7 +200,8 @@ class BeachDetailsScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey[900],
+                    color: Colors.green,
+                    fontFamily: 'Roboto', // Green background for card
                   ),
                 ),
                 const SizedBox(
@@ -211,7 +212,8 @@ class BeachDetailsScreen extends StatelessWidget {
                   beach['description'] ?? 'No description',
                   style: TextStyle(
                     fontSize: 18,
-                    color: Colors.blueGrey[700],
+                    color: Colors.green, 
+                    fontFamily: 'Roboto',// Green background for card
                   ),
                 ),
                 const SizedBox(height: 16.0),
@@ -219,19 +221,31 @@ class BeachDetailsScreen extends StatelessWidget {
                 // Seasonal Time Section
                 Text(
                   'Seasonal Time: ${beach['seasonalTime'] ?? 'Not available'}',
-                  style: TextStyle(fontSize: 18, color: Colors.blueGrey[700]),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.green, 
+                    fontFamily: 'Roboto',// Green background for card
+                  ),
                 ),
                 const SizedBox(height: 8.0),
 
                 // Opening and Closing Time Section
                 Text(
                   'Opening Time: ${beach['openingTime'] ?? 'Not available'}',
-                  style: TextStyle(fontSize: 18, color: Colors.blueGrey[700]),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.green,
+                    fontFamily: 'Roboto', // Green background for card
+                  ),
                 ),
                 const SizedBox(height: 8.0),
                 Text(
                   'Closing Time: ${beach['closingTime'] ?? 'Not available'}',
-                  style: TextStyle(fontSize: 18, color: Colors.blueGrey[700]),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.green, 
+                    fontFamily: 'Roboto',// Green background for card
+                  ),
                 ),
                 const SizedBox(
                     height: 16.0), // Space between description and image
@@ -266,7 +280,7 @@ class BeachDetailsScreen extends StatelessWidget {
                     child: const Icon(
                       Icons.beach_access,
                       size: 50,
-                      color: Colors.blueGrey,
+                      color: Colors.green, // Green background for card
                     ),
                   ),
               ],
