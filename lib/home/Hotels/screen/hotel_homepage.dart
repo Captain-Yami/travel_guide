@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // To interact with Firestore
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:travel_guide/home/Hotels/screen/hotel_addroom.dart';
+import 'package:travel_guide/home/Hotels/screen/hotel_bookings.dart';
+import 'package:travel_guide/home/Hotels/screen/hotel_viewroom.dart';
 
 class HotelHomepage extends StatefulWidget {
   const HotelHomepage({super.key});
@@ -9,153 +12,105 @@ class HotelHomepage extends StatefulWidget {
 }
 
 class _HotelHomepageState extends State<HotelHomepage> {
-  final TextEditingController _hotelNameController = TextEditingController();
-  final TextEditingController _roomTypeController = TextEditingController();
-  final TextEditingController _roomPriceController = TextEditingController();
-  bool _isLoading = false;
+  int _currentIndex = 0; // for the bottom navigation bar
 
-  // Fetching the list of rooms (both booked and available) from Firestore
-  Future<List<DocumentSnapshot>> _getRooms() async {
-    var snapshot = await FirebaseFirestore.instance.collection('rooms').get();
-    return snapshot.docs;
-  }
-
-  // Add room details to the Firestore collection
-  Future<void> _addRoom() async {
-    if (_hotelNameController.text.isEmpty ||
-        _roomTypeController.text.isEmpty ||
-        _roomPriceController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields")),
-      );
-      return;
-    }
-
+  // Function to update the index on bottom navigation bar item tap
+  void onNavItemTapped(int index) {
     setState(() {
-      _isLoading = true;
+      _currentIndex = index;
     });
 
-    try {
-      await FirebaseFirestore.instance.collection('rooms').add({
-        'hotelName': _hotelNameController.text,
-        'roomType': _roomTypeController.text,
-        'price': double.parse(_roomPriceController.text),
-        'isBooked': false, // New rooms are initially available
-      });
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Room added successfully")),
-      );
-
-      _hotelNameController.clear();
-      _roomTypeController.clear();
-      _roomPriceController.clear();
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("An error occurred, please try again")),
-      );
+    // Navigate to corresponding pages based on the index
+    switch (index) {
+      case 0:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HotelViewroom()),
+        );
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  HotelAddroom()),
+        );
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  HotelBookings()),
+        );
+        break;
+      default:
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Hotel Homepage')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Hotel Details Section
-            TextField(
-              controller: _hotelNameController,
-              decoration: const InputDecoration(
-                labelText: 'Hotel Name',
-                border: OutlineInputBorder(),
+      appBar: AppBar(
+        title: const Text('Hotel Homepage'),
+      ),
+      body: Column(
+        children: [
+          // Carousel Slider (directly specifying images without using a list)
+          CarouselSlider(
+            options: CarouselOptions(
+              autoPlay: true,
+              enlargeCenterPage: true,
+              aspectRatio: 16 / 9, // Adjust aspect ratio as needed
+              viewportFraction: 1.0,
+            ),
+            items: [
+              // Image 1 from assets
+              Image.asset(
+                'assets/images/hotel1.0.jpg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 300, // Set a fixed height for the images
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _roomTypeController,
-              decoration: const InputDecoration(
-                labelText: 'Room Type',
-                border: OutlineInputBorder(),
+              // Image 2 from assets
+              Image.asset(
+                'assets/images/hotel1.1.jpg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 300,
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _roomPriceController,
-              decoration: const InputDecoration(
-                labelText: 'Room Price',
-                border: OutlineInputBorder(),
+              // Image 3 from assets
+              Image.asset(
+                'assets/images/hotel1.2.jpg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 300,
               ),
-              keyboardType: TextInputType.number,
+            ],
+          ),
+          // Additional content can be added here for the hotel homepage
+          Expanded(
+            child: Center(
+              child: Text('Current index: $_currentIndex'),
             ),
-            const SizedBox(height: 24),
-
-            // Add Room Button
-            _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: _addRoom,
-                    child: const Text('Add Room'),
-                  ),
-            const SizedBox(height: 24),
-
-            // Room List Section: Display Booked and Available Rooms
-            FutureBuilder<List<DocumentSnapshot>>(
-              future: _getRooms(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text("No rooms available");
-                }
-
-                var rooms = snapshot.data!;
-                var availableRooms = rooms.where((room) => room['isBooked'] == false).toList();
-                var bookedRooms = rooms.where((room) => room['isBooked'] == true).toList();
-
-                return Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Available Rooms',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      ...availableRooms.map((room) => ListTile(
-                            title: Text(room['roomType']),
-                            subtitle: Text("Price: \$${room['price']}"),
-                            trailing: const Text('Available'),
-                          )),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Booked Rooms',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      ...bookedRooms.map((room) => ListTile(
-                            title: Text(room['roomType']),
-                            subtitle: Text("Price: \$${room['price']}"),
-                            trailing: const Text('Booked'),
-                          )),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
+      ),
+      // Bottom Navigation Bar
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: onNavItemTapped,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.room),
+            label: 'View Rooms',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.hotel),
+            label: 'Add Rooms',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book_online),
+            label: 'View Bookings',
+          ),
+        ],
       ),
     );
   }
