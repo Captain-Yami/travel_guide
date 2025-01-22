@@ -270,13 +270,24 @@ class GuideDetailPage extends StatelessWidget {
         await FirebaseFirestore.instance.collection('Users').doc(userId).get();
 
     final userName = userDoc.data()?['name'] ?? 'Unknown User';
-    final userProfilePic = userDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
+    final userProfilePic =
+        userDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
 
-    return {'userId': userId, 'userName': userName, 'userProfilePic': userProfilePic};
+    return {
+      'userId': userId,
+      'userName': userName,
+      'userProfilePic': userProfilePic
+    };
   }
 
-  void _startChat(BuildContext context, String userId, String guideId,
-      String userName, String guideName, String userProfilePic, String profileImage) {
+  void _startChat(
+      BuildContext context,
+      String userId,
+      String guideId,
+      String userName,
+      String guideName,
+      String userProfilePic,
+      String profileImage) {
     if (userId.isEmpty || userName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to load user data.')),
@@ -298,7 +309,7 @@ class GuideDetailPage extends StatelessWidget {
           userId: userId,
           userName: userName,
           guideName: guideName,
-          userProfilePic: userProfilePic, 
+          userProfilePic: userProfilePic,
           guideProfilePic: profileImage,
         ),
       ),
@@ -361,7 +372,8 @@ class GuideDetailPage extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+                          backgroundColor:
+                              const Color.fromARGB(255, 240, 240, 240),
                           foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -380,7 +392,8 @@ class GuideDetailPage extends StatelessWidget {
                             final userDetails = await _fetchUserDetails();
                             final userId = userDetails['userId']!;
                             final userName = userDetails['userName']!;
-                            final userProfilePic = userDetails['userProfilePic']!;
+                            final userProfilePic =
+                                userDetails['userProfilePic']!;
 
                             // Start the chat with the guide using fetched details
                             _startChat(
@@ -392,6 +405,15 @@ class GuideDetailPage extends StatelessWidget {
                               userProfilePic,
                               guide.profileImage,
                             );
+
+                            FirebaseFirestore.instance
+                                .collection('Notifications')
+                                .add({
+                              'guideId': guide.id,
+                              'text': '$userName sent you a message',
+                              'time': Timestamp.now(),
+                              'type': 'message'
+                            });
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -504,11 +526,12 @@ class GuideDetailPage extends StatelessWidget {
                       .get();
 
                   final userName = userDoc.data()?['name'] ?? 'Unknown User';
-                  final userProfilePic = userDoc.data()?['profile_picture'] ?? 'asset/background3.jpg';
+                  final userProfilePic = userDoc.data()?['profile_picture'] ??
+                      'asset/background3.jpg';
 
                   // Send the request to Firestore with the user's name and guideId
                   await FirebaseFirestore.instance.collection('requests').add({
-                    'userProfilePic':userProfilePic,
+                    'userProfilePic': userProfilePic,
                     'guideId': guide.id, // Add guideId to the request
                     'aboutTrip': tripController.text,
                     'categories': categoriesController.text,
@@ -516,6 +539,12 @@ class GuideDetailPage extends StatelessWidget {
                     'user': userId,
                     'userName': userName, // Add the user's name
                     'requestDate': Timestamp.now(),
+                  });
+                  FirebaseFirestore.instance.collection('Notifications').add({
+                    'guideId': guide.id,
+                    'text': 'New booking request from $userName',
+                    'time': Timestamp.now(),
+                    'type': 'request',
                   });
 
                   Navigator.of(context).pop();

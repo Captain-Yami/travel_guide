@@ -56,7 +56,30 @@ class _ChatScreenState extends State<ChatScreen> {
     });                                                
                                                        
     _messageController.clear();                        
-  }                                                    
+  }  
+
+   // Clear all messages in the chat
+  Future<void> _clearChat() async {
+    try {
+      final messageSnapshot = await FirebaseFirestore.instance
+          .collection('Chats')
+          .doc(widget.chatId)
+          .collection('messages')
+          .get();
+
+      for (var messageDoc in messageSnapshot.docs) {
+        await messageDoc.reference.delete();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Chat cleared successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to clear chat')),
+      );
+    }
+  }                                                  
                                                        
   // Determine whether to show the user's name or guide's name in the app bar
   String get appBarTitle {
@@ -93,7 +116,46 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         backgroundColor: const Color.fromARGB(255, 42, 41, 41),
         foregroundColor: const Color.fromARGB(255, 255, 255, 255),
-        elevation: 6.0, // Add shadow to the app bar
+        elevation: 6.0,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'clear_chat') {
+                // Confirm before clearing chat
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Clear Chat'),
+                    content: const Text(
+                        'Are you sure you want to clear all messages in this chat?'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // Close the dialog
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          _clearChat();
+                          Navigator.pop(context); // Close the dialog
+                        },
+                        child: const Text('Clear'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.settings),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'clear_chat',
+                child: Text('Clear Chat'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Column(
         children: [

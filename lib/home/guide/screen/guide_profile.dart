@@ -20,7 +20,7 @@ class _GuideProfileState extends State<GuideProfile> {
 
   // Profile image variables
   File? _profileImage;
-  ImageProvider profileImage = const AssetImage('assets/background3.jpg'); // Default profile image
+  ImageProvider profileImage = const AssetImage('asset/background3.jpg'); // Default profile image
 
   // Guide details
   String name = "";
@@ -87,7 +87,7 @@ class _GuideProfileState extends State<GuideProfile> {
 
           String profileImageUrl = data['profile_picture'] ?? '';
           profileImage = profileImageUrl.isEmpty
-              ? const AssetImage('assets/background3.jpg') as ImageProvider
+              ? const AssetImage('asset/background3.jpg') as ImageProvider
               : NetworkImage(profileImageUrl);
         });
       }

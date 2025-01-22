@@ -189,8 +189,8 @@ class _BookingDetailsPageState extends State<BookingDetailsPage> {
           userId: userId,
           userName: userName,
           guideName: guideName,
-          userProfilePic: userProfilePic,
-          guideProfilePic: guideProfilePic,
+          userProfilePic: guideProfilePic,
+          guideProfilePic: userProfilePic,
         ),
       ),
     );

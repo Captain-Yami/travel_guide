@@ -52,7 +52,7 @@ class _ChatsPageState extends State<ChatsPageguide> {
              // Fetch the guide's profile picture from the Guide collection
       final guideDoc = await FirebaseFirestore.instance
           .collection('Guide')
-          .doc(_currentUserId) // Get the guide's data using the guide's userId
+          .doc(data['guideId']) // Get the guide's data using the guide's userId
           .get();
 
       String guideProfilePicture = guideDoc.data()?['profile_picture'] ?? 'asset/background3.jpg'; // Fallback to default avatar if not available
@@ -119,6 +119,13 @@ class _ChatsPageState extends State<ChatsPageguide> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Chats',
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 41, 41, 41),
+      ),
       body: Column(
         children: [
           const SizedBox(height: 5),
@@ -232,4 +239,3 @@ class _ChatsPageState extends State<ChatsPageguide> {
     );
   }
 }
-

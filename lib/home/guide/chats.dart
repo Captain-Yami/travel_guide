@@ -18,6 +18,7 @@ class _ChatsPageState extends State<ChatsPage> {
   List<Map<String, dynamic>> _chats = [];
   List<Map<String, dynamic>> _filteredChats = [];
   final TextEditingController _searchController = TextEditingController();
+  String? _longPressedChatId; // Variable to store the long-pressed chatId
 
   @override
   void initState() {
@@ -49,13 +50,14 @@ class _ChatsPageState extends State<ChatsPage> {
         String profilePicture = userDoc.data()?['profile_picture'] ??
             'asset/background3.jpg'; // Fallback to default avatar if not available
 
-             // Fetch the guide's profile picture from the Guide collection
-      final guideDoc = await FirebaseFirestore.instance
-          .collection('Guide')
-          .doc(_currentUserId) // Get the guide's data using the guide's userId
-          .get();
+        // Fetch the guide's profile picture from the Guide collection
+        final guideDoc = await FirebaseFirestore.instance
+            .collection('Guide')
+            .doc(_currentUserId) // Get the guide's data using the guide's userId
+            .get();
 
-      String guideProfilePicture = guideDoc.data()?['profile_picture'] ?? 'asset/background3.jpg'; // Fallback to default avatar if not available
+        String guideProfilePicture = guideDoc.data()?['profile_picture'] ??
+            'asset/background3.jpg'; // Fallback to default avatar if not available
 
         // Fetch the last message from the messages subcollection
         final messageSnapshot = await FirebaseFirestore.instance
@@ -71,11 +73,11 @@ class _ChatsPageState extends State<ChatsPage> {
 
         if (messageSnapshot.docs.isNotEmpty) {
           final messageData = messageSnapshot.docs.first.data();
-          lastMessage = messageData['message'] ?? 'No message';
+          lastMessage = messageData['message'] ?? '';
           messageTime = messageData['timestamp'] != null
               ? DateFormat('hh:mm a')
                   .format(messageData['timestamp'].toDate().toLocal())
-              : 'No timestamp';
+              : '';
         }
 
         fetchedChats.add({
@@ -107,6 +109,40 @@ class _ChatsPageState extends State<ChatsPage> {
           .where((chat) => chat['userName'].toLowerCase().contains(query))
           .toList();
     });
+  }
+
+  // Delete chat from Firestore
+  Future<void> _deleteChat(String chatId) async {
+    try {
+      // Delete the chat document from the 'Chats' collection
+      await FirebaseFirestore.instance.collection('Chats').doc(chatId).delete();
+
+      // Delete the associated messages subcollection
+      final messageSnapshot = await FirebaseFirestore.instance
+          .collection('Chats')
+          .doc(chatId)
+          .collection('messages')
+          .get();
+
+      for (var messageDoc in messageSnapshot.docs) {
+        await messageDoc.reference.delete();
+      }
+
+      setState(() {
+        _chats.removeWhere((chat) => chat['chatId'] == chatId);
+        _filteredChats = _chats; // Update filtered chats
+        _longPressedChatId = null; // Reset long-pressed state
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Chat deleted successfully')),
+      );
+    } catch (e) {
+      print('Error deleting chat: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete chat')),
+      );
+    }
   }
 
   @override
@@ -162,6 +198,7 @@ class _ChatsPageState extends State<ChatsPage> {
                     itemCount: _filteredChats.length,
                     itemBuilder: (context, index) {
                       final chat = _filteredChats[index];
+                      bool isLongPressed = _longPressedChatId == chat['chatId'];
                       return Card(
                         color: const Color.fromARGB(255, 240, 240, 240),
                         margin: const EdgeInsets.symmetric(
@@ -205,6 +242,42 @@ class _ChatsPageState extends State<ChatsPage> {
                               ),
                             ],
                           ),
+                          trailing: isLongPressed
+                              ? IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    // Show confirmation dialog before deleting
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Delete Chat'),
+                                        content: const Text(
+                                            'Are you sure you want to delete this chat?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context); // Close dialog
+                                            },
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              _deleteChat(chat['chatId']);
+                                              Navigator.pop(context); // Close dialog
+                                            },
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                )
+                              : null,
+                          onLongPress: () {
+                            setState(() {
+                              _longPressedChatId = _longPressedChatId == chat['chatId'] ? null : chat['chatId'];
+                            });
+                          },
                           onTap: () {
                             // Navigate to the ChatScreen when a user is tapped
                             Navigator.push(
@@ -215,9 +288,9 @@ class _ChatsPageState extends State<ChatsPage> {
                                   userId: chat['userId'],
                                   userName: chat['userName'],
                                   guideName: chat['guideName'],
-                                  guideId: _currentUserId,// Send guideId here
-                                   userProfilePic: chat['profilePicture'],
-                                    guideProfilePic: chat['guideProfilePicture'],
+                                  guideId: _currentUserId, // Send guideId here
+                                  userProfilePic: chat['profilePicture'],
+                                  guideProfilePic: chat['guideProfilePicture'],
                                 ),
                               ),
                             );
@@ -232,4 +305,3 @@ class _ChatsPageState extends State<ChatsPage> {
     );
   }
 }
-

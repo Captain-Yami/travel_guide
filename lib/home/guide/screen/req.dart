@@ -33,57 +33,67 @@ class _GuideDashboardState extends State<GuideDashboard>
 
  Future<void> _fetchRequests() async {
   try {
-    // Fetch the current user's ID
     final guideId = FirebaseAuth.instance.currentUser?.uid;
     if (guideId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Guide not logged in.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Guide not logged in.')),
+        );
+      }
       return;
     }
 
-    // Query Firestore to get requests sent by the current user for the specific guide
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('requests')
-        .where('guideId', isEqualTo: guideId) // Filter by the guide ID
+        .where('guideId', isEqualTo: guideId)
         .get();
 
-    setState(() {
-      requests = snapshot.docs.map((doc) => _parseRequestData(doc)).toList();
-    });
+    if (mounted) {
+      setState(() {
+        requests = snapshot.docs.map((doc) => _parseRequestData(doc)).toList();
+      });
+    }
   } catch (e) {
     print('Error fetching requests: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Failed to fetch requests.')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to fetch requests.')),
+      );
+    }
   }
 }
 
-
-  Future<void> _fetchBookings() async {
-    try {
-      final guideId = FirebaseAuth.instance.currentUser?.uid;
+Future<void> _fetchBookings() async {
+  try {
+    final guideId = FirebaseAuth.instance.currentUser?.uid;
     if (guideId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Guide not logged in.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Guide not logged in.')),
+        );
+      }
       return;
     }
-       QuerySnapshot snapshot = await FirebaseFirestore.instance
+
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('confirmed_requests')
-        .where('guideId', isEqualTo: guideId) // Filter by the guide ID
+        .where('guideId', isEqualTo: guideId)
         .get();
 
+    if (mounted) {
       setState(() {
         bookings = snapshot.docs.map((doc) => _parseBookingData(doc)).toList();
       });
-    } catch (e) {
-      print('Error fetching bookings: $e');
+    }
+  } catch (e) {
+    print('Error fetching bookings: $e');
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Failed to fetch boookings.')),
-    );
+        const SnackBar(content: Text('Failed to fetch bookings.')),
+      );
     }
   }
+}
 
   void _removeRequest(String requestId) {
     setState(() {

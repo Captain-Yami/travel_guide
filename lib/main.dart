@@ -7,6 +7,7 @@ import 'package:travel_guide/home/admin/screen/hotel_managment.dart';
 import 'package:travel_guide/home/user/screen/UserHomePage.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:travel_guide/intro.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -14,4 +15,4 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
-  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:AdminHomepage()));} 
+  runApp(MaterialApp(debugShowCheckedModeBanner: false,home:LoginPage ()));} 

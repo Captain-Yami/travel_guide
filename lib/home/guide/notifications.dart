@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Notifications extends StatefulWidget {
   const Notifications({super.key});
@@ -8,41 +10,9 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
-  final List<Map<String, String>> recentNotifications = [
-    {
-      "icon": "message",
-      "text": "John Doe sent you a message",
-      "time": "2m ago",
-    },
-    {
-      "icon": "star",
-      "text": "You received a 5-star review!",
-      "time": "10m ago",
-    },
-    {
-      "icon": "book",
-      "text": "New booking request from Sarah",
-      "time": "20m ago",
-    },
-  ];
+  final String guideId = FirebaseAuth.instance.currentUser!.uid;
 
-  final List<Map<String, String>> earlierNotifications = [
-    {
-      "icon": "calendar",
-      "text": "Your availability has been updated",
-      "time": "Yesterday",
-    },
-    {
-      "icon": "person",
-      "text": "Tom started following you",
-      "time": "2 days ago",
-    },
-    {
-      "icon": "review",
-      "text": "Anna left a review for your last trip",
-      "time": "3 days ago",
-    },
-  ];
+  
 
   @override
   Widget build(BuildContext context) {
@@ -50,40 +20,53 @@ class _NotificationsState extends State<Notifications> {
       appBar: AppBar(
         title: const Text(
           'Notifications',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20,color: Color.fromARGB(255, 253, 253, 253),),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Color.fromARGB(255, 253, 253, 253),
+          ),
         ),
         backgroundColor: const Color.fromARGB(255, 42, 41, 41),
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        children: [
-          const Text(
-            "Recent",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          ...recentNotifications.map((notification) {
-            return _buildNotificationItem(
-              icon: notification["icon"]!,
-              text: notification["text"]!,
-              time: notification["time"]!,
-            );
-          }).toList(),
-          const SizedBox(height: 20),
-          const Text(
-            "Earlier",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          ...earlierNotifications.map((notification) {
-            return _buildNotificationItem(
-              icon: notification["icon"]!,
-              text: notification["text"]!,
-              time: notification["time"]!,
-            );
-          }).toList(),
-        ],
-      ),
+      body: StreamBuilder<QuerySnapshot>(
+  stream: FirebaseFirestore.instance
+      .collection('Notifications')
+      .where('guideId', isEqualTo: guideId)
+      .orderBy('time', descending: true)
+      .snapshots(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (snapshot.hasError) {
+      print("Error: ${snapshot.error}");
+      return Center(child: Text('Error: ${snapshot.error}'));
+    }
+
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      print("No notifications found");
+      return const Center(child: Text('No notifications yet.'));
+    }
+
+    final notifications = snapshot.data!.docs;
+    print("Fetched ${notifications.length} notifications");
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      itemCount: notifications.length,
+      itemBuilder: (context, index) {
+        final notificationData =
+            notifications[index].data() as Map<String, dynamic>;
+        return _buildNotificationItem(
+          icon: notificationData['type'],
+          text: notificationData['text'],
+          time: _formatTime(notificationData['time']),
+        );
+      },
+    );
+  },
+),
     );
   }
 
@@ -97,20 +80,8 @@ class _NotificationsState extends State<Notifications> {
       case "message":
         notificationIcon = Icons.message;
         break;
-      case "star":
-        notificationIcon = Icons.star;
-        break;
-      case "book":
+      case "request":
         notificationIcon = Icons.book;
-        break;
-      case "calendar":
-        notificationIcon = Icons.calendar_today;
-        break;
-      case "person":
-        notificationIcon = Icons.person;
-        break;
-      case "review":
-        notificationIcon = Icons.rate_review;
         break;
       default:
         notificationIcon = Icons.notifications;
@@ -137,7 +108,7 @@ class _NotificationsState extends State<Notifications> {
                 Text(
                   text,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
+                ),
                 const SizedBox(height: 5),
                 Text(
                   time,
@@ -146,14 +117,24 @@ class _NotificationsState extends State<Notifications> {
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              // Add actions for notification items, like delete or view details
-            },
-          ),
         ],
       ),
     );
+  }
+
+  String _formatTime(Timestamp timestamp) {
+    final date = timestamp.toDate();
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 }
