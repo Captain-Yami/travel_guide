@@ -329,7 +329,7 @@ class _MainPageState extends State<MainPage> {
                         const SizedBox(width: 20),
                              Expanded(
                           child: InkWell(
-                            onTap: _navigateToGuideDetails,
+                            onTap: _navigateToRequests,
                             borderRadius: BorderRadius.circular(12),
                             child: Ink(
                               decoration: BoxDecoration(

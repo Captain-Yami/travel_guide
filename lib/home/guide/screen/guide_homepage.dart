@@ -562,7 +562,7 @@ class _MainPageState extends State<GuideHomepage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  backgroundColor: const Color.fromARGB(255, 94, 255, 0),
+                  backgroundColor: Colors.green,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -645,12 +645,12 @@ class _MainPageState extends State<GuideHomepage> {
             child: Column(
               children: [
                 Icon(icon,
-                    size: 50, color: const Color.fromARGB(255, 94, 255, 0)),
+                    size: 50, color: Colors.green),
                 const SizedBox(height: 8),
                 Text(label,
                     style: GoogleFonts.roboto(
                         fontSize: 16,
-                        color: const Color.fromARGB(255, 94, 255, 0))),
+                        color:  Colors.green)),
               ],
             ),
           ),
