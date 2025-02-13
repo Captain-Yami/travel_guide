@@ -1,46 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class hotel extends StatefulWidget {
-  const hotel({super.key});
+class HotelPage extends StatelessWidget {
+  const HotelPage({super.key});
 
-  @override
-  State<hotel> createState() => _hotelState();
-}
-
-class _hotelState extends State<hotel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hotels'),
-        backgroundColor: Colors.blueGrey[800], // Darker AppBar color
+        title: const Text('Hotels List', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.greenAccent)),
+        backgroundColor: const Color(0xFF0C1615),
+        centerTitle: true,
+        elevation: 6,
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF0C1615), // Dark black
-              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
-              Color.fromARGB(255, 14, 26, 25), // Even lighter black
-            ], // Three colors for gradient
+              Color(0xFF0C1615),
+              Color(0xFF1B5E20),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('Hotels').snapshots(),
+          stream: FirebaseFirestore.instance.collection('hotels').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator(color: Colors.greenAccent));
             }
 
-            if (snapshot.hasError) {
-              return const Center(child: Text('Error fetching data'));
-            }
-
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('No hotels available'));
+            if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No hotels available', style: TextStyle(color: Colors.greenAccent)));
             }
 
             final hotels = snapshot.data!.docs;
@@ -49,29 +43,33 @@ class _hotelState extends State<hotel> {
               itemCount: hotels.length,
               itemBuilder: (context, index) {
                 final hotel = hotels[index];
-                final hotelName = hotel['name'];
+                final hotelName = hotel['hotelName'];
+                final location = hotel['location'];
+                final imageUrl = hotel['imageUrl'] ?? '';
 
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  elevation: 4,
-                  color: Colors.green, // Set card color to green
+                  elevation: 5,
+                  color: Colors.black.withOpacity(0.7),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   child: ListTile(
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: imageUrl.isNotEmpty
+                          ? Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover)
+                          : const Icon(Icons.hotel, size: 60, color: Colors.greenAccent),
+                    ),
                     title: Text(
                       hotelName,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.greenAccent),
                     ),
+                    subtitle: Text(location, style: const TextStyle(color: Colors.white70)),
+                    trailing: const Icon(Icons.arrow_forward_ios, color: Colors.greenAccent),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => hotelDetails(
-                            name: hotel['name'],
-                            description: hotel['description'],
-                            location: hotel['location'],
-                            openingTime: hotel['openingTime'],
-                            closingTime: hotel['closingTime'],
-                            imageUrl: hotel['imageUrl'],
-                          ),
+                          builder: (context) => HotelRoomsPage(hotelId: hotel.id, hotelName: hotelName),
                         ),
                       );
                     },
@@ -86,87 +84,162 @@ class _hotelState extends State<hotel> {
   }
 }
 
-class hotelDetails extends StatelessWidget {
-  final String name;
-  final String description;
-  final String location;
-  final String openingTime;
-  final String closingTime;
-  final String imageUrl;
+class HotelRoomsPage extends StatefulWidget {
+  final String hotelId;
+  final String hotelName;
 
-  const hotelDetails({
-    Key? key,
-    required this.name,
-    required this.description,
-    required this.location,
-    required this.openingTime,
-    required this.closingTime,
-    required this.imageUrl,
-  }) : super(key: key);
+  const HotelRoomsPage({Key? key, required this.hotelId, required this.hotelName}) : super(key: key);
+
+  @override
+  _HotelRoomsPageState createState() => _HotelRoomsPageState();
+}
+
+class _HotelRoomsPageState extends State<HotelRoomsPage> {
+  late Razorpay _razorpay;
+  final String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  void _payForRoom(String roomNumber, String price) {
+    var options = {
+      'key': 'rzp_test_D5Vh3hyi1gRBV0',
+      'amount': int.parse(price) * 100,
+      'name': 'Hotel Room Booking',
+      'description': 'Booking for Room $roomNumber',
+      'prefill': {'contact': '1234567890', 'email': 'user@example.com'},
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    await FirebaseFirestore.instance.collection('Users').doc(currentUserId).collection('orders').add({
+      'paymentId': response.paymentId,
+      'description': 'Hotel Room Booking',
+      'amount': response.orderId,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment Successful!')));
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Failed: ${response.message}')));
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('External Wallet Selected: ${response.walletName}')));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(name),
-        backgroundColor: Colors.blueGrey[800], // Darker AppBar color
+        title: Text('${widget.hotelName} - Rooms', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.greenAccent)),
+        backgroundColor: const Color(0xFF0C1615),
+        centerTitle: true,
+        elevation: 6,
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFF0C1615), // Dark black
-              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
-              Color.fromARGB(255, 14, 26, 25), // Even lighter black
-            ], // Three colors for gradient
+            colors: [Color(0xFF0C1615), Color(0xFF1B5E20)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (imageUrl.isNotEmpty)
-                  Image.network(
-                    imageUrl,
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance.collection('hotels').doc(widget.hotelId).collection('rooms').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator(color: Colors.greenAccent));
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text('No rooms available', style: TextStyle(color: Colors.greenAccent)));
+            }
+
+            final rooms = snapshot.data!.docs;
+
+            return ListView.builder(
+              itemCount: rooms.length,
+              itemBuilder: (context, index) {
+                final room = rooms[index];
+                final roomNumber = room['roomNumber'] ?? 'Unknown';
+                final roomPrice = room['price'] ?? '0';
+                final roomImage = room['imageUrl'] ?? '';
+                final features = room['features'] ?? {};
+                final ac = features['AC'] ?? false;
+                final balcony = features['Balcony'] ?? false;
+                final roomService = features['Room Service'] ?? false;
+                final wifi = features['Wi-Fi'] ?? false;
+                final isAvailable = room['isAvailable'] ?? false;
+
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  elevation: 5,
+                  color: Colors.black.withOpacity(0.7),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: roomImage.isNotEmpty
+                              ? Image.network(roomImage, width: 60, height: 60, fit: BoxFit.cover)
+                              : const Icon(Icons.bed, size: 60, color: Colors.greenAccent),
+                        ),
+                        title: Text('Room $roomNumber',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.greenAccent)),
+                        subtitle: Text('Price: \$${roomPrice}', style: const TextStyle(color: Colors.white70)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Features:',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.greenAccent)),
+                            Text('AC: ${ac ? 'Yes' : 'No'}', style: const TextStyle(color: Colors.white70)),
+                            Text('Balcony: ${balcony ? 'Yes' : 'No'}', style: const TextStyle(color: Colors.white70)),
+                            Text('Room Service: ${roomService ? 'Yes' : 'No'}', style: const TextStyle(color: Colors.white70)),
+                            Text('Wi-Fi: ${wifi ? 'Yes' : 'No'}', style: const TextStyle(color: Colors.white70)),
+                            Text('Available: ${isAvailable ? 'Yes' : 'No'}', style: const TextStyle(color: Colors.white70)),
+                            const SizedBox(height: 10),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                onPressed: () => _payForRoom(roomNumber, roomPrice),
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent),
+                                child: const Text('Book Now', style: TextStyle(color: Colors.black)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 16),
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Description: $description',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Location: $location',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Opening Time: $openingTime',
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Closing Time: $closingTime',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
+                );
+              },
+            );
+          },
         ),
       ),
     );

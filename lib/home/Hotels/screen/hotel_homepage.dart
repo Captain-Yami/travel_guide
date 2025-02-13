@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:travel_guide/home/Hotels/screen/hotel_addroom.dart';
 import 'package:travel_guide/home/Hotels/screen/hotel_bookings.dart';
 import 'package:travel_guide/home/Hotels/screen/hotel_viewroom.dart';
@@ -12,15 +11,8 @@ class HotelHomepage extends StatefulWidget {
 }
 
 class _HotelHomepageState extends State<HotelHomepage> {
-  int _currentIndex = 0; // for the bottom navigation bar
-
-  // Function to update the index on bottom navigation bar item tap
-  void onNavItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
-    // Navigate to corresponding pages based on the index
+  // Function to navigate to corresponding pages
+  void onButtonTapped(int index) {
     switch (index) {
       case 0:
         Navigator.push(
@@ -31,13 +23,13 @@ class _HotelHomepageState extends State<HotelHomepage> {
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  HotelAddroom()),
+          MaterialPageRoute(builder: (context) => HotelAddroom()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  HotelBookings()),
+          MaterialPageRoute(builder: (context) => HotelBookings()),
         );
         break;
       default:
@@ -49,68 +41,110 @@ class _HotelHomepageState extends State<HotelHomepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hotel Homepage'),
+        backgroundColor: const Color.fromARGB(255, 42, 41, 41),
+        title:
+            const Text('Hotel Homepage', style: TextStyle(color: Colors.green)),
       ),
-      body: Column(
-        children: [
-          // Carousel Slider (directly specifying images without using a list)
-          CarouselSlider(
-            options: CarouselOptions(
-              autoPlay: true,
-              enlargeCenterPage: true,
-              aspectRatio: 16 / 9, // Adjust aspect ratio as needed
-              viewportFraction: 1.0,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0C1615), // Dark black
+              Color.fromARGB(255, 16, 31, 29), // Slightly lighter black
+              Color.fromARGB(255, 14, 26, 25),
+            ], // Three-color gradient
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          children: [
+            // Row for the first button (View Rooms)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+              child: Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Center the button
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: CircleBorder(),
+                      backgroundColor: Colors.green, // Circular shape
+                      minimumSize: Size(150, 150), // Increased size
+                      padding: const EdgeInsets.all(
+                          30), // Green color for the button
+                    ),
+                    onPressed: () => onButtonTapped(0),
+                    child: const Text(
+                      'View\nRooms',
+                      textAlign: TextAlign.center, // Center text in the button
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black), // Black font color
+                    ),
+                  ),
+                ],
+              ),
             ),
-            items: [
-              // Image 1 from assets
-              Image.asset(
-                'assets/images/hotel1.0.jpg',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 300, // Set a fixed height for the images
+            // Row for the second button (Add Rooms)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+              child: Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Center the button
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: CircleBorder(),
+                      backgroundColor: Colors.green, // Circular shape
+                      minimumSize: Size(150, 150), // Increased size
+                      padding: const EdgeInsets.all(
+                          30), // Green color for the button
+                    ),
+                    onPressed: () => onButtonTapped(1),
+                    child: const Text(
+                      'Add\nRooms',
+                      textAlign: TextAlign.center, // Center text in the button
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black), // Black font color
+                    ),
+                  ),
+                ],
               ),
-              // Image 2 from assets
-              Image.asset(
-                'assets/images/hotel1.1.jpg',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 300,
-              ),
-              // Image 3 from assets
-              Image.asset(
-                'assets/images/hotel1.2.jpg',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 300,
-              ),
-            ],
-          ),
-          // Additional content can be added here for the hotel homepage
-          Expanded(
-            child: Center(
-              child: Text('Current index: $_currentIndex'),
             ),
-          ),
-        ],
-      ),
-      // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: onNavItemTapped,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.room),
-            label: 'View Rooms',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.hotel),
-            label: 'Add Rooms',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book_online),
-            label: 'View Bookings',
-          ),
-        ],
+            // Row for the third button (View Bookings)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+              child: Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Center the button
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: CircleBorder(),
+                      backgroundColor: Colors.green, // Circular shape
+                      minimumSize: Size(150, 150), // Increased size
+                      padding: const EdgeInsets.all(
+                          30), // Green color for the button
+                    ),
+                    onPressed: () => onButtonTapped(2),
+                    child: const Text(
+                      'View\nBookings',
+                      textAlign: TextAlign.center, // Center text in the button
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black), // Black font color
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

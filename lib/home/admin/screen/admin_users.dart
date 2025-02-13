@@ -19,11 +19,11 @@ class _AdminUsersState extends State<AdminUsers> {
   }
 
   // Navigate to the user details page
-  void navigateToUserDetails(Map<String, dynamic> user) {
+  void navigateToUserDetails(Map<String, dynamic> user, String userId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => UserDetailsPage(user: user),
+        builder: (context) => UserDetailsPage(user: user, userId: userId),
       ),
     );
   }
@@ -116,7 +116,7 @@ class _AdminUsersState extends State<AdminUsers> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: GestureDetector(
-                    onTap: () => navigateToUserDetails(user),
+                    onTap: () => navigateToUserDetails(user, userId),
                     child: Card(
                       elevation: 5,
                       shape: RoundedRectangleBorder(
@@ -179,11 +179,129 @@ class _AdminUsersState extends State<AdminUsers> {
 
 class UserDetailsPage extends StatelessWidget {
   final Map<String, dynamic> user;
+  final String userId;
 
-  const UserDetailsPage({super.key, required this.user});
+  const UserDetailsPage({super.key, required this.user, required this.userId});
+
+  // Suspend the user with a reason
+ Future<void> suspendUser(BuildContext context) async {
+  TextEditingController reasonController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Suspend User'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Please provide a reason for suspending this user:'),
+            TextField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: const InputDecoration(hintText: 'Enter reason here'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              String reason = reasonController.text.trim();
+              if (reason.isNotEmpty) {
+                try {
+                  // Suspend the user in the Users collection
+                  await FirebaseFirestore.instance.collection('Users').doc(userId).update({
+                    'status': true,  // Set user as suspended
+                    'suspensionReasons': FieldValue.arrayUnion([reason]), // Add reason to the list
+                  });
+
+                  // Update or create the suspend document for the user
+                  await FirebaseFirestore.instance.collection('suspend').doc(userId).set({
+                    'useremail': user['useremail'], // Store user email
+                    'status': true,  // Set user status as suspended
+                    'id': userId, // Store user ID
+                    'reason': FieldValue.arrayUnion([reason]), // Add suspension reason to list
+                    'timestamp': FieldValue.serverTimestamp(), // Optional: track when the suspension happened
+                  }, SetOptions(merge: true)); // If the document exists, merge the updates
+
+                  Navigator.pop(context); // Close the dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('User suspended successfully')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('An error occurred while suspending the user.')),
+                  );
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please provide a reason.')),
+                );
+              }
+            },
+            child: const Text('Suspend'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+  // Revoke the suspension of the user
+  Future<void> revokeSuspension(BuildContext context) async {
+  try {
+    // Fetch the current user status first
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+
+    if (userDoc.exists) {
+      bool isSuspended = userDoc['status'] ?? false; // Fetch the status of the user
+
+      if (isSuspended) {
+        // Update the user's status in the 'Users' collection to false (revoked)
+        await FirebaseFirestore.instance.collection('Users').doc(userId).update({
+          'status': false,  // Revoke the suspension (set status to false)
+        });
+
+        // Update the status in the 'suspend' collection
+        await FirebaseFirestore.instance.collection('suspend').doc(userId).update({
+          'status': false, // Mark status as revoked
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Suspension revoked successfully')),
+        );
+      } else {
+        // If the user is already not suspended, show a message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('The user is not suspended.')),
+        );
+      }
+    } else {
+      // Handle the case when the user document does not exist
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not found.')),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('An error occurred while revoking the suspension.')),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
+    bool isSuspended =
+        user['status'] ?? false; // Check if the user is suspended
+
     return Scaffold(
       appBar: AppBar(
         title: Text('${user['name']} Details'),
@@ -205,60 +323,53 @@ class UserDetailsPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
-              // Display the user's name in a tile
               _buildTile('Name', user['name'] ?? 'Not Available'),
               const SizedBox(height: 10),
-              // Display Date of Birth in a tile
               _buildTile('Date of Birth', user['DOB'] ?? 'Not Available'),
               const SizedBox(height: 10),
-              // Display Email in a tile
               _buildTile('Email', user['useremail'] ?? 'Not Available'),
               const SizedBox(height: 10),
-              // Display Address in a tile
               _buildTile('Address', user['address'] ?? 'Not Available'),
               const SizedBox(height: 10),
-              // Display City in a tile
               _buildTile('City', user['city'] ?? 'Not Available'),
               const SizedBox(height: 10),
-              // Display State in a tile
               _buildTile('State', user['state'] ?? 'Not Available'),
               const SizedBox(height: 10),
-              // Display Pincode in a tile
               _buildTile('Pincode', user['pincode'] ?? 'Not Available'),
               const SizedBox(height: 10),
-              // Display Nation in a tile
               _buildTile('Nation', user['nation'] ?? 'Not Available'),
-              const SizedBox(height: 20),
-              // Display the user's profile image or placeholder icon
-              user['image'] != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        user['image'],
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Container(
-                      width: double.infinity,
-                      height: 200,
-                      color: Colors.blueGrey[100],
-                      child: const Icon(
-                        Icons.account_circle,
-                        size: 50,
-                        color: Colors.blueGrey,
-                      ),
-                    ),
             ],
           ),
         ),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: null,
+            onPressed: () => suspendUser(context),
+            backgroundColor: Colors.orange,
+            child: const Icon(Icons.lock, color: Colors.white),
+            tooltip: 'Suspend User',
+          ),
+          const SizedBox(height: 10),
+          // Only show the Revoke Suspension button if the user is suspended (status == true)
+          if (isSuspended)
+            FloatingActionButton(
+              heroTag: null,
+              onPressed: () => revokeSuspension(context),
+              backgroundColor: Colors.green,
+              child: const Icon(Icons.lock_open, color: Colors.white),
+              tooltip: 'Revoke Suspension',
+            ),
+        ],
       ),
     );
   }
 
   // Helper method to create a tile for user details
-  Widget _buildTile(String title, String value) {
+  Widget _buildTile(String title, String subtitle) {
     return Card(
       color: const Color.fromARGB(255, 39, 39, 40),
       shape: RoundedRectangleBorder(
@@ -267,11 +378,12 @@ class UserDetailsPage extends StatelessWidget {
       child: ListTile(
         title: Text(
           title,
-          style: const TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          value,
-          style: const TextStyle(color: Colors.white, fontSize: 16),
+          subtitle,
+          style: const TextStyle(color: Colors.green, fontSize: 16),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/select_user.dart';
 import 'package:travel_guide/services/login_services.dart';
@@ -15,24 +16,73 @@ class _LoginPageState extends State<LoginPage> {
   bool loading = false;
   bool _obscurePassword = true;
 
-  void LoginHandler() async {
-    setState(() {
-      loading = true;
-    });
+void LoginHandler() async {
+  setState(() {
+    loading = true;
+  });
 
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
 
-    await LoginServiceFire().LoginService(
-      email: email,
-      password: password,
-      context: context,
-    );
+  try {
+    // Check if email exists in suspended collection
+    final suspendedUserSnapshot = await FirebaseFirestore.instance
+        .collection('suspend') // Change this collection name if needed
+        .doc(email) // Assuming email is stored as document ID
+        .get();
 
-    setState(() {
-      loading = false;
-    });
+    // If the document exists
+    if (suspendedUserSnapshot.exists) {
+      final status = suspendedUserSnapshot['status'];
+
+      if (status == true) {
+        // Show suspended message and do not proceed with login
+        _showSuspendedMessage();
+      } else {
+        // Proceed with normal login
+        await LoginServiceFire().LoginService(
+          email: email,
+          password: password,
+          context: context,
+        );
+      }
+    } else {
+      // If the email is not in the suspended collection, proceed with login
+      await LoginServiceFire().LoginService(
+        email: email,
+        password: password,
+        context: context,
+      );
+    }
+  } catch (e) {
+    print("Error: $e");
+    // Handle any error from Firebase or the login process.
   }
+
+  setState(() {
+    loading = false;
+  });
+}
+
+void _showSuspendedMessage() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Account Suspended'),
+        content: Text('Your account has been suspended. Please contact support.'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   void _navigateToSignup() {
     Navigator.push(

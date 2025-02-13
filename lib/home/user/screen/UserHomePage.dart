@@ -22,7 +22,7 @@ class _MainPageState extends State<MainPage> {
   void _navigateToHotel() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const hotel()),
+      MaterialPageRoute(builder: (context) => const HotelPage()),
     );
   }
 

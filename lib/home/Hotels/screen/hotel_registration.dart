@@ -142,29 +142,38 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
     return facilities.isNotEmpty ? facilities.join(", ") : "None";
   }
 
+  final user = FirebaseAuth.instance.currentUser;
+
   // Submit form
   void submitForm() async {
-    if (_formKey.currentState!.validate()) {
+  if (_formKey.currentState!.validate()) {
+    setState(() {
+      isLoading = true;
+    });
+
+    _formKey.currentState!.save();
+
+    // Validate password and confirm password match
+    if (password != confirmPassword) {
       setState(() {
-        isLoading = true;
+        isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match")),
+      );
+      return;
+    }
 
-      _formKey.currentState!.save();
+    try {
+      // Create user in Firebase Authentication
+      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: contactEmail, 
+        password: password,
+      );
+      
+      final String userId = userCredential.user!.uid; // Get newly created user ID
 
-      // Validate password and confirm password match
-      if (password != confirmPassword) {
-        setState(() {
-          isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Passwords do not match")),
-        );
-        return;
-      }
-
-      final user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: contactEmail, password: password);
-      // Upload image to Cloudinary if an image was picked
+      // Upload images to Cloudinary
       if (_image != null && document != null) {
         imageUrl = await _uploadImageToCloudinary(_image!);
         documnetUrl = await _uploadImageToCloudinary(document!);
@@ -182,60 +191,59 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
         'numberOfRooms': numberOfRooms,
         'facilities': _getSelectedFacilities(),
         'imageUrl': imageUrl, // Add image URL to the data
-        'document': documnetUrl
+        'document': documnetUrl,
+        'ownerId': userId, // 🔹 Store logged-in user's ID
       };
 
-      try {
-        await _firestore
-            .collection('hotels')
-            .doc(user.user!.uid)
-            .set(hotelData);
-        setState(() {
-          isLoading = false;
-        });
+      // Save hotel data to Firestore
+      await _firestore.collection('hotels').doc(userId).set(hotelData);
 
-        Navigator.of(context).pop();
+      setState(() {
+        isLoading = false;
+      });
 
-        // Display success dialog
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text("Registration Successful"),
-              content: const Text("Hotel registration successful!"),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("OK"),
-                ),
-              ],
-            );
-          },
-        );
-      } catch (e) {
-        setState(() {
-          isLoading = false;
-        });
-        // Error dialog
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text("Error"),
-              content:
-                  const Text("Failed to register hotel. Please try again."),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("OK"),
-                ),
-              ],
-            );
-          },
-        );
-      }
+      Navigator.of(context).pop();
+
+      // Display success dialog
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Registration Successful"),
+            content: const Text("Hotel registration successful!"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      // Error dialog
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text("Error"),
+            content: Text("Failed to register hotel. Error: $e"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
+}
 
   // Input decoration
   InputDecoration _buildInputDecoration(String labelText) {
