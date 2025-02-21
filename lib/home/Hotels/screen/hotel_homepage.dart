@@ -17,7 +17,7 @@ class _HotelHomepageState extends State<HotelHomepage> {
       case 0:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HotelBookings()),
+          MaterialPageRoute(builder: (context) => ViewRooms()),
         );
         break;
       case 1:

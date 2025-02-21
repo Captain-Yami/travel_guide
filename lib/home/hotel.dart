@@ -164,8 +164,12 @@ class _HotelRoomsPageState extends State<HotelRoomsPage> {
     }
   }
 
+  String? selectedRoomNumber;
+  String? selectedPrice;
 
   void _payForRoom(String roomNumber, String price) {
+    selectedRoomNumber = roomNumber;
+    selectedPrice = price;
     var options = {
       'key': 'rzp_test_D5Vh3hyi1gRBV0',
       'amount': int.parse(price) * 100,
@@ -183,15 +187,11 @@ class _HotelRoomsPageState extends State<HotelRoomsPage> {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
 
-    DocumentSnapshot roomSnapshot = await FirebaseFirestore.instance
-        .collection('hotels')
-        .doc(widget.hotelId)
-        .collection('rooms')
-        .limit(1) // Fetch only one room
-        .get()
-        .then((snapshot) => snapshot.docs.first);
-
-    String roomNumber = roomSnapshot['roomNumber']; // Extract room number
+     if (selectedRoomNumber == null || checkInDate == null || checkOutDate == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Booking details missing.')));
+    return;
+  }
   await FirebaseFirestore.instance
       .collection('hotels')
       .doc(widget.hotelId)
@@ -199,14 +199,14 @@ class _HotelRoomsPageState extends State<HotelRoomsPage> {
       .add({
     'hotelId': widget.hotelId,
     'hotelName': widget.hotelName,
-    'roomNumber':roomNumber, 
+    'roomNumber':selectedRoomNumber, 
     'userId': currentUserId,
     'userName': FirebaseAuth.instance.currentUser?.displayName ?? 'Guest',
     'userEmail': FirebaseAuth.instance.currentUser?.email ?? 'N/A',
     'paymentId': response.paymentId,
     'checkInDate': DateFormat('yyyy-MM-dd').format(checkInDate!),
     'checkOutDate': DateFormat('yyyy-MM-dd').format(checkOutDate!),
-    'amount': response.orderId,
+    'amount': selectedPrice!* 100,
     'timestamp': FieldValue.serverTimestamp(),
   });
 
