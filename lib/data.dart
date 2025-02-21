@@ -1195,144 +1195,712 @@ List<Map<String, dynamic>> kannurTripPlan = [
     ]
   },
   {
-    "place name": "Kokkayi Waterfalls",
+    "place name": "Sree Rajarajeshwara Temple",
     "Trip plan": [
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "6:00 AM - 7:00 AM",
         "activity":
-            "Arrive early at Kokkayi Waterfalls and enjoy the cool, misty atmosphere of the area. Start your walk towards the waterfall, surrounded by lush greenery and serene surroundings."
+            "Arrive early at the Sree Rajarajeshwara Temple to witness the peaceful morning rituals. Start by exploring the temple's architecture and surroundings."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "7:00 AM - 8:00 AM",
         "activity":
-            "Continue your walk through the forested trails towards the waterfall. Admire the natural beauty of the landscape and keep an eye out for local flora and fauna."
+            "Attend the morning pooja and soak in the divine atmosphere. Spend time in quiet contemplation or prayer."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "8:00 AM - 9:00 AM",
         "activity":
-            "Reach the Kokkayi Waterfalls and marvel at the sight of the water cascading down the rocks. Spend some time capturing photographs and enjoying the peaceful ambiance of the falls."
+            "Explore the temple's inner sanctum and admire the intricate carvings. Learn about its history and significance."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "9:00 AM - 10:00 AM",
         "activity":
-            "Take a dip in the refreshing waters at the base of the waterfall, if safe. Relax by the water's edge and listen to the soothing sounds of the cascading water."
+            "Take a walk around the temple's outer precincts, enjoying the serene surroundings and lush gardens."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "10:00 AM - 11:00 AM",
         "activity":
-            "Explore the surroundings of the waterfall, take a walk along the nearby streams, and enjoy the lush forest trails that lead to beautiful vantage points of the falls."
+            "Visit the nearby shrines within the temple complex and explore their unique features."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "11:00 AM - 12:00 PM",
         "activity":
-            "Relax in the tranquil environment, perhaps enjoying some snacks or a packed lunch that you brought along. Alternatively, take more time to explore the area around the waterfall."
+            "Take a break and enjoy some local snacks from nearby vendors, or relax in the temple's peaceful surroundings."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "12:00 PM - 1:00 PM",
         "activity":
-            "After lunch, take a rest and soak in the natural beauty. Spend time relaxing under the shade of trees or continue to explore nearby trails."
+            "Take a moment to meditate and reflect at the temple. You can also interact with the locals and learn about the cultural heritage."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "1:00 PM - 2:00 PM",
         "activity":
-            "Head back towards the starting point, enjoying the walk through the forest and taking in the surroundings before you leave the area."
+            "Explore the nearby areas or visit local shops for souvenirs or religious items."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "2:00 PM - 3:00 PM",
         "activity":
-            "Take a break at the entrance or nearby spot for refreshments. If you’re interested, visit a local shop to purchase handmade goods or souvenirs."
+            "Enjoy a peaceful lunch nearby, either inside the temple's guest house or at a local restaurant."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "3:00 PM - 4:00 PM",
         "activity":
-            "Relax and reflect on the day's experience before departing. Enjoy the peaceful environment or have a chat with locals about the area."
+            "Take a final walk around the temple grounds, observing its beauty in the light of the afternoon sun."
       },
       {
-        "place name": "Kokkayi Waterfalls",
+        "place name": "Sree Rajarajeshwara Temple",
         "time": "4:00 PM - 5:00 PM",
         "activity":
-            "Prepare to leave. Begin the journey back, reflecting on the beauty of the waterfall and the peaceful experience you had at Kokkayi Waterfalls."
+            "End your visit by reflecting on the divine experience and preparing for departure."
       }
     ]
   },
   {
-    "place name": "Kappimala Waterfalls",
+    "place name": "Kannur Sree Subramanya Temple",
     "Trip plan": [
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "6:00 AM - 7:00 AM",
         "activity":
-            "Arrive early at Kappimala Waterfalls to enjoy the peaceful and misty atmosphere of the area. Start your trek towards the waterfall through scenic forest trails."
+            "Arrive at the Kannur Sree Subramanya Temple early in the morning. Experience the calm atmosphere and witness the morning pooja."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "7:00 AM - 8:00 AM",
         "activity":
-            "Continue your walk through the dense greenery, passing through various natural features. Take in the sights and sounds of the forest as you head toward the falls."
+            "Visit the temple’s inner sanctum and explore the beautiful carvings of Lord Subramanya."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "8:00 AM - 9:00 AM",
         "activity":
-            "Arrive at the Kappimala Waterfalls and enjoy the view of the water cascading down the rocks. Spend some time capturing photos or simply soak in the beauty of the falls."
+            "Take part in the spiritual offerings or sit and meditate in the temple."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "9:00 AM - 10:00 AM",
         "activity":
-            "Take a refreshing dip in the cool waters at the base of the waterfall if safe to do so. Relax by the water, or simply enjoy the sound of the flowing water."
+            "Explore the temple’s surroundings, including the lush green gardens and serene ponds."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "10:00 AM - 11:00 AM",
         "activity":
-            "Explore the surrounding area, take a walk along nearby streams, and enjoy the untouched natural beauty. You may also spot a variety of local flora and fauna."
+            "Spend some time interacting with locals or priests to learn more about the temple’s significance."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "11:00 AM - 12:00 PM",
         "activity":
-            "Rest and enjoy a packed snack or lunch at the waterfall, surrounded by nature. Take a moment to relax and reflect on the tranquil surroundings."
+            "Take a break and enjoy some local food at a nearby restaurant or food stall."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "12:00 PM - 1:00 PM",
         "activity":
-            "Take more time to relax and explore the nearby trails or small caves around the waterfall area. Engage in some quiet contemplation or enjoy the solitude."
+            "Relax in the peaceful ambiance, or spend time in quiet reflection in the temple courtyard."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "1:00 PM - 2:00 PM",
         "activity":
-            "Start your journey back to the starting point, retracing your steps through the forest trails and relishing the beauty of the surroundings."
+            "Take a walk through the temple’s smaller shrines and enjoy the spiritual experience."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "2:00 PM - 3:00 PM",
         "activity":
-            "Once you reach the base, take a break and relax before heading out. Visit a local shop or café for refreshments or small souvenirs if available."
+            "Have lunch at a local restaurant or temple canteen offering regional specialties."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "3:00 PM - 4:00 PM",
         "activity":
-            "Take a final stroll around the base of the waterfall or visit other nearby attractions before you prepare to leave. Enjoy the peace of the area one last time."
+            "Take a final stroll around the temple grounds and enjoy the serenity before preparing to leave."
       },
       {
-        "place name": "Kappimala Waterfalls",
+        "place name": "Kannur Sree Subramanya Temple",
         "time": "4:00 PM - 5:00 PM",
         "activity":
-            "Wrap up your visit and begin the journey back, reflecting on the day’s experience and the beauty of Kappimala Waterfalls."
+            "Conclude your visit and depart with a sense of peace and spirituality."
+      }
+    ]
+  },
+  {
+    "place name": "Iritty Sree Ayyappa Temple",
+    "Trip plan": [
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "6:00 AM - 7:00 AM",
+        "activity":
+            "Arrive at Iritty Sree Ayyappa Temple early in the morning and enjoy the tranquil atmosphere as you witness the morning rituals."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "7:00 AM - 8:00 AM",
+        "activity":
+            "Pay your respects in the temple and take part in morning prayers or pooja."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "8:00 AM - 9:00 AM",
+        "activity":
+            "Explore the inner sanctum of the temple and admire the intricate designs and architecture."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "9:00 AM - 10:00 AM",
+        "activity":
+            "Take a peaceful walk around the temple grounds and enjoy the surrounding nature."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "10:00 AM - 11:00 AM",
+        "activity":
+            "Spend time reflecting or meditating at the temple, appreciating its peaceful ambiance."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "11:00 AM - 12:00 PM",
+        "activity":
+            "Take a break and enjoy a snack or light refreshment from nearby food vendors."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "12:00 PM - 1:00 PM",
+        "activity":
+            "Engage in conversation with locals to learn more about the temple's history and significance."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "1:00 PM - 2:00 PM",
+        "activity":
+            "Enjoy a peaceful walk through the surrounding village or take part in temple activities."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "2:00 PM - 3:00 PM",
+        "activity":
+            "Visit nearby shops for souvenirs or temple-related artifacts."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "3:00 PM - 4:00 PM",
+        "activity":
+            "Take a final stroll through the temple grounds or visit other nearby attractions."
+      },
+      {
+        "place name": "Iritty Sree Ayyappa Temple",
+        "time": "4:00 PM - 5:00 PM",
+        "activity":
+            "Conclude your visit and leave the temple, taking with you memories of a spiritually enriching experience."
+      }
+    ]
+  },
+  {
+    "place name": "Kavvayi Islands",
+    "Trip plan": [
+      {
+        "place name": "Kavvayi Islands",
+        "time": "6:00 AM - 7:00 AM",
+        "activity":
+            "Arrive at the boat station early in the morning. Start your journey to Kavvayi Islands by boat and enjoy the early morning calm of the backwaters."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "7:00 AM - 8:00 AM",
+        "activity":
+            "Explore the scenic beauty of the islands. Walk along the shores, enjoy the picturesque landscapes, and take in the fresh morning air."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "8:00 AM - 9:00 AM",
+        "activity":
+            "Visit the various small islands and enjoy the serene environment. Spot local birds and wildlife as you explore."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "9:00 AM - 10:00 AM",
+        "activity":
+            "Take a boat ride around the island, enjoying the view of lush greenery and waters."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "10:00 AM - 11:00 AM",
+        "activity":
+            "Stop at one of the smaller islands for a short walk or rest. Take some time to relax and enjoy the untouched nature."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "11:00 AM - 12:00 PM",
+        "activity":
+            "Continue your exploration of the islands or enjoy a packed snack on the boat, surrounded by tranquil views."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "12:00 PM - 1:00 PM",
+        "activity":
+            "Engage in a relaxing activity like fishing or photography, capturing the beauty of the islands and its landscapes."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "1:00 PM - 2:00 PM",
+        "activity":
+            "Head back to the main boat station and enjoy a simple lunch at a local restaurant."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "2:00 PM - 3:00 PM",
+        "activity":
+            "Take a final boat ride around the islands or visit other nearby attractions before preparing to leave."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "3:00 PM - 4:00 PM",
+        "activity":
+            "Relax and reflect on your peaceful experience on the islands before returning to the mainland."
+      },
+      {
+        "place name": "Kavvayi Islands",
+        "time": "4:00 PM - 5:00 PM",
+        "activity":
+            "Wrap up your trip and prepare for departure, taking in the views one last time."
+      }
+    ]
+  },
+  {
+    "place name": "Arakkal Kettu",
+    "Trip plan": [
+      {
+        "place name": "Arakkal Kettu",
+        "time": "6:00 AM - 7:00 AM",
+        "activity":
+            "Arrive early to explore Arakkal Kettu, the historic palace. Begin with a walk around the beautiful grounds of the palace."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "7:00 AM - 8:00 AM",
+        "activity":
+            "Visit the museum within the palace to learn about the royal Arakkal family and their history."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "8:00 AM - 9:00 AM",
+        "activity":
+            "Admire the intricate architecture and design of the palace, exploring the rooms and courtyards."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "9:00 AM - 10:00 AM",
+        "activity":
+            "Take a guided tour to better understand the royal family’s influence in the region."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "10:00 AM - 11:00 AM",
+        "activity":
+            "Explore the museum's exhibits showcasing artifacts, royal relics, and historical objects."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "11:00 AM - 12:00 PM",
+        "activity":
+            "Spend some time in the garden or courtyard, reflecting on the grandeur and history of the Arakkal dynasty."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "12:00 PM - 1:00 PM",
+        "activity":
+            "Relax and enjoy a light snack or beverage at a nearby café, or inside the palace grounds if available."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "1:00 PM - 2:00 PM",
+        "activity":
+            "Walk around the nearby areas to further explore the local culture and heritage of the region."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "2:00 PM - 3:00 PM",
+        "activity":
+            "Take a break and enjoy lunch at a local restaurant, savoring regional dishes."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "3:00 PM - 4:00 PM",
+        "activity":
+            "Explore the surrounding neighborhoods or visit nearby historical sites related to the Arakkal family."
+      },
+      {
+        "place name": "Arakkal Kettu",
+        "time": "4:00 PM - 5:00 PM",
+        "activity":
+            "Conclude your visit with a final walk through the palace grounds before heading back."
+      }
+    ]
+  },
+  {
+    "place name": "Sundareswara Temple",
+    "Trip plan": [
+      {
+        "place name": "Sundareswara Temple",
+        "time": "6:00 AM - 7:00 AM",
+        "activity":
+            "Arrive early at the Sundareswara Temple to witness the morning rituals and pooja. Enjoy the peaceful ambiance of the temple."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "7:00 AM - 8:00 AM",
+        "activity":
+            "Explore the temple's architectural wonders, taking in the intricate carvings and unique features."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "8:00 AM - 9:00 AM",
+        "activity":
+            "Spend time reflecting or meditating inside the temple or on its premises, soaking in the spiritual environment."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "9:00 AM - 10:00 AM",
+        "activity":
+            "Walk around the temple grounds, visiting smaller shrines and learning about the significance of each."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "10:00 AM - 11:00 AM",
+        "activity":
+            "Sit in contemplation or interact with the locals to learn more about the temple's history and traditions."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "11:00 AM - 12:00 PM",
+        "activity":
+            "Enjoy the calm surroundings of the temple, perhaps resting in the garden or temple courtyard."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "12:00 PM - 1:00 PM",
+        "activity":
+            "Take part in the afternoon pooja or relax before heading to nearby areas for lunch."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "1:00 PM - 2:00 PM",
+        "activity":
+            "Explore the nearby village or visit other nearby religious landmarks."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "2:00 PM - 3:00 PM",
+        "activity":
+            "Take a break for lunch at a local restaurant and try regional dishes."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "3:00 PM - 4:00 PM",
+        "activity":
+            "Explore more of the temple complex or take a final walk around the surrounding areas before preparing to leave."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "4:00 PM - 5:00 PM",
+        "activity":
+            "Wrap up your visit and reflect on the enriching experience of visiting the Sundareswara Temple."
+      }
+    ],
+  },
+  {
+    "place name": "Sundareswara Temple",
+    "Trip plan": [
+      {
+        "place name": "Sundareswara Temple",
+        "time": "6:00 AM - 7:00 AM",
+        "activity":
+            "Arrive early at Sundareswara Temple to witness the morning rituals and pooja. Enjoy the peaceful ambiance of the temple and soak in the spiritual atmosphere."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "7:00 AM - 8:00 AM",
+        "activity":
+            "Explore the temple’s intricate architecture, including its carvings, sculptures, and beautifully adorned walls."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "8:00 AM - 9:00 AM",
+        "activity":
+            "Spend time reflecting, meditating, or participating in the temple’s activities. Take a moment to connect with the calm surroundings."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "9:00 AM - 10:00 AM",
+        "activity":
+            "Walk around the temple grounds and visit smaller shrines within the temple complex. Learn about the significance of each space and its history."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "10:00 AM - 11:00 AM",
+        "activity":
+            "Interact with the local devotees or temple priests to learn more about the temple’s rituals and history."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "11:00 AM - 12:00 PM",
+        "activity":
+            "Sit in contemplation in the temple’s peaceful courtyard, reflecting on the experience and surroundings."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "12:00 PM - 1:00 PM",
+        "activity":
+            "Take part in the afternoon pooja, if available, or relax and enjoy the serene atmosphere before lunch."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "1:00 PM - 2:00 PM",
+        "activity":
+            "After the pooja, take a walk around the nearby areas, including local markets or nearby religious sites."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "2:00 PM - 3:00 PM",
+        "activity":
+            "Enjoy a traditional lunch at a local restaurant or within the temple premises if available."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "3:00 PM - 4:00 PM",
+        "activity":
+            "Explore other parts of the temple complex or take a moment to rest and reflect."
+      },
+      {
+        "place name": "Sundareswara Temple",
+        "time": "4:00 PM - 5:00 PM",
+        "activity":
+            "Wrap up your visit to Sundareswara Temple, taking in the final views of the temple and its surroundings before preparing to leave."
+      }
+    ]
+  },
+  {
+    "place name": "Vadeshwaram Temple",
+    "Trip plan": [
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "6:00 AM - 7:00 AM",
+        "activity":
+            "Arrive early to Vadeshwaram Temple to witness the peaceful morning atmosphere and the temple’s first rituals. Enjoy the serenity of the surroundings."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "7:00 AM - 8:00 AM",
+        "activity":
+            "Explore the temple’s unique architecture and intricate carvings. Admire the spiritual significance and historic value of the temple."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "8:00 AM - 9:00 AM",
+        "activity":
+            "Sit quietly in the temple courtyard or in the inner sanctum for personal reflection or meditation, embracing the calmness of the space."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "9:00 AM - 10:00 AM",
+        "activity":
+            "Learn about the history of Vadeshwaram Temple from the priests or local devotees. Understand the significance of the rituals and ceremonies held at the temple."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "10:00 AM - 11:00 AM",
+        "activity":
+            "Explore nearby shrines within the temple complex and observe the local devotees performing their daily prayers and rituals."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "11:00 AM - 12:00 PM",
+        "activity":
+            "Take part in the mid-day pooja, if available, or observe the temple rituals from a quiet corner of the temple."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "12:00 PM - 1:00 PM",
+        "activity":
+            "Relax and enjoy the surroundings before having lunch. You can either have a meal in a local restaurant or within the temple premises if provided."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "1:00 PM - 2:00 PM",
+        "activity":
+            "Take a walk around the temple grounds or visit nearby areas of interest, such as local markets or other religious spots."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "2:00 PM - 3:00 PM",
+        "activity":
+            "Rest in the temple’s peaceful environment and enjoy the tranquility before heading to nearby attractions or spending more time at the temple."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "3:00 PM - 4:00 PM",
+        "activity":
+            "Wrap up your visit by reflecting on the experience and the spirituality of the place, taking a final stroll around the temple grounds."
+      },
+      {
+        "place name": "Vadeshwaram Temple",
+        "time": "4:00 PM - 5:00 PM",
+        "activity":
+            "Prepare to leave the temple and the surrounding area, with a sense of peace and fulfillment after the visit."
+      }
+    ]
+  },
+  {
+    "place name": "Madayi Kavu",
+    "Trip plan": [
+      {
+        "place name": "Madayi Kavu",
+        "time": "6:00 AM - 7:00 AM",
+        "activity":
+            "Arrive early at Madayi Kavu to witness the peaceful atmosphere of the temple and the surrounding area. Start with a quiet moment for reflection and spirituality."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "7:00 AM - 8:00 AM",
+        "activity":
+            "Explore the beautiful temple and its surroundings. Admire the traditional Kerala-style architecture and the natural beauty around the temple."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "8:00 AM - 9:00 AM",
+        "activity":
+            "Participate in or observe the morning rituals. The calmness and devotion at the temple will offer a sense of peace and tranquility."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "9:00 AM - 10:00 AM",
+        "activity":
+            "Take a walk around the temple grounds and enjoy the surrounding landscapes. The lush greenery adds to the spiritual atmosphere."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "10:00 AM - 11:00 AM",
+        "activity":
+            "Visit the nearby shrine and offer prayers. Spend time in quiet contemplation and absorb the positive energy around you."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "11:00 AM - 12:00 PM",
+        "activity":
+            "Rest and take in the peaceful environment of the temple. You can also engage in a casual conversation with the local devotees to learn more about the temple’s history."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "12:00 PM - 1:00 PM",
+        "activity":
+            "Enjoy lunch either at a nearby local restaurant or at a temple-provided meal. Take time to relax before continuing your exploration."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "1:00 PM - 2:00 PM",
+        "activity":
+            "Take a stroll through the nearby village or nature trails. The area surrounding Madayi Kavu offers scenic views and a quiet atmosphere."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "2:00 PM - 3:00 PM",
+        "activity":
+            "Engage in a bit more exploration within the temple complex or enjoy the peaceful ambiance. You can also interact with other visitors or locals who frequent the temple."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "3:00 PM - 4:00 PM",
+        "activity":
+            "Reflect on your visit and the calm surroundings. Spend some final moments at the temple before concluding your time there."
+      },
+      {
+        "place name": "Madayi Kavu",
+        "time": "4:00 PM - 5:00 PM",
+        "activity":
+            "Wrap up your visit and begin your journey to the next destination, carrying with you the peaceful experience and spiritual rejuvenation."
+      }
+    ]
+  },
+  {
+    "place name": "Thottada Beach",
+    "Trip plan": [
+      {
+        "place name": "Thottada Beach",
+        "time": "6:00 AM - 7:00 AM",
+        "activity":
+            "Arrive early at Thottada Beach to enjoy the calm and serene atmosphere. Take a leisurely walk along the shore, watching the sunrise over the horizon."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "7:00 AM - 8:00 AM",
+        "activity":
+            "Take a swim in the gentle waves of the beach. The cool water is refreshing and perfect for a peaceful early morning dip."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "8:00 AM - 9:00 AM",
+        "activity":
+            "Relax on the beach, sunbathe, and enjoy the sound of the waves crashing. You can also collect seashells or simply unwind on the sand."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "9:00 AM - 10:00 AM",
+        "activity":
+            "Engage in some water sports activities such as surfing or jet skiing if available, or enjoy a calm boat ride to explore the nearby waters."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "10:00 AM - 11:00 AM",
+        "activity":
+            "Take a break at a nearby beach café or vendor. Enjoy a refreshing drink or snack while taking in the view of the ocean."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "11:00 AM - 12:00 PM",
+        "activity":
+            "Go for a walk along the coastline and explore the nearby areas. The beach has a lot of scenic spots to discover, including small coves and rock formations."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "12:00 PM - 1:00 PM",
+        "activity":
+            "Enjoy lunch at a nearby restaurant or beachside café. Opt for fresh seafood or local Kerala dishes as you enjoy the coastal ambiance."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "1:00 PM - 2:00 PM",
+        "activity":
+            "Take some time to relax and sunbathe, or indulge in a good book while lying on a beach mat. The afternoon breeze adds to the tranquil setting."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "2:00 PM - 3:00 PM",
+        "activity":
+            "Explore the beach surroundings and perhaps take a stroll down to the nearby fishing village to experience local life and culture."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "3:00 PM - 4:00 PM",
+        "activity":
+            "Take another dip in the water or simply enjoy the sound of the waves. Capture some photographs of the beach and its picturesque surroundings."
+      },
+      {
+        "place name": "Thottada Beach",
+        "time": "4:00 PM - 5:00 PM",
+        "activity":
+            "Wrap up your visit with a leisurely walk along the shore. Watch the sunset if you're staying into the evening, and reflect on the peaceful day at the beach."
       }
     ]
   }

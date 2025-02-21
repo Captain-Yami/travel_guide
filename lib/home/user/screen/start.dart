@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
@@ -172,6 +173,44 @@ class _StartState extends State<Start> {
       }
     } catch (e) {
       throw Exception("An error occurred: $e");
+    }
+  }
+
+  // Function to save the scheduled trips to Firestore
+  Future<void> saveScheduleToFirestore() async {
+    try {
+      final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+      // Get the current user ID (You can modify this based on how your app manages authentication)
+      String userId =
+          "USER_ID"; // Replace with actual user ID (e.g., FirebaseAuth.instance.currentUser?.uid)
+
+      // Check if there's any schedule data to save
+      if (scheduledTrips.isNotEmpty) {
+        for (var schedule in scheduledTrips) {
+          await _firestore
+              .collection('Users')
+              .doc(userId)
+              .collection('travel')
+              .add({
+            'place_name': schedule['place name'],
+            'time': schedule['time'],
+            'activity': schedule['activity'],
+            'created_at':
+                FieldValue.serverTimestamp(), // Timestamp for when it was saved
+          });
+        }
+
+        // Notify the user
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Schedule saved successfully!')));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('No schedule to save')));
+      }
+    } catch (e) {
+      // Handle error
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to save schedule: $e')));
     }
   }
 
@@ -377,6 +416,7 @@ class _StartState extends State<Start> {
                       List<dynamic> recommendedPlaces =
                           aidata['recommended_places'];
                       List<dynamic> selectedPlaces = [];
+                      print(aidata);
 
                       // Select up to 4 places
                       for (int i = 0;
@@ -453,6 +493,23 @@ class _StartState extends State<Start> {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+              ),
+              onPressed: saveScheduleToFirestore, // Save schedule data
+              child: const Text(
+                'Save',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          )
         ],
       ),
     );

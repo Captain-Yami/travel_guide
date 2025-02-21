@@ -271,7 +271,7 @@ Future<void> suspendGuide(BuildContext context, String guideId, String reason) a
 
 
 
-  // Revoke the suspension of the guide
+// Revoke the suspension of the guide
 // Revoke the suspension of the guide
 // Revoke the suspension of the guide
 // Revoke the suspension of the guide
