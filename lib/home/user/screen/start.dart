@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/api.dart';
 import 'package:travel_guide/data.dart';
@@ -182,7 +183,7 @@ class _StartState extends State<Start> {
       final FirebaseFirestore _firestore = FirebaseFirestore.instance;
       // Get the current user ID (You can modify this based on how your app manages authentication)
       String userId =
-          "USER_ID"; // Replace with actual user ID (e.g., FirebaseAuth.instance.currentUser?.uid)
+          (FirebaseAuth.instance.currentUser!.uid); // Replace with actual user ID (e.g., FirebaseAuth.instance.currentUser?.uid)
 
       // Check if there's any schedule data to save
       if (scheduledTrips.isNotEmpty) {
