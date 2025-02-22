@@ -169,10 +169,10 @@ class _HotelRoomsPageState extends State<HotelRoomsPage> {
 
   void _payForRoom(String roomNumber, String price) {
     selectedRoomNumber = roomNumber;
-    selectedPrice = int.parse(price) * 100;
+    selectedPrice = int.parse(price);
     var options = {
       'key': 'rzp_test_D5Vh3hyi1gRBV0',
-      'amount': int.parse(price) * 100,
+      'amount': int.parse(price),
       'name': 'Hotel Room Booking',
       'description': 'Booking for Room $roomNumber',
       'prefill': {'contact': '1234567890', 'email': 'user@example.com'},

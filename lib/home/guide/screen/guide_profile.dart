@@ -20,7 +20,8 @@ class _GuideProfileState extends State<GuideProfile> {
 
   // Profile image variables
   File? _profileImage;
-  ImageProvider profileImage = const AssetImage('asset/background3.jpg'); // Default profile image
+  ImageProvider profileImage =
+      const AssetImage('asset/background3.jpg'); // Default profile image
 
   // Guide details
   String name = "";
@@ -39,7 +40,8 @@ class _GuideProfileState extends State<GuideProfile> {
   final TextEditingController expertiseController = TextEditingController();
   final TextEditingController experienceController = TextEditingController();
   final TextEditingController ratePerTripController = TextEditingController();
-  final TextEditingController additionalDetailsController = TextEditingController();
+  final TextEditingController additionalDetailsController =
+      TextEditingController();
 
   // Cloudinary configuration
   final Cloudinary cloudinary = Cloudinary.signedConfig(
@@ -49,6 +51,18 @@ class _GuideProfileState extends State<GuideProfile> {
   );
 
   @override
+  void dispose() {
+    nameController.dispose();
+    phoneNumberController.dispose();
+    emailController.dispose();
+    licenseNumberController.dispose();
+    expertiseController.dispose();
+    experienceController.dispose();
+    ratePerTripController.dispose();
+    additionalDetailsController.dispose();
+    super.dispose();
+  }
+
   void initState() {
     super.initState();
     isEditing = widget.isEditing;
@@ -61,18 +75,22 @@ class _GuideProfileState extends State<GuideProfile> {
 
   Future<void> _fetchGuideDetails() async {
     try {
-      final docSnapshot = await FirebaseFirestore.instance.collection('Guide').doc(uid).get();
+      final docSnapshot =
+          await FirebaseFirestore.instance.collection('Guide').doc(uid).get();
 
       if (docSnapshot.exists) {
         var data = docSnapshot.data()!;
+        if (!mounted)
+          return; // Ensure widget is still in the tree before updating state
+
         setState(() {
           name = data['name'] ?? '';
           phoneNumber = data['phone number'] ?? '';
           email = data['gideemail'] ?? '';
           licenseNumber = data['License'] ?? '';
           expertise = data['expertise'] ?? '';
-          experience = data['experience'] ?? 0;
-          ratePerTrip = data['ratePerTrip'] ?? 0.0;
+          experience = (data['experience'] ?? 0) as int;
+          ratePerTrip = (data['ratePerTrip'] ?? 0.0).toDouble();
           additionalDetails = data['additionalDetails'] ?? '';
 
           // Initialize controllers with fetched data
@@ -92,9 +110,11 @@ class _GuideProfileState extends State<GuideProfile> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch guide details: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch guide details: $e')),
+        );
+      }
     }
   }
 
@@ -107,6 +127,8 @@ class _GuideProfileState extends State<GuideProfile> {
     }
 
     try {
+      if (!mounted) return; // Prevent setState() call if widget is disposed
+
       setState(() {
         name = nameController.text;
         phoneNumber = phoneNumberController.text;
@@ -132,20 +154,25 @@ class _GuideProfileState extends State<GuideProfile> {
         if (imageUrl.isNotEmpty) 'profile_picture': imageUrl,
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully!')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update profile: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update profile: $e')),
+        );
+      }
     }
   }
 
   Future<void> _pickProfileImage() async {
     if (!isEditing) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enable edit mode to change the profile picture.')),
+        const SnackBar(
+            content: Text('Enable edit mode to change the profile picture.')),
       );
       return;
     }
@@ -153,7 +180,7 @@ class _GuideProfileState extends State<GuideProfile> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
+    if (pickedFile != null && mounted) {
       setState(() {
         _profileImage = File(pickedFile.path);
         profileImage = FileImage(_profileImage!);
@@ -254,13 +281,20 @@ class _GuideProfileState extends State<GuideProfile> {
             child: Column(
               children: [
                 buildProfileDetail("Name", name, controller: nameController),
-                buildProfileDetail("Phone Number", phoneNumber, controller: phoneNumberController),
+                buildProfileDetail("Phone Number", phoneNumber,
+                    controller: phoneNumberController),
                 buildProfileDetail("Email", email, controller: emailController),
-                buildProfileDetail("License Number", licenseNumber, controller: licenseNumberController),
-                buildProfileDetail("Expertise", expertise, controller: expertiseController),
-                buildProfileDetail("Years of Experience", experience.toString(), controller: experienceController),
-                buildProfileDetail("Per Trip Rate", "\$${ratePerTrip.toStringAsFixed(2)}", controller: ratePerTripController),
-                buildProfileDetail("Additional Details", additionalDetails, controller: additionalDetailsController),
+                buildProfileDetail("License Number", licenseNumber,
+                    controller: licenseNumberController),
+                buildProfileDetail("Expertise", expertise,
+                    controller: expertiseController),
+                buildProfileDetail("Years of Experience", experience.toString(),
+                    controller: experienceController),
+                buildProfileDetail(
+                    "Per Trip Rate", "\$${ratePerTrip.toStringAsFixed(2)}",
+                    controller: ratePerTripController),
+                buildProfileDetail("Additional Details", additionalDetails,
+                    controller: additionalDetailsController),
               ],
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/select_user.dart';
 import 'package:travel_guide/services/login_services.dart';
@@ -15,74 +16,102 @@ class _LoginPageState extends State<LoginPage> {
 
   bool loading = false;
   bool _obscurePassword = true;
+  Future<String?> getUserIdByEmail(String email, String collection, String ugemail) async {
+    try {
+      QuerySnapshot query = await FirebaseFirestore.instance
+          .collection(collection) // "Users" or "Guides"
+          .where(ugemail, isEqualTo: email)
+          .limit(1)
+          .get();
 
-void LoginHandler() async {
-  setState(() {
-    loading = true;
-  });
-
-  final email = _emailController.text.trim();
-  final password = _passwordController.text.trim();
-
-  try {
-    // Check if email exists in suspended collection
-    final suspendedUserSnapshot = await FirebaseFirestore.instance
-        .collection('suspend') // Change this collection name if needed
-        .doc(email) // Assuming email is stored as document ID
-        .get();
-
-    // If the document exists
-    if (suspendedUserSnapshot.exists) {
-      final status = suspendedUserSnapshot['status'];
-
-      if (status == true) {
-        // Show suspended message and do not proceed with login
-        _showSuspendedMessage();
+      if (query.docs.isNotEmpty) {
+        return query.docs.first.id;
       } else {
-        // Proceed with normal login
-        await LoginServiceFire().LoginService(
-          email: email,
-          password: password,
-          context: context,
-        );
+        print("No user found with email: $email");
+        return null;
       }
-    } else {
-      // If the email is not in the suspended collection, proceed with login
+    } catch (e) {
+      print("Error fetching user ID: $e");
+      return null;
+    }
+  }
+
+  void LoginHandler() async {
+    setState(() {
+      loading = true;
+    });
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    String? useremail = 'useremail';
+    String? guideemail = 'gideemail';
+
+    try {
+      String? userId = await getUserIdByEmail(email, 'Users', useremail);
+      String? guideId = await getUserIdByEmail(email, 'Guide', guideemail);
+
+      if (userId != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(userId)
+            .get();
+        if (userDoc.exists && userDoc['status'] == true) {
+          _showSuspendedMessage("User");
+          return;
+        }
+      }
+
+      if (guideId != null) {
+        DocumentSnapshot guideDoc = await FirebaseFirestore.instance
+            .collection('Guide')
+            .doc(guideId)
+            .get();
+        if (guideDoc.exists && guideDoc['status'] == true) {
+          _showSuspendedMessage("Guide");
+          return;
+        }
+      }
+
+      // Proceed with login if not suspended
       await LoginServiceFire().LoginService(
         email: email,
         password: password,
         context: context,
       );
+    } catch (e) {
+      print("Error: $e");
+      // Handle any error from Firebase or the login process.
     }
-  } catch (e) {
-    print("Error: $e");
-    // Handle any error from Firebase or the login process.
+
+    setState(() {
+      loading = false;
+    });
   }
 
-  setState(() {
-    loading = false;
-  });
-}
-
-void _showSuspendedMessage() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Account Suspended'),
-        content: Text('Your account has been suspended. Please contact support.'),
-        actions: <Widget>[
-          TextButton(
-            child: Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+  void _showSuspendedMessage(String userType) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('$userType Account Suspended'),
+          content: const Text(
+              'Your account has been suspended. Please contact support.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/login', (route) => false);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _navigateToSignup() {
     Navigator.push(
@@ -275,8 +304,10 @@ class BackgroundPainter extends CustomPainter {
     paint.color = Color.fromARGB(255, 18, 34, 32); // Light Green for the wave
     var wavePath = Path();
     wavePath.moveTo(0, 100); // Start position
-    wavePath.quadraticBezierTo(size.width * 0.25, 50, size.width * 0.5, 100); // Wave curve
-    wavePath.quadraticBezierTo(size.width * 0.75, 150, size.width, 100); // Wave curve
+    wavePath.quadraticBezierTo(
+        size.width * 0.25, 50, size.width * 0.5, 100); // Wave curve
+    wavePath.quadraticBezierTo(
+        size.width * 0.75, 150, size.width, 100); // Wave curve
     wavePath.lineTo(size.width, 0);
     wavePath.lineTo(0, 0);
     wavePath.close();

@@ -74,7 +74,9 @@ class _PlaceState extends State<Place> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
+          child:SingleChildScrollView(
           child: GridView.count(
+            shrinkWrap: true, 
             crossAxisCount: 2, // Two buttons per row
             crossAxisSpacing: 10, // Space between columns
             mainAxisSpacing: 20, // Space between rows
@@ -173,7 +175,7 @@ class _PlaceState extends State<Place> {
               ),
             ],
           ),
-        ),
+        ),),
       ),
     );
   }

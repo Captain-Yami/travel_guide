@@ -54,19 +54,18 @@ class _AdminGuidesState extends State<AdminGuides> {
   }
 
   // Navigate to the guide details page
- // Navigate to the guide details page
-void navigateToGuideDetails(Map<String, dynamic> guide, String guideId) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => GuideDetailsPage(
-        guide: guide,
-        guideId: guideId, // Pass guideId along with guide
+  // Navigate to the guide details page
+  void navigateToGuideDetails(Map<String, dynamic> guide, String guideId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GuideDetailsPage(
+          guide: guide,
+          guideId: guideId, // Pass guideId along with guide
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +118,7 @@ void navigateToGuideDetails(Map<String, dynamic> guide, String guideId) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: GestureDetector(
-                    onTap: () => navigateToGuideDetails(guide,guideId),
+                    onTap: () => navigateToGuideDetails(guide, guideId),
                     child: Card(
                       elevation: 5,
                       shape: RoundedRectangleBorder(
@@ -179,172 +178,164 @@ void navigateToGuideDetails(Map<String, dynamic> guide, String guideId) {
   }
 }
 
-
-
-
-
-
 class GuideDetailsPage extends StatelessWidget {
   final Map<String, dynamic> guide;
   final String guideId;
 
-  GuideDetailsPage({super.key, required this.guide, required this.guideId}); 
+  GuideDetailsPage({super.key, required this.guide, required this.guideId});
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Suspend the guide with a reason
 // Suspend the guide with a reason
 // Suspend the guide with a reason
-Future<void> suspendGuide(BuildContext context, String guideId, String reason) async {
-  if (guideId.isEmpty || reason.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Guide ID or Reason is empty')),
-    );
-    return;
-  }
-
-  try {
-    // Get the guide data from the Guide collection to fetch the email
-    DocumentSnapshot guideDoc = await _firestore.collection('Guide').doc(guideId).get();
-    
-    if (!guideDoc.exists) {
+  Future<void> suspendGuide(
+      BuildContext context, String guideId, String reason) async {
+    if (guideId.isEmpty || reason.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Guide not found')),
+        const SnackBar(content: Text('Guide ID or Reason is empty')),
       );
       return;
     }
 
-    String guideEmail = guideDoc['guideemail'] ?? ''; // Fetch the guide email
+    try {
+      // Get the guide data from the Guide collection to fetch the email
+      DocumentSnapshot guideDoc =
+          await _firestore.collection('Guide').doc(guideId).get();
 
-    // Start a transaction to ensure atomic updates
-    await _firestore.runTransaction((transaction) async {
-      // Set the data in the 'suspend' collection
-      await transaction.set(_firestore.collection('suspend').doc(guideId), {
-        'guideemail': guideEmail, // Store guide email
-        'status': true, // Guide is suspended
-        'id': guideId, // Store guide ID
-        'reason': FieldValue.arrayUnion([reason]), // Add reason to the list, does not overwrite previous reasons
-        'timestamp': FieldValue.serverTimestamp(), // Optionally, track when the suspension happened
+      if (!guideDoc.exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Guide not found')),
+        );
+        return;
+      }
+
+      String guideEmail = guideDoc['gideemail'] ?? ''; // Fetch the guide email
+
+      // Start a transaction to ensure atomic updates
+      await _firestore.runTransaction((transaction) async {
+        // Set the data in the 'suspend' collection
+        await transaction.set(_firestore.collection('suspend').doc(guideId), {
+          'guideemail': guideEmail, // Store guide email
+          'status': true, // Guide is suspended
+          'id': guideId, // Store guide ID
+          'reason': FieldValue.arrayUnion([
+            reason
+          ]), // Add reason to the list, does not overwrite previous reasons
+          'timestamp': FieldValue
+              .serverTimestamp(), // Optionally, track when the suspension happened
+        });
+
+        // Update the guide's status in the 'Guide' collection
+        await transaction.update(_firestore.collection('Guide').doc(guideId), {
+          'status': true, // Guide is suspended
+        });
       });
 
-      // Update the guide's status in the 'Guide' collection
-      await transaction.update(_firestore.collection('Guide').doc(guideId), {
-        'status': true, // Guide is suspended
-      });
-    });
-
-    // Show success dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Guide Suspended'),
-          content: const Text('The guide has been suspended successfully.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  } catch (e) {
-    // Handle any errors
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: const Text('An error occurred while suspending the guide.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-
-
-// Revoke the suspension of the guide
-// Revoke the suspension of the guide
-// Revoke the suspension of the guide
-// Revoke the suspension of the guide
-Future<void> revokeSuspension(BuildContext context, String guideId) async {
-  try {
-    // Start a transaction to ensure atomic updates
-    await _firestore.runTransaction((transaction) async {
-      // Fetch the current suspension status from the 'suspend' collection
-      DocumentSnapshot suspendDoc = await _firestore.collection('suspend').doc(guideId).get();
-
-      if (suspendDoc.exists) {
-        bool isSuspended = suspendDoc['status'] ?? false;
-
-        if (isSuspended) {
-          // Revoke the suspension (set status to false)
-          await transaction.update(_firestore.collection('suspend').doc(guideId), {
-            'status': false, // Revoke the suspension (set status to false)
-          });
-
-          // Update the guide status in the 'Guide' collection
-          await transaction.update(_firestore.collection('Guide').doc(guideId), {
-            'status': false, // Guide is no longer suspended
-          });
-
-          // Show success dialog
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Suspension Revoked'),
-                content: const Text('The suspension has been successfully revoked.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
+      // Show success dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Guide suspended successfully')),
+      );
+    } catch (e) {
+      // Handle any errors
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content:
+                const Text('An error occurred while suspending the guide.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           );
+        },
+      );
+    }
+  }
+
+// Revoke the suspension of the guide
+// Revoke the suspension of the guide
+// Revoke the suspension of the guide
+// Revoke the suspension of the guide
+  Future<void> revokeSuspension(BuildContext context, String guideId) async {
+    try {
+      // Start a transaction to ensure atomic updates
+      await _firestore.runTransaction((transaction) async {
+        // Fetch the current suspension status from the 'suspend' collection
+        DocumentSnapshot suspendDoc =
+            await _firestore.collection('suspend').doc(guideId).get();
+
+        if (suspendDoc.exists) {
+          bool isSuspended = suspendDoc['status'] ?? false;
+
+          if (isSuspended) {
+            // Revoke the suspension (set status to false)
+            await transaction
+                .update(_firestore.collection('suspend').doc(guideId), {
+              'status': false, // Revoke the suspension (set status to false)
+            });
+
+            // Update the guide status in the 'Guide' collection
+            await transaction
+                .update(_firestore.collection('Guide').doc(guideId), {
+              'status': false, // Guide is no longer suspended
+            });
+
+            // Show success dialog
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Suspension Revoked'),
+                  content: const Text(
+                      'The suspension has been successfully revoked.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+          } else {
+            // If the guide is already not suspended, show a message
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('The guide is not suspended.')),
+            );
+          }
         } else {
-          // If the guide is already not suspended, show a message
+          // If the suspend document doesn't exist, it means the guide is not suspended
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('The guide is not suspended.')),
+            const SnackBar(
+                content: Text('No suspension record found for this guide.')),
           );
         }
-      } else {
-        // If the suspend document doesn't exist, it means the guide is not suspended
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No suspension record found for this guide.')),
-        );
-      }
-    });
-  } catch (e) {
-    // Handle any errors
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: const Text('An error occurred while revoking the suspension.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+      });
+    } catch (e) {
+      // Handle any errors
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content:
+                const Text('An error occurred while revoking the suspension.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
-}
-
 
   // Show suspension dialog
   void showSuspensionDialog(BuildContext context, String guideId) {
@@ -362,7 +353,8 @@ Future<void> revokeSuspension(BuildContext context, String guideId) async {
               TextField(
                 controller: reasonController,
                 maxLines: 3,
-                decoration: const InputDecoration(hintText: 'Enter reason here'),
+                decoration:
+                    const InputDecoration(hintText: 'Enter reason here'),
               ),
             ],
           ),
@@ -495,7 +487,8 @@ Future<void> revokeSuspension(BuildContext context, String guideId) async {
       child: ListTile(
         title: Text(
           title,
-          style: const TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
           value,

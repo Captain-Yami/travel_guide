@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:travel_guide/home/Hotels/screen/hotel_homepage.dart';
 import 'dart:io';
 
 import 'package:travel_guide/home/Hotels/screen/hotel_login.dart';
+import 'package:travel_guide/home/Hotels/services/hotefirebaseservice.dart';
 
 class HotelRegistrationPage extends StatefulWidget {
   const HotelRegistrationPage({super.key});
@@ -261,6 +263,38 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
     super.initState();
     _getCurrentLocation(); // Get current location when the page is loaded
   }
+      final User? userId = FirebaseAuth.instance.currentUser; // Get newly created user ID
+
+   void Registerhotel() async {
+
+    if (_formKey.currentState?.validate() ?? false) {
+      // After file upload, continue with the registration login
+        hotelfirebaseauthservice().hotelRegister(
+          email: contactEmail,
+          hotelName: hotelName,
+          Phone_number: contactNumber,
+          password: password,
+          numberOfRooms: numberOfRooms,
+          location: location,
+          facilities: _getSelectedFacilities(),
+          imageUrl:imageUrl,
+          documnetUrl:documnetUrl,  
+          ownerId:userId,
+          context: context,
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return const HotelHomepage();
+            },
+          ),
+        );
+    } else {
+      print('Form is invalid');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -512,7 +546,7 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
 
                 // Submit Button
                 ElevatedButton(
-                  onPressed: submitForm,
+                  onPressed: Registerhotel,
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
                       fixedSize: Size(MediaQuery.of(context).size.width, 50)),

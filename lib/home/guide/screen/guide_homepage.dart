@@ -46,7 +46,7 @@ class _MainPageState extends State<GuideHomepage> {
     );
   }
 
-   void _navigateToreq() {
+  void _navigateToreq() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -54,7 +54,6 @@ class _MainPageState extends State<GuideHomepage> {
               const GuideDashboard()), // Replace with actual destination widget
     );
   }
-
 
   void _navigateToAvailability() {
     Navigator.push(
@@ -567,12 +566,11 @@ class _MainPageState extends State<GuideHomepage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
                     Text(
                       'Requests & Booking',
                       style: GoogleFonts.roboto(
                         fontSize: 22,
-                         fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
@@ -587,24 +585,28 @@ class _MainPageState extends State<GuideHomepage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
+                    // Updated Container wrapping the GridView
                     Container(
-                      width: 400, // Set the width of the TextFormField
-                      height: 200, // Set the height of the TextFormField
+                      width: 400,
+                      constraints: BoxConstraints(
+                        maxHeight: 200, // Limit height dynamically
+                      ),
                       child: GridView.count(
-                        shrinkWrap: true,
+                        shrinkWrap:
+                            true, // Ensures it takes only required space
+                        physics:
+                            NeverScrollableScrollPhysics(), // Prevents nested scrolling
                         crossAxisCount: 2,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
                         childAspectRatio:
-                            1.3, // Square aspect ratio (width == height)
+                            1.2, // Adjust aspect ratio to avoid overflow
                         children: [
-                          // Button 1: Place
                           _buildGridButton(
                             icon: Icons.event_available,
                             label: 'Availability',
                             onPressed: _navigateToAvailability,
                           ),
-                          // Button 2: Guide
                           _buildGridButton(
                             icon: Icons.star,
                             label: 'Feedbacks',
@@ -629,9 +631,9 @@ class _MainPageState extends State<GuideHomepage> {
     required VoidCallback onPressed,
   }) {
     return Container(
-      width: 150, // Adjust width of container
-      height: 150, // Adjust height of container
-      margin: const EdgeInsets.all(10),
+      width: 140, // Adjust width to fit within GridView
+      height: 140, // Adjust height to prevent overflow
+      margin: const EdgeInsets.all(8), // Reduce margin
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
@@ -641,16 +643,20 @@ class _MainPageState extends State<GuideHomepage> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(12.0), // Reduce padding
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon,
-                    size: 50, color: Colors.green),
-                const SizedBox(height: 8),
-                Text(label,
-                    style: GoogleFonts.roboto(
-                        fontSize: 16,
-                        color:  Colors.green)),
+                Icon(icon, size: 40, color: Colors.white), // Change icon color
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: GoogleFonts.roboto(
+                    fontSize: 14, // Reduce text size
+                    color: Colors.white, // Change text color
+                  ),
+                  textAlign: TextAlign.center, // Ensure proper alignment
+                ),
               ],
             ),
           ),

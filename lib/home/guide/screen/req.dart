@@ -31,69 +31,71 @@ class _GuideDashboardState extends State<GuideDashboard>
     super.dispose();
   }
 
- Future<void> _fetchRequests() async {
-  try {
-    final guideId = FirebaseAuth.instance.currentUser?.uid;
-    if (guideId == null) {
+  Future<void> _fetchRequests() async {
+    try {
+      final guideId = FirebaseAuth.instance.currentUser?.uid;
+      if (guideId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Guide not logged in.')),
+          );
+        }
+        return;
+      }
+
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('requests')
+          .where('guideId', isEqualTo: guideId)
+          .get();
+
+      if (mounted) {
+        setState(() {
+          requests =
+              snapshot.docs.map((doc) => _parseRequestData(doc)).toList();
+        });
+      }
+    } catch (e) {
+      print('Error fetching requests: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Guide not logged in.')),
+          const SnackBar(content: Text('Failed to fetch requests.')),
         );
       }
-      return;
-    }
-
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('requests')
-        .where('guideId', isEqualTo: guideId)
-        .get();
-
-    if (mounted) {
-      setState(() {
-        requests = snapshot.docs.map((doc) => _parseRequestData(doc)).toList();
-      });
-    }
-  } catch (e) {
-    print('Error fetching requests: $e');
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to fetch requests.')),
-      );
     }
   }
-}
 
-Future<void> _fetchBookings() async {
-  try {
-    final guideId = FirebaseAuth.instance.currentUser?.uid;
-    if (guideId == null) {
+  Future<void> _fetchBookings() async {
+    try {
+      final guideId = FirebaseAuth.instance.currentUser?.uid;
+      if (guideId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Guide not logged in.')),
+          );
+        }
+        return;
+      }
+
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('confirmed_requests')
+          .where('guideId', isEqualTo: guideId)
+          .get();
+
+      if (mounted) {
+        setState(() {
+          bookings =
+              snapshot.docs.map((doc) => _parseBookingData(doc)).toList();
+        });
+      }
+    } catch (e) {
+      print('Error fetching bookings: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Guide not logged in.')),
+          const SnackBar(content: Text('Failed to fetch bookings.')),
         );
       }
-      return;
-    }
-
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('confirmed_requests')
-        .where('guideId', isEqualTo: guideId)
-        .get();
-
-    if (mounted) {
-      setState(() {
-        bookings = snapshot.docs.map((doc) => _parseBookingData(doc)).toList();
-      });
-    }
-  } catch (e) {
-    print('Error fetching bookings: $e');
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to fetch bookings.')),
-      );
     }
   }
-}
 
   void _removeRequest(String requestId) {
     setState(() {
@@ -116,7 +118,7 @@ Future<void> _fetchBookings() async {
       'categories': _parseList(data['categories']),
       'places': _parseList(data['places']),
       'status': data['status'] ?? 'Pending',
-      'image': data['userProfilePic'] ??'asset/background3.jpg',
+      'image': data['userProfilePic'] ?? 'asset/background3.jpg',
       'user': data['user'] ?? '',
     };
   }
@@ -130,7 +132,7 @@ Future<void> _fetchBookings() async {
       'name': data['userName'] ?? 'Unknown User',
       'details': data['aboutTrip'] ?? '',
       'places': _parseList(data['places']),
-      'image': data['userProfilePic'] ??'asset/background3.jpg',
+      'image': data['userProfilePic'] ?? 'asset/background3.jpg',
     };
   }
 
@@ -180,7 +182,10 @@ Future<void> _fetchBookings() async {
           margin: const EdgeInsets.symmetric(vertical: 8.0),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundImage: AssetImage(request['image']),
+              backgroundImage: request['image'].startsWith('http')
+                  ? NetworkImage(request['image']) // Load from URL
+                  : AssetImage(request['image'])
+                      as ImageProvider, // Load from assets
               radius: 30,
             ),
             title: Text(request['name']),
@@ -196,7 +201,8 @@ Future<void> _fetchBookings() async {
                       name: request['name'],
                       image: request['image'],
                       placesToVisit: List<String>.from(request['places']),
-                      interestedCategories: List<String>.from(request['categories']),
+                      interestedCategories:
+                          List<String>.from(request['categories']),
                       details: request['details'],
                       startDate: request['startDate'],
                       endDate: request['endDate'],
@@ -215,47 +221,51 @@ Future<void> _fetchBookings() async {
   }
 
   Widget _buildBookingList(BuildContext context) {
-  return ListView.builder(
-    padding: const EdgeInsets.all(8.0),
-    itemCount: bookings.length,
-    itemBuilder: (context, index) {
-      final booking = bookings[index];
-      final String requestId = booking['id'];
+    return ListView.builder(
+      padding: const EdgeInsets.all(8.0),
+      itemCount: bookings.length,
+      itemBuilder: (context, index) {
+        final booking = bookings[index];
+        final String requestId = booking['id'];
 
-      return Card(
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundImage: AssetImage(booking['image']),
-            radius: 30,
-          ),
-          title: Text(booking['name']),
-          subtitle: Text(booking['details']),
-          trailing: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookingDetailsPage(
-                    guideId: booking['guideId'],
-                    name: booking['name'],
-                    image: booking['image'],
-                    requestId: requestId,
-                    places: List<String>.from(booking['places']),
-                    onRemoveBooking: (String id) {
-                      setState(() {
-                        bookings.removeWhere((booking) => booking['id'] == id);
-                      });
-                    },
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundImage: booking['image'].startsWith('http')
+                  ? NetworkImage(booking['image']) // Load from URL
+                  : AssetImage(booking['image'])
+                      as ImageProvider, // Load from assets
+              radius: 30,
+            ),
+            title: Text(booking['name']),
+            subtitle: Text(booking['details']),
+            trailing: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookingDetailsPage(
+                      guideId: booking['guideId'],
+                      name: booking['name'],
+                      image: booking['image'],
+                      requestId: requestId,
+                      places: List<String>.from(booking['places']),
+                      onRemoveBooking: (String id) {
+                        setState(() {
+                          bookings
+                              .removeWhere((booking) => booking['id'] == id);
+                        });
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
-            child: const Text('View'),
+                );
+              },
+              child: const Text('View'),
+            ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
+  }
 }
-    }

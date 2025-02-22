@@ -45,10 +45,17 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
 
   Future<void> _loadStatus() async {
     try {
-      final doc = await _firestore.collection('requests').doc(widget.requestId).get();
-      if (doc.exists) {
+      final doc =
+          await _firestore.collection('requests').doc(widget.requestId).get();
+      if (doc.exists &&
+          doc.data() != null &&
+          doc.data()!.containsKey('status')) {
         setState(() {
           status = doc['status'] ?? "Pending";
+        });
+      } else {
+        setState(() {
+          status = "Pending"; // Default if field is missing
         });
       }
     } catch (e) {
@@ -63,7 +70,7 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
       String expertiseStr = widget.interestedCategories.join(', ');
 
       final confirmedRequestDetails = {
-        'guideId' : widget.guideId,
+        'guideId': widget.guideId,
         'userName': widget.name,
         'image': widget.image,
         'places': placesStr,
@@ -84,7 +91,8 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
       widget.onRemoveRequest(widget.requestId); // Remove from local UI
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Request for ${widget.name} has been confirmed!')),
+        SnackBar(
+            content: Text('Request for ${widget.name} has been confirmed!')),
       );
 
       Navigator.pop(context); // Navigate back after confirmation
@@ -103,7 +111,8 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
       widget.onRemoveRequest(widget.requestId); // Remove from local UI
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Request from ${widget.name} has been declined.')),
+        SnackBar(
+            content: Text('Request from ${widget.name} has been declined.')),
       );
 
       Navigator.pop(context); // Navigate back after decline
@@ -134,7 +143,10 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: AssetImage(widget.image),
+                  backgroundImage: widget.image.startsWith('http')
+                      ? NetworkImage(widget.image) // Load from URL
+                      : AssetImage(widget.image)
+                          as ImageProvider, // Load from assets
                   onBackgroundImageError: (_, __) => const Icon(Icons.error),
                 ),
                 const SizedBox(width: 16),
@@ -175,7 +187,7 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
             const SizedBox(height: 8),
             Text(widget.interestedCategories.join(', ')),
             const SizedBox(height: 16),
-             const Text(
+            const Text(
               'Start Date:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),

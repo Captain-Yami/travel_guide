@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:travel_guide/home/Hotels/screen/hotel_registration.dart';
 import 'package:travel_guide/home/guide/screen/guide_signup.dart';
 import 'package:travel_guide/home/user/screen/signup.dart';
 
@@ -17,10 +18,17 @@ class _SelectUserState extends State<SelectUser> {
     );
   }
 
-  void _navigateToguidesignup() {
+  void _navigateToGuideSignup() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const GuideSignup()),
+    );
+  }
+
+  void _navigateToHotelSignup() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HotelRegistrationPage()),
     );
   }
 
@@ -46,59 +54,64 @@ class _SelectUserState extends State<SelectUser> {
             ),
             const SizedBox(height: 60), // Add space after the logo
 
-            // Row to place the buttons to the left and right
+            // Row to place the buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center, // Align buttons to center
               children: <Widget>[
-                // "User" Button on the left
-                Container(
-                  width: 150, // Width of the square button
-                  height: 150, // Height of the square button
-                  margin: const EdgeInsets.symmetric(horizontal: 20), // Reduced horizontal margin between buttons
-                  child: ElevatedButton(
-                    onPressed: _navigateToSignup, // Navigate to user signup
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 240, 240, 240), // Set button color to light grey
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12), // Rounded corners
-                      ),
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.person, size: 40, color: Colors.black), // Icon inside the button
-                        SizedBox(height: 8), // Space between icon and text
-                        Text('User', style: TextStyle(fontSize: 16, color: Colors.black)), // Text inside the button
-                      ],
-                    ),
-                  ),
-                ),
-
-                // "Guide" Button on the right
-                Container(
-                  width: 150, // Width of the square button
-                  height: 150, // Height of the square button
-                  margin: const EdgeInsets.symmetric(horizontal: 20), // Reduced horizontal margin between buttons
-                  child: ElevatedButton(
-                    onPressed: _navigateToguidesignup, // Navigate to guide signup
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 240, 240, 240), // Set button color to light grey
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12), // Rounded corners
-                      ),
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.map, size: 40, color: Colors.black), // Icon inside the button
-                        SizedBox(height: 8), // Space between icon and text
-                        Text('Guide', style: TextStyle(fontSize: 16, color: Colors.black)), // Text inside the button
-                      ],
-                    ),
-                  ),
-                ),
+                _buildUserButton(),
+                _buildGuideButton(),
+                _buildHotelButton(),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserButton() {
+    return _buildButton(
+      onPressed: _navigateToSignup,
+      icon: Icons.person,
+      label: 'User',
+    );
+  }
+
+  Widget _buildGuideButton() {
+    return _buildButton(
+      onPressed: _navigateToGuideSignup,
+      icon: Icons.map,
+      label: 'Guide',
+    );
+  }
+
+  Widget _buildHotelButton() {
+    return _buildButton(
+      onPressed: _navigateToHotelSignup,
+      icon: Icons.hotel,
+      label: 'Hotel',
+    );
+  }
+
+  Widget _buildButton({required VoidCallback onPressed, required IconData icon, required String label}) {
+    return Container(
+      width: 120, // Adjusted width for three buttons
+      height: 120,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: Colors.black),
+            const SizedBox(height: 8),
+            Text(label, style: const TextStyle(fontSize: 16, color: Colors.black)),
           ],
         ),
       ),

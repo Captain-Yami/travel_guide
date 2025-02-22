@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:travel_guide/home/Hotels/screen/hotel_homepage.dart';
 import 'package:travel_guide/home/admin/screen/Admin_Homepage.dart';
 import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
 import 'package:travel_guide/home/user/screen/UserHomePage.dart';
@@ -47,6 +48,13 @@ class LoginServiceFire {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const GuideHomepage(),
+                ));
+            break;
+            case 'hotels':
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HotelHomepage(),
                 ));
             break;
          case 'Admin':

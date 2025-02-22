@@ -16,7 +16,8 @@ class _AvailabilityState extends State<Availability> {
   TimeOfDay _endTime = TimeOfDay(hour: 17, minute: 0); // Default: 5:00 PM
 
   // Track selected days of the week
-  final List<bool> _selectedDays = List.generate(7, (index) => false); // 7 days of the week
+  final List<bool> _selectedDays =
+      List.generate(7, (index) => false); // 7 days of the week
   final List<String> _daysOfWeek = [
     'sunday',
     'monday',
@@ -34,64 +35,68 @@ class _AvailabilityState extends State<Availability> {
   }
 
   // Load the availability status from SharedPreferences
- Future<void> _loadAvailabilityStatus() async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  Future<void> _loadAvailabilityStatus() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // Assuming that you have a Firebase user authentication and you can get the user ID
-  String userId = FirebaseAuth.instance.currentUser?.uid ?? ''; // Get the current user's UID
-  
-  try {
-    // Fetch the availability data from Firestore
-    DocumentSnapshot docSnapshot = await firestore
-        .collection('Guide')
-        .doc(userId) // Use the user's uid to retrieve their data
-        .collection('availability')
-        .doc('data') // Document ID
-        .get();
+    // Assuming that you have a Firebase user authentication and you can get the user ID
+    String userId = FirebaseAuth.instance.currentUser?.uid ??
+        ''; // Get the current user's UID
 
-    if (docSnapshot.exists) {
-      var data = docSnapshot.data() as Map<String, dynamic>;
+    try {
+      // Fetch the availability data from Firestore
+      DocumentSnapshot docSnapshot = await firestore
+          .collection('Guide')
+          .doc(userId) // Use the user's uid to retrieve their data
+          .collection('availability')
+          .doc('data') // Document ID
+          .get();
 
-      setState(() {
-        isSelected = data['isSelected'] ?? false;
+      if (docSnapshot.exists) {
+        var data = docSnapshot.data() as Map<String, dynamic>;
 
-        _startTime = TimeOfDay(
-          hour: data['startTime']['hour'],
-          minute: data['startTime']['minute'],
-        );
-        _endTime = TimeOfDay(
-          hour: data['endTime']['hour'],
-          minute: data['endTime']['minute'],
-        );
+        setState(() {
+          isSelected = data['isSelected'] ?? false;
 
-        List<String> days = List<String>.from(data['selectedDays']);
-        _selectedDays.setAll(0, List.generate(7, (index) {
-          return days.contains(_daysOfWeek[index]);
-        }));
-      });
-      print("Availability loaded successfully!");
+          _startTime = TimeOfDay(
+            hour: data['startTime']['hour'],
+            minute: data['startTime']['minute'],
+          );
+          _endTime = TimeOfDay(
+            hour: data['endTime']['hour'],
+            minute: data['endTime']['minute'],
+          );
+
+          List<String> days = List<String>.from(data['selectedDays']);
+          _selectedDays.setAll(
+              0,
+              List.generate(7, (index) {
+                return days.contains(_daysOfWeek[index]);
+              }));
+        });
+        print("Availability loaded successfully!");
+      }
+    } catch (e) {
+      print("Error loading availability: $e");
     }
-  } catch (e) {
-    print("Error loading availability: $e");
   }
-}
-
-
 
   // Save the availability status to SharedPreferences
   Future<void> _saveAvailabilityStatus() async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // Assuming that you have a Firebase user authentication and you can get the user ID
-  String userId = FirebaseAuth.instance.currentUser?.uid ?? ''; // Get the current user's UID
+    // Assuming that you have a Firebase user authentication and you can get the user ID
+    String userId = FirebaseAuth.instance.currentUser?.uid ??
+        ''; // Get the current user's UID
 
-  try {
-    // Save availability data to Firestore
-    await firestore.collection('Guide')
-      .doc(userId)  // Use the user's uid to store their data
-      .collection('availability') // Sub-collection for availability
-      .doc('data') // You can use a static document name like 'data' for availability
-      .set({
+    try {
+      // Save availability data to Firestore
+      await firestore
+          .collection('Guide')
+          .doc(userId) // Use the user's uid to store their data
+          .collection('availability') // Sub-collection for availability
+          .doc(
+              'data') // You can use a static document name like 'data' for availability
+          .set({
         'isSelected': isSelected,
         'startTime': {
           'hour': _startTime.hour,
@@ -101,18 +106,19 @@ class _AvailabilityState extends State<Availability> {
           'hour': _endTime.hour,
           'minute': _endTime.minute,
         },
-        'selectedDays': _selectedDays.asMap().entries
-          .where((entry) => entry.value)
-          .map((entry) => _daysOfWeek[entry.key])
-          .toList(),
+        'selectedDays': _selectedDays
+            .asMap()
+            .entries
+            .where((entry) => entry.value)
+            .map((entry) => _daysOfWeek[entry.key])
+            .toList(),
       });
 
-    print("Availability saved successfully!");
-  } catch (e) {
-    print("Error saving availability: $e");
+      print("Availability saved successfully!");
+    } catch (e) {
+      print("Error saving availability: $e");
+    }
   }
-}
-
 
   // Function to show the time picker
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
@@ -131,11 +137,13 @@ class _AvailabilityState extends State<Availability> {
           _startTime = pickedTime;
         } else {
           if (pickedTime.hour > _startTime.hour ||
-              (pickedTime.hour == _startTime.hour && pickedTime.minute > _startTime.minute)) {
+              (pickedTime.hour == _startTime.hour &&
+                  pickedTime.minute > _startTime.minute)) {
             _endTime = pickedTime;
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('End time must be after start time')),
+              const SnackBar(
+                  content: Text('End time must be after start time')),
             );
           }
         }
@@ -146,61 +154,60 @@ class _AvailabilityState extends State<Availability> {
 
   // Function to show the dropdown with checkboxes to select days
   Future<void> _selectDays(BuildContext context) async {
-  if (!isSelected) {
-    return; // Do nothing if availability is not selected
+    if (!isSelected) {
+      return; // Do nothing if availability is not selected
+    }
+
+    // Show the dialog with updated state handling
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setStateDialog) {
+            return AlertDialog(
+              title: const Text("Select Days"),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: List.generate(_daysOfWeek.length, (index) {
+                    return CheckboxListTile(
+                      title: Text(_daysOfWeek[index]),
+                      value: _selectedDays[index],
+                      onChanged: (bool? value) {
+                        setStateDialog(() {
+                          _selectedDays[index] = value ??
+                              false; // Update the state inside the dialog
+                        });
+                        _saveAvailabilityStatus(); // Save selected days
+                      },
+                    );
+                  }),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("OK"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setStateDialog(() {
+                      // Reset selection
+                      _selectedDays.fillRange(0, _selectedDays.length, false);
+                    });
+                    _saveAvailabilityStatus(); // Save reset selection
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Cancel"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
-
-  // Show the dialog with updated state handling
-  await showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setStateDialog) {
-          return AlertDialog(
-            title: const Text("Select Days"),
-            content: SingleChildScrollView(
-              child: Column(
-                children: List.generate(_daysOfWeek.length, (index) {
-                  return CheckboxListTile(
-                    title: Text(_daysOfWeek[index]),
-                    value: _selectedDays[index],
-                    onChanged: (bool? value) {
-                      setStateDialog(() {
-                        _selectedDays[index] = value ?? false; // Update the state inside the dialog
-                      });
-                      _saveAvailabilityStatus(); // Save selected days
-                    },
-                  );
-                }),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("OK"),
-              ),
-              TextButton(
-                onPressed: () {
-                  setStateDialog(() {
-                    // Reset selection
-                    _selectedDays.fillRange(0, _selectedDays.length, false);
-                  });
-                  _saveAvailabilityStatus(); // Save reset selection
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Cancel"),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-
 
   void _navigateToGuideHomepage() {
     Navigator.push(
@@ -276,7 +283,7 @@ class _AvailabilityState extends State<Availability> {
                         padding: const EdgeInsets.all(5.0),
                         child: Container(
                           width: 20,
-height: 20,
+                          height: 20,
                           decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white,
@@ -297,20 +304,35 @@ height: 20,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: isSelected ? () => _selectTime(context, true) : null,
-                  child: Text(
-                    'Start: ${_startTime.format(context)}',
-                    style: const TextStyle(fontSize: 18),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed:
+                        isSelected ? () => _selectTime(context, true) : null,
+                    child: FittedBox(
+                      // Ensures text fits inside the button
+                      child: Text(
+                        'Start: ${_startTime.format(context)}',
+                        style:
+                            const TextStyle(fontSize: 16), // Reduce font size
+                      ),
+                    ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: isSelected ? () => _selectTime(context, false) : null,
-                  child: Text(
-                    'End: ${_endTime.format(context)}',
-                    style: const TextStyle(fontSize: 18),
+                const SizedBox(width: 10), // Adds spacing between buttons
+                Expanded(
+                  // Ensures buttons resize evenly
+                  child: ElevatedButton(
+                    onPressed:
+                        isSelected ? () => _selectTime(context, false) : null,
+                    child: FittedBox(
+                      child: Text(
+                        'End: ${_endTime.format(context)}',
+                        style:
+                            const TextStyle(fontSize: 16), // Reduce font size
+                      ),
+                    ),
                   ),
-                ),
+                )
               ],
             ),
             const SizedBox(height: 30),
@@ -321,7 +343,9 @@ height: 20,
             ),
             const SizedBox(height: 10),
             ElevatedButton(
-              onPressed: isSelected ? () => _selectDays(context) : null, // Only enable if selected
+              onPressed: isSelected
+                  ? () => _selectDays(context)
+                  : null, // Only enable if selected
               child: const Text('Select Days'),
             ),
           ],
