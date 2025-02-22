@@ -8,6 +8,8 @@ class RequestDetailsPage extends StatefulWidget {
   final List<String> placesToVisit;
   final List<String> interestedCategories;
   final String details;
+  final String startDate;
+  final String endDate;
   final String user;
   final String guideId;
   final Function(String) onRemoveRequest;
@@ -20,6 +22,8 @@ class RequestDetailsPage extends StatefulWidget {
     required this.placesToVisit,
     required this.interestedCategories,
     required this.details,
+    required this.startDate,
+    required this.endDate,
     required this.user,
     required this.onRemoveRequest,
     required this.guideId,
@@ -170,6 +174,20 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
             ),
             const SizedBox(height: 8),
             Text(widget.interestedCategories.join(', ')),
+            const SizedBox(height: 16),
+             const Text(
+              'Start Date:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(widget.startDate),
+            const SizedBox(height: 16),
+            const Text(
+              'End Date:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(widget.endDate),
             const SizedBox(height: 16),
             const Text(
               'Places to Visit:',

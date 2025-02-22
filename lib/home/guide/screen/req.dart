@@ -111,6 +111,8 @@ Future<void> _fetchBookings() async {
       'id': doc.id,
       'name': data['userName'] ?? 'Unknown User',
       'details': data['aboutTrip'] ?? '',
+      'startDate': data['startDate'] ?? '',
+      'endDate': data['endDate'] ?? '',
       'categories': _parseList(data['categories']),
       'places': _parseList(data['places']),
       'status': data['status'] ?? 'Pending',
@@ -196,6 +198,8 @@ Future<void> _fetchBookings() async {
                       placesToVisit: List<String>.from(request['places']),
                       interestedCategories: List<String>.from(request['categories']),
                       details: request['details'],
+                      startDate: request['startDate'],
+                      endDate: request['endDate'],
                       user: request['user'],
                       onRemoveRequest: _removeRequest, // Pass callback
                     ),

@@ -165,11 +165,11 @@ class _HotelRoomsPageState extends State<HotelRoomsPage> {
   }
 
   String? selectedRoomNumber;
-  String? selectedPrice;
+  int? selectedPrice;
 
   void _payForRoom(String roomNumber, String price) {
     selectedRoomNumber = roomNumber;
-    selectedPrice = price;
+    selectedPrice = int.parse(price) * 100;
     var options = {
       'key': 'rzp_test_D5Vh3hyi1gRBV0',
       'amount': int.parse(price) * 100,
@@ -192,6 +192,17 @@ class _HotelRoomsPageState extends State<HotelRoomsPage> {
         const SnackBar(content: Text('Booking details missing.')));
     return;
   }
+    // Fetch the user's actual name from FirebaseAuth
+  User? user = FirebaseAuth.instance.currentUser;
+  String userName = user?.displayName ?? 'Guest';
+
+  // If the displayName is null, try to fetch it from Firestore (if stored there)
+  if (userName == 'Guest') {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user?.uid).get();
+    if (userDoc.exists) {
+      userName = userDoc['name'] ?? 'Guest';  // Assuming 'name' field is stored in Firestore
+    }
+  }
   await FirebaseFirestore.instance
       .collection('hotels')
       .doc(widget.hotelId)
@@ -201,12 +212,12 @@ class _HotelRoomsPageState extends State<HotelRoomsPage> {
     'hotelName': widget.hotelName,
     'roomNumber':selectedRoomNumber, 
     'userId': currentUserId,
-    'userName': FirebaseAuth.instance.currentUser?.displayName ?? 'Guest',
-    'userEmail': FirebaseAuth.instance.currentUser?.email ?? 'N/A',
+    'userName':  userName,
+    'userEmail': user?.email ?? 'N/A',
     'paymentId': response.paymentId,
     'checkInDate': DateFormat('yyyy-MM-dd').format(checkInDate!),
     'checkOutDate': DateFormat('yyyy-MM-dd').format(checkOutDate!),
-    'amount': selectedPrice!* 100,
+    'amount': selectedPrice,
     'timestamp': FieldValue.serverTimestamp(),
   });
 

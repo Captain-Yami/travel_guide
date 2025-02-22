@@ -476,6 +476,8 @@ class GuideDetailPage extends StatelessWidget {
     final TextEditingController tripController = TextEditingController();
     final TextEditingController categoriesController = TextEditingController();
     final TextEditingController placesController = TextEditingController();
+     final TextEditingController startDateController = TextEditingController();
+      final TextEditingController endDateController = TextEditingController();
 
     showDialog(
       context: context,
@@ -501,6 +503,18 @@ class GuideDetailPage extends StatelessWidget {
                   controller: placesController,
                   decoration:
                       const InputDecoration(labelText: 'Places to Visit'),
+                  maxLines: 3,
+                ),
+                TextField(
+                  controller: startDateController,
+                  decoration:
+                      const InputDecoration(labelText: 'Starting Date'),
+                  maxLines: 3,
+                ),
+                TextField(
+                  controller: endDateController,
+                  decoration:
+                      const InputDecoration(labelText: 'Ending Date'),
                   maxLines: 3,
                 ),
               ],
@@ -536,6 +550,8 @@ class GuideDetailPage extends StatelessWidget {
                     'aboutTrip': tripController.text,
                     'categories': categoriesController.text,
                     'places': placesController.text,
+                    'startDate' : startDateController.text,
+                    'endDate' : endDateController.text,
                     'user': userId,
                     'userName': userName, // Add the user's name
                     'requestDate': Timestamp.now(),
