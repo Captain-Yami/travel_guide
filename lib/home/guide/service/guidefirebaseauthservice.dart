@@ -13,6 +13,8 @@ class Guidefirebaseauthservice {
   bool isApproved= false;
   bool guideAvailable= true;
   
+  bool reqAccept = false;
+
   Future<void> guideRegister({
   required String email,
   required String Phone_number,
@@ -43,6 +45,7 @@ class Guidefirebaseauthservice {
       'status': status,
       'guideAvailable' : guideAvailable,
        'needsAdminReview': false,
+      'reqAccept':reqAccept
     });
 
     // Add the role information to the 'role_tb' collection
