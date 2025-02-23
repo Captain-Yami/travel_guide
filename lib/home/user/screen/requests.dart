@@ -18,6 +18,7 @@ class _RequestsState extends State<Requests>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
+  String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   void dispose() {
@@ -73,7 +74,7 @@ class _RequestsState extends State<Requests>
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('confirmed_requests')
-          .where('status', isEqualTo: 'Confirmed')
+          .where('user', isEqualTo: currentUserId)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

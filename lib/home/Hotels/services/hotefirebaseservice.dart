@@ -20,14 +20,15 @@ class hotelfirebaseauthservice {
       required String facilities,
       required String? imageUrl,
       required String? documnetUrl,
-      required User? ownerId,
       required BuildContext context}) async {
     try {
       print('.............');
       final user = await firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
+      String userId = user.user!.uid;
+
       print('vysakh');
-      firestoreDatabase.collection('hotels').doc(user.user?.uid).set({
+      firestoreDatabase.collection('hotels').doc(userId).set({
         'hotelName': hotelName,
         'contactEmail': email,
         'contactNumber': Phone_number,
@@ -36,7 +37,7 @@ class hotelfirebaseauthservice {
         'imageUrl': imageUrl,
         'location': location,
         'numberOfRooms': numberOfRooms,
-        'ownerId': ownerId,
+        'ownerId': userId,
         'isApproved': isApproved,
       });
       print('kkkkkkkkkkkkk');

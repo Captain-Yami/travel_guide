@@ -23,14 +23,15 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
   final _formKey = GlobalKey<FormState>();
 
   // Form field values
-  String hotelName = '';
-  String location = ''; // Location will be automatically fetched
-  String contactEmail = '';
-  String contactNumber = ''; // Added for full address
-  // Added for pin code
-  String password = ''; // Added for password
-  String confirmPassword = ''; // Added for confirm password
-  int numberOfRooms = 1;
+   final TextEditingController hotelNameController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController contactEmailController = TextEditingController();
+  final TextEditingController contactNumberController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+    int numberOfRooms = 1;
+  bool show=true;
 
   String? latitude;
   String? longitude;
@@ -63,39 +64,6 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
     apiSecret: 'YDHnglB1cOzo4FSlhoQmSzca1e0',
     cloudName: 'db2nki9dh',
   );
-
-  // Method to request location permission and get the current location
-  Future<void> _getCurrentLocation() async {
-    // Request permission for location
-    LocationPermission permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      // Handle permission denied case
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Location permission denied")));
-      return;
-    }
-
-    // Get current position
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
-    setState(() {
-      latitude = position.latitude.toString();
-      longitude = position.longitude.toString();
-      location =
-          "Lat: ${position.latitude}, Long: ${position.longitude}"; // Set location as a string
-    });
-
-    // Reverse Geocoding to get location name (city, country)
-    List<Placemark> placemarks =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-    Placemark place = placemarks[0];
-    setState(() {
-      location =
-          "${place.subLocality}, ${place.locality}, ${place.country}"; // Update location with a human-readable name
-    });
-  }
 
   // Method to pick image
   Future<void> _pickImage({bool isDocument = false}) async {
@@ -157,7 +125,7 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
     _formKey.currentState!.save();
 
     // Validate password and confirm password match
-    if (password != confirmPassword) {
+    if (passwordController != confirmPasswordController) {
       setState(() {
         isLoading = false;
       });
@@ -170,8 +138,8 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
     try {
       // Create user in Firebase Authentication
       final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: contactEmail, 
-        password: password,
+        email: contactEmailController.text, 
+        password: passwordController.text,
       );
       
       final String userId = userCredential.user!.uid; // Get newly created user ID
@@ -181,25 +149,9 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
         imageUrl = await _uploadImageToCloudinary(_image!);
         documnetUrl = await _uploadImageToCloudinary(document!);
       }
-
+      
       // Creating a hotel registration model
-      Map<String, dynamic> hotelData = {
-        'hotelName': hotelName,
-        'location': location,
-        'contactEmail': contactEmail,
-        'contactNumber': contactNumber,
-        'lat': latitude,
-        'log': longitude,
-        'isApproved': false,
-        'numberOfRooms': numberOfRooms,
-        'facilities': _getSelectedFacilities(),
-        'imageUrl': imageUrl, // Add image URL to the data
-        'document': documnetUrl,
-        'ownerId': userId, // 🔹 Store logged-in user's ID
-      };
-
-      // Save hotel data to Firestore
-      await _firestore.collection('hotels').doc(userId).set(hotelData);
+     
 
       setState(() {
         isLoading = false;
@@ -262,25 +214,22 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation(); // Get current location when the page is loaded
   }
-      final User? userId = FirebaseAuth.instance.currentUser; // Get newly created user ID
 
    void Registerhotel() async {
 
     if (_formKey.currentState?.validate() ?? false) {
       // After file upload, continue with the registration login
         hotelfirebaseauthservice().hotelRegister(
-          email: contactEmail,
-          hotelName: hotelName,
-          Phone_number: contactNumber,
-          password: password,
+          email: contactEmailController.text,
+          hotelName: hotelNameController.text,
+          Phone_number: contactNumberController.text,
+          password: passwordController.text,
           numberOfRooms: numberOfRooms,
-          location: location,
+          location: locationController.text,
           facilities: _getSelectedFacilities(),
           imageUrl:imageUrl,
           documnetUrl:documnetUrl,  
-          ownerId:userId,
           context: context,
         );
 
@@ -316,73 +265,88 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
                   "Hotel Information",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                Row(
-                  children: [
-                    const Icon(Icons.location_pin, color: Colors.teal),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(location),
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 16),
                 // Hotel Name
-                TextFormField(
-                  decoration: _buildInputDecoration("Hotel Name"),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter the hotel name";
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    hotelName = value!;
-                  },
-                ),
+                 TextFormField(
+                    controller: hotelNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Hotelname',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a Hotelname';
+                      }
+                      return null;
+                    },
+                  ),
                 const SizedBox(height: 16),
                 // Contact Email
-                TextFormField(
-                  decoration: _buildInputDecoration("Contact Email"),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter the contact email";
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    contactEmail = value!;
-                  },
-                ),
+                 TextFormField(
+                    controller: contactEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email address',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter an email address';
+                      } else if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
+                    },
+                  ),
                 const SizedBox(height: 16),
                 // Contact Number
-                TextFormField(
-                  decoration: _buildInputDecoration("Contact Number"),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter the contact number";
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    contactNumber = value!;
-                  },
-                ),
+                 TextFormField(
+                    controller: contactNumberController,
+                    decoration: const InputDecoration(
+                      labelText: 'Phone number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                      ),
+                    ),
+                    keyboardType: TextInputType.phone,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your phone number';
+                      } else if (value.length < 10) {
+                        return 'Phone number should be at least 10 digits';
+                      } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                        return 'Phone number can only contain digits';
+                      }
+                      return null;
+                    },
+                  ),
                 const SizedBox(height: 16),
                  TextFormField(
-                  decoration: _buildInputDecoration("Location"),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter the Location";
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    location = value!;
-                  },
-                 ),
+                controller: locationController,
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30)), // Oval shape
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your location';
+                  }
+                  // Allow only alphabetic characters
+                  RegExp cityRegEx = RegExp(r"^[a-zA-Z\s]+$");
+                  if (!cityRegEx.hasMatch(value)) {
+                    return 'location name can only contain letters and spaces';
+                  }
+                  return null;
+                },
+              ),
                 const SizedBox(height: 16),
                 // Number of Rooms
-                TextFormField(
+               TextFormField(
                   decoration: _buildInputDecoration("No. of Rooms"),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -396,34 +360,62 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
                 ),
                 const SizedBox(height: 16),
                 // Password
-                TextFormField(
-                  decoration: _buildInputDecoration("Password"),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter a password";
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    password = value!;
-                  },
-                ),
+               TextFormField(
+                    controller: passwordController,
+                    obscureText: show,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            show = !show;
+                          });
+                        },
+                        icon: Icon(show ? Icons.visibility : Icons.visibility_off),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a password';
+                      } else if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      } else if (!RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)').hasMatch(value)) {
+                        return 'Password must include at least one uppercase letter, one lowercase letter, and one number';
+                      }
+                      return null;
+                    },
+                  ),
                 const SizedBox(height: 16),
                 // Confirm Password
-                TextFormField(
-                  decoration: _buildInputDecoration("Confirm Password"),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please confirm your password";
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    confirmPassword = value!;
-                  },
-                ),
+               TextFormField(
+                    controller: confirmPasswordController,
+                    obscureText: show,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm password',
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            show = !show;
+                          });
+                        },
+                        icon: Icon(show ? Icons.visibility : Icons.visibility_off),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please confirm your password';
+                      } else if (value != passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
                 const SizedBox(height: 16),
                 // Facilities Checkboxes
                 const Text(
