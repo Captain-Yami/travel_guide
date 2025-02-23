@@ -176,6 +176,7 @@ class _BeachesState extends State<adminBeaches> {
   }
 }
 
+
 class BeachDetails extends StatefulWidget {
   final String beachId;
 
@@ -214,45 +215,69 @@ class _BeachDetailsState extends State<BeachDetails> {
 
   // Function to fetch beach details from Firestore
   Future<void> _fetchBeachDetails() async {
-    DocumentSnapshot snapshot = await _firestore
-        .collection('Places')
-        .doc('Locations')
-        .collection('Beaches')
-        .doc(widget.beachId)
-        .get();
+  DocumentSnapshot snapshot = await _firestore
+      .collection('Places')
+      .doc('Locations')
+      .collection('Beaches')
+      .doc(widget.beachId)
+      .get();
 
-    if (snapshot.exists) {
-      var beach = snapshot.data() as Map<String, dynamic>;
-      _nameController.text = beach['name'] ?? '';
-      _descriptionController.text = beach['description'] ?? '';
-      _openingTimeController.text = beach['openingTime'] ?? '';
-      _closingTimeController.text = beach['closingTime'] ?? '';
+  if (snapshot.exists) {
+    var beach = snapshot.data() as Map<String, dynamic>;
+
+    _nameController.text = beach['name'] ?? '';
+    _descriptionController.text = beach['description'] ?? '';
+    _openingTimeController.text = beach['openingTime'] ?? '';
+    _closingTimeController.text = beach['closingTime'] ?? '';
+
+    // ✅ If 'seasonalTime' is a List, convert it to a comma-separated string
+    if (beach['seasonalTime'] is List) {
+      _seasonalTimeController.text = (beach['seasonalTime'] as List)
+          .map((e) => e.toString()) // Convert each element to string
+          .join(', '); // Join elements with commas
+    } else {
       _seasonalTimeController.text = beach['seasonalTime'] ?? '';
+    }
+
+    // ✅ If 'imageUrl' is a List, convert it to a string (or take the first image)
+    if (beach['imageUrl'] is List) {
+      _imageUrlController.text = (beach['imageUrl'] as List)
+          .map((e) => e.toString()) // Convert each element to string
+          .join(', '); // Join elements with commas
+    } else {
       _imageUrlController.text = beach['imageUrl'] ?? '';
     }
   }
-
+}
   // Function to save the edited beach details to Firestore
-  Future<void> _saveBeachDetails() async {
-    await _firestore
-        .collection('Places')
-        .doc('Locations')
-        .collection('Beaches')
-        .doc(widget.beachId)
-        .update({
-      'name': _nameController.text,
-      'description': _descriptionController.text,
-      'openingTime': _openingTimeController.text,
-      'closingTime': _closingTimeController.text,
-      'seasonalTime': _seasonalTimeController.text,
-      'imageUrl': _imageUrlController.text,
+Future<void> _saveBeachDetails() async {
+  await _firestore
+      .collection('Places')
+      .doc('Locations')
+      .collection('Beaches')
+      .doc(widget.beachId)
+      .update({
+    'name': _nameController.text,
+    'description': _descriptionController.text,
+    'openingTime': _openingTimeController.text,
+    'closingTime': _closingTimeController.text,
+
+    // ✅ Convert string back to list (split by commas)
+     'seasonalTime': _seasonalTimeController.text
+          .split(',')
+          .map((e) => e.trim())
+          .toList(),
+
+
+    // ✅ Convert string back to list (split by commas)
+    'imageUrl': _imageUrlController.text.trim(),
     });
 
-    // Show a confirmation message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Beach details updated successfully!')),
-    );
-  }
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Beach details updated successfully!')),
+  );
+}
+
 
   @override
   void dispose() {
@@ -401,8 +426,8 @@ class _BeachDetailsState extends State<BeachDetails> {
                                   const InputDecoration(labelText: 'Image URL'),
                               style: TextStyle(color: Colors.green),
                             )
-                          : (beach['imageUrl'] != null
-                              ? Image.network(beach['imageUrl'])
+                          : (beach['imageUrl'] is List
+                              ? Image.network(beach['imageUrl'][0])
                               : const Text('No image available',
                                   style: TextStyle(color: Colors.green))),
                     ],

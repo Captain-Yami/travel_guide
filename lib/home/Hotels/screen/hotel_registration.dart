@@ -10,6 +10,7 @@ import 'dart:io';
 
 import 'package:travel_guide/home/Hotels/screen/hotel_login.dart';
 import 'package:travel_guide/home/Hotels/services/hotefirebaseservice.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';
 
 class HotelRegistrationPage extends StatefulWidget {
   const HotelRegistrationPage({super.key});
@@ -287,7 +288,7 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
           context,
           MaterialPageRoute(
             builder: (context) {
-              return const HotelHomepage();
+              return LoginPage();
             },
           ),
         );
@@ -572,7 +573,7 @@ class _HotelRegistrationPageState extends State<HotelRegistrationPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const HotelLoginPage()),
+                                builder: (context) => LoginPage()),
                           );
                         },
                         child: const Text("Login"),

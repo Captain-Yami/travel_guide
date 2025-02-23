@@ -8,7 +8,7 @@ import 'package:travel_guide/home/user/screen/login_page.dart';
 class hotelfirebaseauthservice {
   final firebaseAuth = FirebaseAuth.instance;
   final firestoreDatabase = FirebaseFirestore.instance;
-  bool isApproved= false;
+  bool isApproved = false;
 
   Future<void> hotelRegister(
       {required String email,
@@ -23,8 +23,10 @@ class hotelfirebaseauthservice {
       required User? ownerId,
       required BuildContext context}) async {
     try {
+      print('.............');
       final user = await firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
+      print('vysakh');
       firestoreDatabase.collection('hotels').doc(user.user?.uid).set({
         'hotelName': hotelName,
         'contactEmail': email,
@@ -35,14 +37,16 @@ class hotelfirebaseauthservice {
         'location': location,
         'numberOfRooms': numberOfRooms,
         'ownerId': ownerId,
-        'isApproved':isApproved,
+        'isApproved': isApproved,
       });
+      print('kkkkkkkkkkkkk');
       firestoreDatabase
           .collection('role_tb')
           .add({'uid': user.user?.uid, 'role': 'hotels'});
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Registration Sucessfull')));
     } catch (e) {
+      print('Registration Failed: $e');
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Registration Failed')));
     }
