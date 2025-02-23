@@ -87,6 +87,10 @@ class _RequestDetailsPageState extends State<RequestDetailsPage> {
           .set(confirmedRequestDetails);
 
       await _firestore.collection('requests').doc(widget.requestId).delete();
+      
+      await _firestore.collection('Guide').doc(widget.guideId).update({
+      'reqAccept': true,
+    });
 
       widget.onRemoveRequest(widget.requestId); // Remove from local UI
 
