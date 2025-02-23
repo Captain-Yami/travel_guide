@@ -11,6 +11,7 @@ class Guidefirebaseauthservice {
   final firestoreDatabase= FirebaseFirestore.instance;
   bool status = false;
   bool isApproved= false;
+  bool guideAvailable= true;
   
   Future<void> guideRegister({
   required String email,
@@ -40,6 +41,8 @@ class Guidefirebaseauthservice {
       'licenseImageUrl': licenseImageUrl,
       'isApproved': isApproved,
       'status': status,
+      'guideAvailable' : guideAvailable,
+       'needsAdminReview': false,
     });
 
     // Add the role information to the 'role_tb' collection

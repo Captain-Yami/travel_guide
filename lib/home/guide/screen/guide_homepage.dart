@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/activities.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:travel_guide/home/guide/screen/availability.dart';
 import 'package:travel_guide/home/guide/chats.dart';
 import 'package:travel_guide/home/guide/screen/guide_profile.dart';
@@ -26,16 +27,96 @@ class GuideHomepage extends StatefulWidget {
 }
 
 class _MainPageState extends State<GuideHomepage> {
-  int _selectedIndex = 0;
+ int _selectedIndex = 0;
   late PageController _pageController;
+   bool _isAvailable = false;
+  DateTime _lastDialogDate = DateTime.now();
+
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(
         initialPage: _selectedIndex); // Initialize PageController
+  _checkAndShowDialog();
   }
 
+  Future<void> _checkAndShowDialog() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Get last shown date
+    String? lastDateString = prefs.getString('lastDialogDate');
+    DateTime lastDate = lastDateString != null ? DateTime.parse(lastDateString) : DateTime(2000);
+    DateTime today = DateTime.now();
+
+    // Show dialog only if it's a new day
+    if (lastDate.day != today.day || lastDate.month != today.month || lastDate.year != today.year) {
+      _showAvailabilityDialog();
+      await prefs.setString('lastDialogDate', today.toIso8601String());
+    }
+
+    // Check if unavailable for a week
+    String? lastAvailableDateString = prefs.getString('lastAvailableDate');
+    if (lastAvailableDateString != null) {
+      DateTime lastAvailableDate = DateTime.parse(lastAvailableDateString);
+      if (today.difference(lastAvailableDate).inDays >= 7) {
+        _sendAdminNotification();
+      }
+    }
+  }
+
+  void _showAvailabilityDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Availability Confirmation"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Are you available for guiding today?"),
+                  CheckboxListTile(
+                    title: Text("Yes, I am available"),
+                    value: _isAvailable,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isAvailable = value ?? false;
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    if (_isAvailable) {
+                      await prefs.setString('lastAvailableDate', DateTime.now().toIso8601String());
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Submit"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _sendAdminNotification() async{
+    bool guideAvailable = false;
+   await FirebaseFirestore.instance.collection('Guide').doc(FirebaseAuth.instance.currentUser?.uid).update({
+      'guideAvailable': guideAvailable,
+      'needsAdminReview': true,
+    });
+
+  }
   // Navigation functions for each page
   void _navigateToFeed() {
     Navigator.push(

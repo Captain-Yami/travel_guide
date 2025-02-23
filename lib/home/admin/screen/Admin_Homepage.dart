@@ -21,6 +21,75 @@ class AdminHomepage extends StatefulWidget {
 class _AdminHomepageState extends State<AdminHomepage> {
   int touchedIndex = -1;
 
+  @override
+  void initState() {
+    super.initState();
+    _checkForUnavailableGuides();
+  }
+
+  Future<void> _checkForUnavailableGuides() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('Guide')
+        .where('needsAdminReview', isEqualTo: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      _showAdminDialog(querySnapshot.docs);
+    }
+  }
+
+  void _showAdminDialog(List<QueryDocumentSnapshot> guides) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Guides Unavailable for a Week"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: guides.map((guide) {
+              String guideName = guide['name'];
+              String guideId = guide.id;
+              return ListTile(
+                title: Text(guideName),
+                subtitle: Text("This guide has been unavailable for a week."),
+                trailing: ElevatedButton(
+                  onPressed: () => _suspendGuide(guideId),
+                  child: Text("Suspend"),
+                ),
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => _dismissAdminNotification(guides),
+              child: Text("Ignore"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _suspendGuide(String guideId) async {
+    await FirebaseFirestore.instance.collection('Guide').doc(guideId).update({
+      'status': true,
+      'needsAdminReview': false, // Admin reviewed
+    });
+
+    Navigator.of(context).pop();
+  }
+
+  void _dismissAdminNotification(List<QueryDocumentSnapshot> guides) async {
+    for (var guide in guides) {
+      await FirebaseFirestore.instance.collection('Guide').doc(guide.id).update({
+        'needsAdminReview': false,
+      });
+    }
+    Navigator.of(context).pop();
+  }
+
+
   // Navigation functions
   void navigateToUsers() {
     Navigator.push(
