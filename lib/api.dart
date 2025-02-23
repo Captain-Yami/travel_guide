@@ -20,7 +20,7 @@ Future<Map<String, dynamic>> getRecommendedPlaces({
     };
 
     // Set the URL for the request
-    final url = Uri.parse('https://5e01-49-15-86-58.ngrok-free.app/recommend');
+    final url = Uri.parse('https://2cef-49-15-201-231.ngrok-free.app/recommend');
 
     // Send the POST request
     final response = await http.post(

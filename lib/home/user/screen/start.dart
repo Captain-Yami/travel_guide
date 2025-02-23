@@ -178,38 +178,45 @@ class _StartState extends State<Start> {
   }
 
   // Function to save the scheduled trips to Firestore
-  Future<void> saveScheduleToFirestore() async {
+  Future<void> saveScheduleToFirestore(BuildContext context) async {
     try {
       final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-      // Get the current user ID (You can modify this based on how your app manages authentication)
-      String userId =
-          (FirebaseAuth.instance.currentUser!.uid); // Replace with actual user ID (e.g., FirebaseAuth.instance.currentUser?.uid)
+      String? userId = FirebaseAuth.instance.currentUser?.uid;
 
-      // Check if there's any schedule data to save
+      if (userId == null) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('User not logged in')));
+        return;
+      }
+
+      // Reference to the user's travel collection
+      CollectionReference userTravelRef =
+          _firestore.collection('Users').doc(userId).collection('travel');
+
+      // Step 1: Clear previous schedule data
+      var existingSchedules = await userTravelRef.get();
+      for (var doc in existingSchedules.docs) {
+        await doc.reference.delete();
+      }
+
+      // Step 2: Save the new schedule
       if (scheduledTrips.isNotEmpty) {
         for (var schedule in scheduledTrips) {
-          await _firestore
-              .collection('Users')
-              .doc(userId)
-              .collection('travel')
-              .add({
+          await userTravelRef.add({
             'place_name': schedule['place name'],
             'time': schedule['time'],
             'activity': schedule['activity'],
-            'created_at':
-                FieldValue.serverTimestamp(), // Timestamp for when it was saved
+            'created_at': FieldValue.serverTimestamp(),
           });
         }
 
-        // Notify the user
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Schedule saved successfully!')));
+            SnackBar(content: Text('Schedule updated successfully!')));
       } else {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('No schedule to save')));
       }
     } catch (e) {
-      // Handle error
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to save schedule: $e')));
     }
@@ -504,7 +511,9 @@ class _StartState extends State<Start> {
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
               ),
-              onPressed: saveScheduleToFirestore, // Save schedule data
+              onPressed: () {
+                saveScheduleToFirestore(context);
+              }, // Save schedule data
               child: const Text(
                 'Save',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

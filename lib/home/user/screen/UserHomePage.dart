@@ -10,6 +10,7 @@ import 'package:travel_guide/home/user/guidechat.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
 import 'package:travel_guide/home/user/screen/place/place.dart';
 import 'package:travel_guide/home/user/screen/requests.dart';
+import 'package:travel_guide/home/user/screen/saved_trip.dart';
 import 'package:travel_guide/home/user/screen/start.dart';
 import 'package:travel_guide/home/user/screen/User_profile.dart';
 import 'package:travel_guide/home/user/screen/favorites.dart';
@@ -58,6 +59,12 @@ class _MainPageState extends State<MainPage> {
       MaterialPageRoute(builder: (context) => const Requests()),
     );
   }
+  void _navigateToSchedule() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => TravelSchedulePage()),
+  );
+}
 
   Future<void> _navigateToStart() async {
     try {
@@ -153,13 +160,13 @@ class _MainPageState extends State<MainPage> {
           bool reqAccept = guideDoc.data()?['reqAccept'] ?? false;
 
           if (status && reqAccept) {
-      debugPrint("Conditions met, showing pop-up...");
-      if (context.mounted) {
-        showConfirmationPopup(currentUserId);
-      }
-    } else {
-      debugPrint("Conditions not met, pop-up will not be shown.");
-    }
+            debugPrint("Conditions met, showing pop-up...");
+            if (context.mounted) {
+              showConfirmationPopup(currentUserId);
+            }
+          } else {
+            debugPrint("Conditions not met, pop-up will not be shown.");
+          }
         }
       }
     } catch (e) {
@@ -168,7 +175,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   void showConfirmationPopup(String currentUserId) {
-    if (!context.mounted) return; 
+    if (!context.mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent closing by tapping outside
@@ -180,15 +187,17 @@ class _MainPageState extends State<MainPage> {
           actions: [
             TextButton(
               onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
-              
-              // Store today's date as the last shown date
-              String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-              await prefs.setString('lastPopupDate_$currentUserId', todayDate);
+                final prefs = await SharedPreferences.getInstance();
 
-              Navigator.pop(context); // Close the dialog
-            },
-            child: Text("OK"),
+                // Store today's date as the last shown date
+                String todayDate =
+                    DateFormat('yyyy-MM-dd').format(DateTime.now());
+                await prefs.setString(
+                    'lastPopupDate_$currentUserId', todayDate);
+
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text("OK"),
             ),
           ],
         );
@@ -451,12 +460,23 @@ class _MainPageState extends State<MainPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // "Place" Button
                         Expanded(
                           child: _buildElevatedButton(
                             icon: Icons.location_on_outlined,
                             label: 'Place',
                             color: Colors.green,
                             onPressed: _navigateToPlace,
+                          ),
+                        ),
+                        SizedBox(width: 10), // Add spacing between buttons
+                        // "Schedule" Button
+                        Expanded(
+                          child: _buildElevatedButton(
+                            icon: Icons.schedule,
+                            label: 'Schedule',
+                            color: Colors.green,
+                            onPressed: _navigateToSchedule,
                           ),
                         ),
                       ],
