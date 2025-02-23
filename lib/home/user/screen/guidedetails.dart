@@ -58,6 +58,7 @@ class Guidedetails extends StatefulWidget {
 
 class _GuidedetailsState extends State<Guidedetails> {
   List<Guide> guides = [];
+  bool isLoading = true; // Added state for loading
 
   @override
   void initState() {
@@ -152,12 +153,16 @@ class _GuidedetailsState extends State<Guidedetails> {
 
       setState(() {
         guides = fetchedGuides;
+        isLoading = false;
       });
 
       // Debug: Log fetched guides
       print('Fetched Guides: ${guides.length}');
     } catch (e) {
       print('Error fetching guides: $e');
+      setState(() {
+        isLoading = false; // Hide loading even on error
+      });
     }
   }
 
@@ -192,65 +197,74 @@ class _GuidedetailsState extends State<Guidedetails> {
         ),
         backgroundColor: Colors.black,
       ),
-      body: guides.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'No available guides at the moment.',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Colors.black, // Customize the color
               ),
             )
-          : ListView.builder(
-              itemCount: guides.length,
-              itemBuilder: (context, index) {
-                final guide = guides[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 16.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
-                      foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                      side: BorderSide(color: Colors.black, width: 1),
-                    ),
-                    onPressed: () => _navigateToGuideDetails(guide),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: NetworkImage(guide.profileImage),
-                          radius: 30,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                guide.name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 18),
-                              ),
-                              Text(
-                                guide.expertise,
-                                style: const TextStyle(color: Colors.black),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.arrow_forward_ios,
-                            color: Colors.black),
-                      ],
+          : guides.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'No available guides at the moment.',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
-                );
-              },
-            ),
+                )
+              : ListView.builder(
+                  itemCount: guides.length,
+                  itemBuilder: (context, index) {
+                    final guide = guides[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          backgroundColor:
+                              const Color.fromARGB(255, 240, 240, 240),
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          side: BorderSide(color: Colors.black, width: 1),
+                        ),
+                        onPressed: () => _navigateToGuideDetails(guide),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundImage: NetworkImage(guide.profileImage),
+                              radius: 30,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    guide.name,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18),
+                                  ),
+                                  Text(
+                                    guide.expertise,
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.arrow_forward_ios,
+                                color: Colors.black),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }
@@ -476,8 +490,8 @@ class GuideDetailPage extends StatelessWidget {
     final TextEditingController tripController = TextEditingController();
     final TextEditingController categoriesController = TextEditingController();
     final TextEditingController placesController = TextEditingController();
-     final TextEditingController startDateController = TextEditingController();
-      final TextEditingController endDateController = TextEditingController();
+    final TextEditingController startDateController = TextEditingController();
+    final TextEditingController endDateController = TextEditingController();
 
     showDialog(
       context: context,
@@ -507,14 +521,12 @@ class GuideDetailPage extends StatelessWidget {
                 ),
                 TextField(
                   controller: startDateController,
-                  decoration:
-                      const InputDecoration(labelText: 'Starting Date'),
+                  decoration: const InputDecoration(labelText: 'Starting Date'),
                   maxLines: 3,
                 ),
                 TextField(
                   controller: endDateController,
-                  decoration:
-                      const InputDecoration(labelText: 'Ending Date'),
+                  decoration: const InputDecoration(labelText: 'Ending Date'),
                   maxLines: 3,
                 ),
               ],
@@ -550,8 +562,8 @@ class GuideDetailPage extends StatelessWidget {
                     'aboutTrip': tripController.text,
                     'categories': categoriesController.text,
                     'places': placesController.text,
-                    'startDate' : startDateController.text,
-                    'endDate' : endDateController.text,
+                    'startDate': startDateController.text,
+                    'endDate': endDateController.text,
                     'user': userId,
                     'userName': userName, // Add the user's name
                     'requestDate': Timestamp.now(),

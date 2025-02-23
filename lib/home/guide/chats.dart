@@ -18,6 +18,7 @@ class _ChatsPageState extends State<ChatsPage> {
   List<Map<String, dynamic>> _chats = [];
   List<Map<String, dynamic>> _filteredChats = [];
   final TextEditingController _searchController = TextEditingController();
+  bool isLoading = true; // Added loading state
   String? _longPressedChatId; // Variable to store the long-pressed chatId
 
   @override
@@ -53,7 +54,8 @@ class _ChatsPageState extends State<ChatsPage> {
         // Fetch the guide's profile picture from the Guide collection
         final guideDoc = await FirebaseFirestore.instance
             .collection('Guide')
-            .doc(_currentUserId) // Get the guide's data using the guide's userId
+            .doc(
+                _currentUserId) // Get the guide's data using the guide's userId
             .get();
 
         String guideProfilePicture = guideDoc.data()?['profile_picture'] ??
@@ -95,9 +97,13 @@ class _ChatsPageState extends State<ChatsPage> {
       setState(() {
         _chats = fetchedChats;
         _filteredChats = _chats; // Initialize filtered chats
+        isLoading = false; // Set loading to false after fetchin
       });
     } catch (e) {
       print('Error fetching chats: $e');
+      setState(() {
+        isLoading = false; // Ensure loading stops even on error
+      });
     }
   }
 
@@ -155,153 +161,173 @@ class _ChatsPageState extends State<ChatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          const SizedBox(height: 5),
-          // Search Bar
-          Container(
-            width: 450, // Set the width of the TextFormField
-            height: 60, // Set the height of the TextFormField
-            child: TextFormField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search by user name', // Optional hint text
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30), // Oval shape
-                  borderSide: const BorderSide(
-                    color: Color.fromARGB(255, 5, 0, 0),
-                    width: 2, // Border color and thickness
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Colors.black, // Customize the loading color
+              ),
+            )
+          : Column(
+              children: [
+                const SizedBox(height: 5),
+                // Search Bar
+                Container(
+                  width: 450, // Set the width of the TextFormField
+                  height: 60, // Set the height of the TextFormField
+                  child: TextFormField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search by user name', // Optional hint text
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30), // Oval shape
+                        borderSide: const BorderSide(
+                          color: Color.fromARGB(255, 5, 0, 0),
+                          width: 2, // Border color and thickness
+                        ),
+                      ),
+                      suffixIcon: const Icon(Icons.search,
+                          color: Color.fromARGB(255, 1, 2, 3)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal:
+                              20), // Padding to adjust the internal space
+                    ),
+                    style: const TextStyle(fontSize: 18),
                   ),
                 ),
-                suffixIcon: const Icon(Icons.search,
-                    color: Color.fromARGB(255, 1, 2, 3)),
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 15, horizontal: 20), // Padding to adjust the internal space
-              ),
-              style: const TextStyle(fontSize: 18),
-            ),
-          ),
-          const SizedBox(height: 5),
-          // Chat List
-          Expanded(
-            child: _filteredChats.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No chats found.',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        fontSize: 16,
-                      ),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: _filteredChats.length,
-                    itemBuilder: (context, index) {
-                      final chat = _filteredChats[index];
-                      bool isLongPressed = _longPressedChatId == chat['chatId'];
-                      return Card(
-                        color: const Color.fromARGB(255, 240, 240, 240),
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 8.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            radius: 30,
-                            backgroundImage: chat['profilePicture']
-                                    .toString()
-                                    .startsWith('http')
-                                ? NetworkImage(chat['profilePicture'])
-                                : AssetImage(chat['profilePicture'])
-                                    as ImageProvider,
+                const SizedBox(height: 5),
+                // Chat List
+                Expanded(
+                  child: _filteredChats.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No chats found.',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 0, 0, 0),
+                              fontSize: 16,
+                            ),
                           ),
-                          title: Text(
-                            chat['userName'],
-                            style: const TextStyle(
-                                color: Colors.black, fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  chat['lastMessage'],
-                                  overflow: TextOverflow.ellipsis,
+                        )
+                      : ListView.builder(
+                          itemCount: _filteredChats.length,
+                          itemBuilder: (context, index) {
+                            final chat = _filteredChats[index];
+                            bool isLongPressed =
+                                _longPressedChatId == chat['chatId'];
+                            return Card(
+                              color: const Color.fromARGB(255, 240, 240, 240),
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 8.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  radius: 30,
+                                  backgroundImage: chat['profilePicture']
+                                          .toString()
+                                          .startsWith('http')
+                                      ? NetworkImage(chat['profilePicture'])
+                                      : AssetImage(chat['profilePicture'])
+                                          as ImageProvider,
+                                ),
+                                title: Text(
+                                  chat['userName'],
                                   style: const TextStyle(
-                                    color: Color.fromARGB(255, 40, 40, 40),
-                                  ),
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                              ),
-                              Text(
-                                chat['messageTime'],
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: isLongPressed
-                              ? IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () {
-                                    // Show confirmation dialog before deleting
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('Delete Chat'),
-                                        content: const Text(
-                                            'Are you sure you want to delete this chat?'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context); // Close dialog
-                                            },
-                                            child: const Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              _deleteChat(chat['chatId']);
-                                              Navigator.pop(context); // Close dialog
-                                            },
-                                            child: const Text('Delete'),
-                                          ),
-                                        ],
+                                subtitle: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        chat['lastMessage'],
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color:
+                                              Color.fromARGB(255, 40, 40, 40),
+                                        ),
                                       ),
-                                    );
-                                  },
-                                )
-                              : null,
-                          onLongPress: () {
-                            setState(() {
-                              _longPressedChatId = _longPressedChatId == chat['chatId'] ? null : chat['chatId'];
-                            });
-                          },
-                          onTap: () {
-                            // Navigate to the ChatScreen when a user is tapped
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatScreen(
-                                  chatId: chat['chatId'],
-                                  userId: chat['userId'],
-                                  userName: chat['userName'],
-                                  guideName: chat['guideName'],
-                                  guideId: _currentUserId, // Send guideId here
-                                  userProfilePic: chat['profilePicture'],
-                                  guideProfilePic: chat['guideProfilePicture'],
+                                    ),
+                                    Text(
+                                      chat['messageTime'],
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                trailing: isLongPressed
+                                    ? IconButton(
+                                        icon: const Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () {
+                                          // Show confirmation dialog before deleting
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Delete Chat'),
+                                              content: const Text(
+                                                  'Are you sure you want to delete this chat?'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(
+                                                        context); // Close dialog
+                                                  },
+                                                  child: const Text('Cancel'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    _deleteChat(chat['chatId']);
+                                                    Navigator.pop(
+                                                        context); // Close dialog
+                                                  },
+                                                  child: const Text('Delete'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    : null,
+                                onLongPress: () {
+                                  setState(() {
+                                    _longPressedChatId =
+                                        _longPressedChatId == chat['chatId']
+                                            ? null
+                                            : chat['chatId'];
+                                  });
+                                },
+                                onTap: () {
+                                  // Navigate to the ChatScreen when a user is tapped
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatScreen(
+                                        chatId: chat['chatId'],
+                                        userId: chat['userId'],
+                                        userName: chat['userName'],
+                                        guideName: chat['guideName'],
+                                        guideId:
+                                            _currentUserId, // Send guideId here
+                                        userProfilePic: chat['profilePicture'],
+                                        guideProfilePic:
+                                            chat['guideProfilePicture'],
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             );
                           },
                         ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+                ),
+              ],
+            ),
     );
   }
 }

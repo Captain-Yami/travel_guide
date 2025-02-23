@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:travel_guide/home/hotel.dart'; 
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:travel_guide/home/hotel.dart';
 import 'package:travel_guide/home/user/guidechat.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
 import 'package:travel_guide/home/user/screen/place/place.dart';
@@ -21,10 +23,11 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-   void initState() {
+  void initState() {
     super.initState();
     checkCondition();
   }
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -111,12 +114,25 @@ class _MainPageState extends State<MainPage> {
       );
     }
   }
+
   Future<void> checkCondition() async {
     print('enetring');
     String? currentUserId = _auth.currentUser?.uid; // Get logged-in user ID
     if (currentUserId == null) return; // Exit if user is not logged in
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      String lastPopupDate =
+          prefs.getString('lastPopupDate_$currentUserId') ?? '';
+
+      // Get today's date
+      String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      // If pop-up was already shown today, exit
+      if (lastPopupDate == todayDate) {
+        debugPrint("Pop-up already shown today. Skipping...");
+        return;
+      }
       // Query Firestore to find a matching document where the user ID matches
       QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
           .collection('confirmed_requests')
@@ -129,7 +145,7 @@ class _MainPageState extends State<MainPage> {
         debugPrint("Fetched guideId: $guideId");
 
         // Show pop-up since the condition is met
-       DocumentSnapshot<Map<String, dynamic>> guideDoc =
+        DocumentSnapshot<Map<String, dynamic>> guideDoc =
             await _firestore.collection('Guide').doc(guideId).get();
 
         if (guideDoc.exists) {
@@ -137,31 +153,42 @@ class _MainPageState extends State<MainPage> {
           bool reqAccept = guideDoc.data()?['reqAccept'] ?? false;
 
           if (status && reqAccept) {
-            // Step 3: Show the pop-up if both conditions are true
-            Future.delayed(Duration.zero, () {
-              showConfirmationPopup();
-            });
-          }
+      debugPrint("Conditions met, showing pop-up...");
+      if (context.mounted) {
+        showConfirmationPopup(currentUserId);
+      }
+    } else {
+      debugPrint("Conditions not met, pop-up will not be shown.");
+    }
         }
       }
     } catch (e) {
       debugPrint("Error checking condition: $e");
     }
   }
-    void showConfirmationPopup() {
+
+  void showConfirmationPopup(String currentUserId) {
+    if (!context.mounted) return; 
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent closing by tapping outside
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("guide information"),
-          content: Text("Your Guide is out of order"),
+          content: Text(
+              "Your Guide is out of order.Request for another guide if needed"),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text("OK"),
+              onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              
+              // Store today's date as the last shown date
+              String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+              await prefs.setString('lastPopupDate_$currentUserId', todayDate);
+
+              Navigator.pop(context); // Close the dialog
+            },
+            child: Text("OK"),
             ),
           ],
         );
@@ -393,7 +420,7 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                             Expanded(
+                        Expanded(
                           child: InkWell(
                             onTap: _navigateToRequests,
                             borderRadius: BorderRadius.circular(12),

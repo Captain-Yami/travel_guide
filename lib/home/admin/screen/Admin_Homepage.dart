@@ -82,13 +82,15 @@ class _AdminHomepageState extends State<AdminHomepage> {
 
   void _dismissAdminNotification(List<QueryDocumentSnapshot> guides) async {
     for (var guide in guides) {
-      await FirebaseFirestore.instance.collection('Guide').doc(guide.id).update({
+      await FirebaseFirestore.instance
+          .collection('Guide')
+          .doc(guide.id)
+          .update({
         'needsAdminReview': false,
       });
     }
     Navigator.of(context).pop();
   }
-
 
   // Navigation functions
   void navigateToUsers() {
@@ -134,7 +136,8 @@ class _AdminHomepageState extends State<AdminHomepage> {
               HotelManagment()), // Navigate to the hotel approval page
     );
   }
-void navigateToGuideApproval() {
+
+  void navigateToGuideApproval() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -142,6 +145,7 @@ void navigateToGuideApproval() {
               GuideApproval()), // Navigate to the hotel approval page
     );
   }
+
   Future<int> fetchUserCount() async {
     var snapshot = await FirebaseFirestore.instance.collection('Users').get();
     return snapshot.size;
@@ -388,9 +392,11 @@ void navigateToGuideApproval() {
                             ),
                           ),
                         ),
+
+                        const SizedBox(height: 16),
                         Align(
-                          alignment: Alignment.centerRight,
-                          child: SizedBox(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(  
                             width: 320,
                             height: 100,
                             child: ElevatedButton.icon(
