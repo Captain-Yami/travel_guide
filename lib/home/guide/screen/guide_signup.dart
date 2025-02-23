@@ -3,6 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloudinary/cloudinary.dart'; // Import Cloudinary package
 import 'package:travel_guide/home/guide/service/guidefirebaseauthservice.dart';
 import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
+import 'package:travel_guide/home/user/screen/UserHomePage.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';
 
 class GuideSignup extends StatefulWidget {
   const GuideSignup({super.key});
@@ -95,7 +97,7 @@ class _GuideSignupState extends State<GuideSignup> {
           context,
           MaterialPageRoute(
             builder: (context) {
-              return const GuideHomepage();
+              return LoginPage();
             },
           ),
         );

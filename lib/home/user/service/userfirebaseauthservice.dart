@@ -6,6 +6,7 @@ import 'package:travel_guide/home/user/screen/UserHomePage.dart';
 class Userfirebaseauthservice {
   final firebaseAuth = FirebaseAuth.instance;
   final firestoreDatabase = FirebaseFirestore.instance;
+  bool status = false;
 
   Future<void> UserRegister(
       {required String email,
@@ -32,6 +33,7 @@ class Userfirebaseauthservice {
         'city': city,
         'nation': nation,
         'password': password,
+        'status' :status,
       });
       firestoreDatabase
           .collection('role_tb')

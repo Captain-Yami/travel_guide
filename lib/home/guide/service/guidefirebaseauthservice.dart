@@ -3,12 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/guide/screen/guide_homepage.dart';
 import 'package:travel_guide/home/user/screen/guidedetails.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';
 
 
 class Guidefirebaseauthservice {
   final firebaseAuth = FirebaseAuth.instance;
   final firestoreDatabase= FirebaseFirestore.instance;
-
+  bool status = false;
+  bool isApproved= false;
+  
   Future<void> guideRegister({
   required String email,
   required String Phone_number,
@@ -35,6 +38,8 @@ class Guidefirebaseauthservice {
       'phone number': Phone_number,
       'License': License,
       'licenseImageUrl': licenseImageUrl,
+      'isApproved': isApproved,
+      'status': status,
     });
 
     // Add the role information to the 'role_tb' collection
@@ -84,7 +89,7 @@ class Guidefirebaseauthservice {
     // Now, navigate to the Guide Homepage
     Navigator.pushReplacement(
       context, 
-      MaterialPageRoute(builder: (context) => const GuideHomepage())
+      MaterialPageRoute(builder: (context) => LoginPage())
     );
   } on FirebaseAuthException catch (e) {
     String errorMessage;

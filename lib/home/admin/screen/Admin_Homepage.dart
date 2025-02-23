@@ -7,6 +7,7 @@ import 'package:travel_guide/home/admin/screen/admin_guides.dart';
 import 'package:travel_guide/home/admin/screen/admin_ratings.dart';
 import 'package:travel_guide/home/admin/screen/admin_complaints.dart';
 import 'package:travel_guide/home/admin/screen/admin_users.dart';
+import 'package:travel_guide/home/admin/screen/approveGuide.dart';
 import 'package:travel_guide/home/admin/screen/hotel_managment.dart';
 import 'package:travel_guide/home/user/screen/login_page.dart';
 
@@ -64,7 +65,14 @@ class _AdminHomepageState extends State<AdminHomepage> {
               HotelManagment()), // Navigate to the hotel approval page
     );
   }
-
+void navigateToGuideApproval() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              GuideApproval()), // Navigate to the hotel approval page
+    );
+  }
   Future<int> fetchUserCount() async {
     var snapshot = await FirebaseFirestore.instance.collection('Users').get();
     return snapshot.size;
@@ -296,6 +304,31 @@ class _AdminHomepageState extends State<AdminHomepage> {
                               icon: const Icon(Icons.check_circle,
                                   size: 32, color: Colors.black),
                               label: Text('Approve Hotels',
+                                  style: TextStyle(
+                                      fontSize: 20, color: Colors.black)),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 20, horizontal: 24),
+                                backgroundColor: Colors.green,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      30), // Rounded edges
+                                ),
+                                minimumSize: const Size(300, 80),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: SizedBox(
+                            width: 320,
+                            height: 100,
+                            child: ElevatedButton.icon(
+                              onPressed: navigateToGuideApproval,
+                              icon: const Icon(Icons.check_circle,
+                                  size: 32, color: Colors.black),
+                              label: Text('Approve Guides',
                                   style: TextStyle(
                                       fontSize: 20, color: Colors.black)),
                               style: ElevatedButton.styleFrom(

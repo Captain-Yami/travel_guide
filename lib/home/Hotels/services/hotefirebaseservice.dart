@@ -3,10 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:travel_guide/home/Hotels/screen/hotel_homepage.dart';
 import 'package:travel_guide/home/user/screen/UserHomePage.dart';
+import 'package:travel_guide/home/user/screen/login_page.dart';
 
 class hotelfirebaseauthservice {
   final firebaseAuth = FirebaseAuth.instance;
   final firestoreDatabase = FirebaseFirestore.instance;
+  bool isApproved= false;
 
   Future<void> hotelRegister(
       {required String email,
@@ -33,6 +35,7 @@ class hotelfirebaseauthservice {
         'location': location,
         'numberOfRooms': numberOfRooms,
         'ownerId': ownerId,
+        'isApproved':isApproved,
       });
       firestoreDatabase
           .collection('role_tb')
@@ -72,7 +75,7 @@ class hotelfirebaseauthservice {
           .showSnackBar(SnackBar(content: Text('Login Successful')));
 
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const HotelHomepage()));
+          context, MaterialPageRoute(builder: (context) => LoginPage()));
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       switch (e.code) {

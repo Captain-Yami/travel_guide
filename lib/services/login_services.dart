@@ -21,7 +21,7 @@ class LoginServiceFire {
         email: email,
         password: password,
       );
-      
+      print('Logged in user UID: ${userCredential.user?.uid}');
 
       if (userCredential.user != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -31,6 +31,13 @@ class LoginServiceFire {
             .collection('role_tb')
             .where('uid', isEqualTo: userCredential.user?.uid)
             .get();
+
+        if (role.docs.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User role not found')),
+          );
+          return;
+        }
 
         final roledata = role.docs.first.data();
         print(roledata);
@@ -50,14 +57,14 @@ class LoginServiceFire {
                   builder: (context) => const GuideHomepage(),
                 ));
             break;
-            case 'hotels':
+          case 'hotels':
             Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const HotelHomepage(),
                 ));
             break;
-         case 'Admin':
+          case 'Admin':
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -70,8 +77,9 @@ class LoginServiceFire {
         // Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
+      print('Login error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed')),
+        SnackBar(content: Text('Login failed: ${e.toString()}')),
       );
     }
   }

@@ -16,7 +16,8 @@ class _LoginPageState extends State<LoginPage> {
 
   bool loading = false;
   bool _obscurePassword = true;
-  Future<String?> getUserIdByEmail(String email, String collection, String ugemail) async {
+  Future<String?> getUserIdByEmail(
+      String email, String collection, String ugemail) async {
     try {
       QuerySnapshot query = await FirebaseFirestore.instance
           .collection(collection) // "Users" or "Guides"
@@ -45,11 +46,32 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text.trim();
     String? useremail = 'useremail';
     String? guideemail = 'gideemail';
+    String? hotelemail = 'contactEmail';
 
     try {
       String? userId = await getUserIdByEmail(email, 'Users', useremail);
       String? guideId = await getUserIdByEmail(email, 'Guide', guideemail);
-
+      String? hotelId = await getUserIdByEmail(email, 'hotels', hotelemail);
+      if (hotelId != null) {
+        DocumentSnapshot hotelDoc = await FirebaseFirestore.instance
+            .collection('hotels')
+            .doc(hotelId)
+            .get();
+        if (hotelDoc.exists && hotelDoc['isApproved'] == false) {
+          _showMessage("hotel");
+          return;
+        }
+      }
+      if (guideId != null) {
+        DocumentSnapshot guideDoc = await FirebaseFirestore.instance
+            .collection('Guide')
+            .doc(guideId)
+            .get();
+        if (guideDoc.exists && guideDoc['isApproved'] == false) {
+          _showMessage("guide");
+          return;
+        }
+      }
       if (userId != null) {
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('Users')
@@ -71,13 +93,15 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
       }
+      print("object");
 
-      // Proceed with login if not suspended
       await LoginServiceFire().LoginService(
         email: email,
         password: password,
         context: context,
       );
+
+      // Proceed with login if not suspended
     } catch (e) {
       print("Error: $e");
       // Handle any error from Firebase or the login process.
@@ -97,6 +121,30 @@ class _LoginPageState extends State<LoginPage> {
           title: Text('$userType Account Suspended'),
           content: const Text(
               'Your account has been suspended. Please contact support.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/login', (route) => false);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showMessage(String userType) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('$userType Account is not approved'),
+          content: const Text('Your account is not approved by admin.'),
           actions: <Widget>[
             TextButton(
               child: const Text('OK'),
