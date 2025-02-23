@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,6 +21,13 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+   void initState() {
+    super.initState();
+    checkCondition();
+  }
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   void _navigateToHotel() {
     Navigator.push(
       context,
@@ -101,6 +110,63 @@ class _MainPageState extends State<MainPage> {
         },
       );
     }
+  }
+  Future<void> checkCondition() async {
+    print('enetring');
+    String? currentUserId = _auth.currentUser?.uid; // Get logged-in user ID
+    if (currentUserId == null) return; // Exit if user is not logged in
+
+    try {
+      // Query Firestore to find a matching document where the user ID matches
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await _firestore
+          .collection('confirmed_requests')
+          .where('user', isEqualTo: currentUserId) // Match user ID
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Fetch the guideId from the first matching document
+        String guideId = querySnapshot.docs.first['guideId'];
+        debugPrint("Fetched guideId: $guideId");
+
+        // Show pop-up since the condition is met
+       DocumentSnapshot<Map<String, dynamic>> guideDoc =
+            await _firestore.collection('Guide').doc(guideId).get();
+
+        if (guideDoc.exists) {
+          bool status = guideDoc.data()?['status'] ?? false;
+          bool reqAccept = guideDoc.data()?['reqAccept'] ?? false;
+
+          if (status && reqAccept) {
+            // Step 3: Show the pop-up if both conditions are true
+            Future.delayed(Duration.zero, () {
+              showConfirmationPopup();
+            });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error checking condition: $e");
+    }
+  }
+    void showConfirmationPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent closing by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("guide information"),
+          content: Text("Your Guide is out of order"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   int _selectedIndex = 0;
